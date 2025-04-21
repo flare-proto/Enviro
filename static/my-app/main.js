@@ -730,6 +730,7 @@ var irtrv = () => {
               .then((rs) => rs.json())
               .then((bft) => {
                   wnd.innerText = `[ ${bft["icon"]} ] ${json["wind_speed"]} km/h at ${json["wind_bearing"]}°`
+                  queuepush(`${json["temperature"]}°C - ${weatherTypes[json["icon_code"]]} - [ ${bft["icon"]} ] ${json["wind_speed"]} km/h at ${json["wind_bearing"]}°`)
               })
       });
       fetch("/api/alerts")
@@ -767,14 +768,19 @@ socket.addEventListener('open', () => {
   console.log('[WebSocket] Connected');
 });
 
+function queuepush(d) {
+  queue.push(d);
+  if (!ticker.isScrolling) startScroll();
+}
+
 socket.addEventListener('message', (event) => {
-  queue.push(event.data);
-  if (!ticker.isScrolling) startScroll(); // Start if not already scrolling
+  queuepush(event.data)// Start if not already scrolling
 });
 
 function startScroll() {
   if (queue.length === 0) {
-    queue.push(currentconds.innerHTML);
+    ticker.isScrolling = false;
+    return;
   }
 
   const message = queue.shift();
