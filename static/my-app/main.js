@@ -449,20 +449,28 @@ function styleFunction(feature) {
   const severity = feature.get('metobject')?.severity?.value;
 
   let fillColor = 'gray'; // default
+  let strokeColor = 'gray'; // default
   if (severity === 'extreme') {
-    fillColor = 'red';
+    fillColor = '#FF0000AA';
+    strokeColor = '#FF0000';
   }else if (severity === 'high') {
-    fillColor = 'orange';
+    fillColor = '#FFAA00AA';
+    strokeColor = '#FFAA00';
   } else if (severity === 'moderate') {
-    fillColor = 'yellow';
+    fillColor = '#FFFF00AA';
+    strokeColor = '#FFFF00';
   } else if (severity === 'minor') {
-    fillColor = 'green';
+    fillColor = '#00FF00AA';
+    strokeColor = '#00FF00';
   }
 
   return new Style({
     stroke: new Stroke({
-      color: fillColor,
+      color: strokeColor,
       width: 3,
+    }),
+    fill: new Fill({
+      color: fillColor,
     }),
   });
 }
