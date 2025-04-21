@@ -686,6 +686,7 @@ map.on("singleclick", function (evt) {
         }
       });
     if (feature) {
+        overlay.setPosition(evt.coordinate);
         var geometry = feature.getGeometry();
         var coord = geometry.getCoordinates();
         
