@@ -28,6 +28,17 @@ def parse_cap_for_alert_exchange(cap_xml):
     certainty = info.findtext('cap:certainty', default='', namespaces=ns)
     areaDesc = info.findtext('cap:area/cap:areaDesc', default='', namespaces=ns)
     references = root.findtext('cap:references', default='', namespaces=ns)
+    description = info.findtext('cap:description', default='', namespaces=ns)
+    
+    broadcast_message = ""
+
+    for param in root.findall('parameter'):
+        value_name = param.findtext('valueName')
+        if value_name == 'layer:SOREM:1.0:Broadcast_Text':
+            value = param.findtext('value')
+            if value:
+                broadcast_message = value
+                break
 
     # Timestamps
     effective = info.findtext('cap:effective', default='', namespaces=ns)
@@ -69,6 +80,8 @@ def parse_cap_for_alert_exchange(cap_xml):
         'references': references,
         'effective_at': effective,
         'expires_at': expires,
+        'description':description,
+        'broadcast_message':broadcast_message,
         'geojson_polygons': geojson_polygons
     }
 

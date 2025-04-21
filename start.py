@@ -1,3 +1,6 @@
+import eventlet
+eventlet.monkey_patch()
+
 import subprocess
 import threading
 import time

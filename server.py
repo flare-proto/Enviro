@@ -5,6 +5,7 @@ import logging
 import struct
 import threading
 from datetime import datetime, timedelta, timezone
+from time import sleep
 
 import ansi2html
 import ansi2html.style
@@ -14,6 +15,8 @@ from env_canada import ECWeather
 from flask import (Flask, Response, json, jsonify, redirect, render_template,
                    request, send_file, send_from_directory, url_for)
 from flask_cors import CORS, cross_origin
+from flask_sock import Sock,Server
+from gevent.pywsgi import WSGIServer
 
 import dbschema
 import pcap
@@ -67,6 +70,10 @@ logging.getLogger().addHandler(list_handler)
 pcap.setup()
 
 app = Flask(__name__)
+app.config['SOCK_SERVER_OPTIONS'] = {'ping_interval': 25}
+sockets = Sock(app)
+
+
 CORS(app,resources=r'/api/*')
 ec_en = ECWeather(station_id=config["server"]["station_id"], language='english')
 types = [
@@ -143,7 +150,18 @@ iconBindings = {
     "36":"windy",
     
 }
+wsocketsConned = set()
 alertsMap = {}
+lock = threading.Lock()
+
+def broadcast(message, sender=None):
+    with lock:
+        for client in list(wsocketsConned):
+            if client != sender:  # Optional: don't echo back to sender
+                try:
+                    client.send(message)
+                except Exception:
+                    wsocketsConned.remove(client)
 
 RABBITMQ_HOST = pika.URLParameters(config["server"]["amqp"])
 
@@ -178,7 +196,6 @@ def saveFeature(feature):
     session.commit()
     session.close()
     
-    
 def callback_outlook(ch, method, properties, body):
     """Handle incoming RabbitMQ messages."""
     message = json.loads(body.decode())
@@ -190,6 +207,8 @@ def callback_nerv_alert(ch, method, properties, body):
     message = json.loads(body.decode())
     logging.debug(message)
     logging.info(f"{message["event"]} {message["urgency"]}")
+    
+    broadcast(message["broadcast_message"])
     
     session = dbschema.Session()
     dbschema.store_alert(session,message)
@@ -247,7 +266,32 @@ def update():
         weather["cond"][c] = ec_en.conditions[c]["value"]
     weather["cond"]["ECicon_code"] = ec_en.conditions["icon_code"]["value"]
     weather["cond"]["icon_code"] = iconBindings.get(weather["cond"]["ECicon_code"],"err")
+    
+    icon = "?"
+    for i,b in enumerate(windLevels):
+        if b["max"] > weather["cond"].get("wind_speed",0)+0.1:
+            icon=chr(0xe3af+i)
+            break
+    
+    brief = f"{weather["cond"]["temperature"]}°C | {weather["cond"]["wind_speed"]} km/h @ {weather['cond']["wind_bearing"]}° {icon}"
+    broadcast(brief)
+    
     return weather
+
+@sockets.route('/apiws/alertsws')
+def echo_socket(ws:Server):
+    logging.info("Socket Connected")
+    #ws.receive()
+    wsocketsConned.add(ws)
+    ws.send("Envirotron WEB")
+    icon = "?"
+    for i,b in enumerate(windLevels):
+        if b["max"] > weather["cond"].get("wind_speed",0)+0.1:
+            icon=chr(0xe3af+i)
+            break
+    ws.send(f"{weather["cond"]["temperature"]}°C | {weather["cond"]["wind_speed"]} km/h @ {weather['cond']["wind_bearing"]}° {icon}")
+
+
 
 @app.route("/api/geojson")
 def alerts():
@@ -331,7 +375,6 @@ def utf8_integer_to_unicode(n):
 
 @app.route("/api/conditions/bft")
 def conditionsbft():
-    print(b'')
     for i,b in enumerate(windLevels):
         if b["max"] > weather["cond"].get("wind_speed",0)+0.1:
             return jsonify({"scale":i,"icon":chr(0xe3af+i)})
@@ -355,5 +398,7 @@ def assets(key):
 
 
 if __name__ == '__main__':
-  threading.Thread(target=consume_messages, daemon=True).start()
-  app.run(host="0.0.0.0")
+    threading.Thread(target=consume_messages, daemon=True).start()
+
+
+    WSGIServer(('0.0.0.0', 5000), app).serve_forever()

@@ -730,6 +730,7 @@ var irtrv = () => {
               .then((rs) => rs.json())
               .then((bft) => {
                   wnd.innerText = `[ ${bft["icon"]} ] ${json["wind_speed"]} km/h at ${json["wind_bearing"]}°`
+                  queuepush(`Current Conditions: ${json["temperature"]}°C - ${weatherTypes[json["icon_code"]]} - [ ${bft["icon"]} ] ${json["wind_speed"]} km/h at ${json["wind_bearing"]}°`)
               })
       });
       fetch("/api/alerts")
@@ -746,9 +747,54 @@ var irtrv = () => {
 
         });
 }
-setInterval(irtrv,15000)
+setInterval(irtrv,1000*60)
 irtrv()
 setInterval(() => {
   alerts_layer.getSource().refresh()
   radar_layer.getSource().refresh()
 },1000*5*60)
+
+
+const ticker = document.getElementById('ticker');
+const queue = [];
+
+const currentconds = document.getElementById("currentconds")
+
+const SCROLL_DURATION = 20000; // in milliseconds (10s = slower, longer scroll)
+
+const socket = new WebSocket('/apiws/alertsws');
+
+socket.addEventListener('open', () => {
+  console.log('[WebSocket] Connected');
+});
+
+function queuepush(d) {
+  queue.push(d);
+  if (!ticker.isScrolling) startScroll();
+}
+
+socket.addEventListener('message', (event) => {
+  queuepush(event.data)// Start if not already scrolling
+});
+
+function startScroll() {
+  if (queue.length == 0) {
+    ticker.isScrolling = false;
+    return;
+  }
+
+  const message = queue.shift();
+  ticker.textContent = message;
+
+  // Reset animation
+  ticker.style.animation = 'none';
+  ticker.offsetHeight; // trigger reflow
+  ticker.style.animation = `scroll ${SCROLL_DURATION}ms linear`;
+
+  ticker.isScrolling = true;
+
+  // Wait for scroll to finish before showing next
+  setTimeout(() => {
+    startScroll();
+  }, SCROLL_DURATION);
+}

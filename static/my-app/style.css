@@ -50,7 +50,7 @@ html, body {
     overflow: hidden;
     position:absolute;
     width: 100%;
-    height: 54px;
+    height: 104px;
     left: 0;
     bottom: 0;
   }
@@ -334,4 +334,27 @@ iframe {
 }
 .sidepane.visible {
   transform: translateX(0);
+}
+.ticker-container {
+  width: 100%;
+  background: #111;
+  overflow: hidden;
+  white-space: nowrap;
+  padding: 10px 0;
+  color: #fff;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  z-index: 999;
+}
+
+.ticker-text {
+  display: inline-block;
+  padding-left: 100%;
+  animation: scroll 20s linear infinite;
+}
+
+@keyframes scroll {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-100%); }
 }
