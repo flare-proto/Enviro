@@ -618,63 +618,85 @@ closer.onclick = function () {
   return false;
 };
 
+const selOpt = document.getElementById("selection")
 
 map.on("singleclick", function (evt) {
   // reset state
   //nav.style.display = 'none'
-  activeAlert = 1
-  overlay.setPosition(undefined);
-  // get coordinates
-  let coordinate = evt.coordinate;
-  let viewResolution = map.getView().getResolution();
-  let wms_source = alertsO_layer.getSource();
-  let url = wms_source.getFeatureInfoUrl(
-    coordinate,
-    viewResolution,
-    "EPSG:3857", {
-    INFO_FORMAT: "application/json",
-    FEATURE_COUNT: 10
-  }
-  );
-  console.log(url)
-  if (url) {
-    fetch(url)
-      .then(function (response) {
-        return response.json();
-      })
-      .then(function (json) {
-        if (json.features.length > 0) {
-          overlay.setPosition(evt.coordinate);
-          let alerts = json.features.map((e, i) => {
-            let alert_area = e.properties.area;
-            let alert_headline = e.properties.headline;
-            let alert_type = e.properties.alert_type;
-            let alert_description = e.properties.descrip_en;
-            let effective_datetime = e.properties.effective
-            let expires_datetime = (e.properties.expires)
-            return `
-            <div id=alert-${i + 1} ${i > 0 ? "style='display: none;'" : ""}>
-              <b>${alert_area}</b><br>
-              <b><span style="text-transform: capitalize;">${alert_headline}<span></b><br><br>
-              Alert type: <span style="text-transform: capitalize;">${alert_type}</span><br>
-              Effective: ${effective_datetime}<br>
-              Expires: ${expires_datetime}<br>
-              <br>
-              <div class="alert-descrip"><b>Description:</b> <br> ${alert_description}</div>
-           </div>
-          `;
-          });
-          if (json.features.length > 1) {
-            navText.innerText = `${activeAlert} of ${json.features.length}`
-            nav.style.display = 'flex';
-            nav.style.justifyContent = 'center';
-            nav.style.flexDirection = 'column';
-            nav.style.alignItems = 'center';
+  if (selOpt.value == "ECCC") {
+    activeAlert = 1
+    overlay.setPosition(undefined);
+    // get coordinates
+    let coordinate = evt.coordinate;
+    let viewResolution = map.getView().getResolution();
+    let wms_source = alertsO_layer.getSource();
+    let url = wms_source.getFeatureInfoUrl(
+      coordinate,
+      viewResolution,
+      "EPSG:3857", {
+      INFO_FORMAT: "application/json",
+      FEATURE_COUNT: 10
+    }
+    );
+    console.log(url)
+    if (url) {
+      fetch(url)
+        .then(function (response) {
+          return response.json();
+        })
+        .then(function (json) {
+          if (json.features.length > 0) {
+            overlay.setPosition(evt.coordinate);
+            let alerts = json.features.map((e, i) => {
+              let alert_area = e.properties.area;
+              let alert_headline = e.properties.headline;
+              let alert_type = e.properties.alert_type;
+              let alert_description = e.properties.descrip_en;
+              let effective_datetime = e.properties.effective
+              let expires_datetime = (e.properties.expires)
+              return `
+              <div id=alert-${i + 1} ${i > 0 ? "style='display: none;'" : ""}>
+                <b>${alert_area}</b><br>
+                <b><span style="text-transform: capitalize;">${alert_headline}<span></b><br><br>
+                Alert type: <span style="text-transform: capitalize;">${alert_type}</span><br>
+                Effective: ${effective_datetime}<br>
+                Expires: ${expires_datetime}<br>
+                <br>
+                <div class="alert-descrip"><b>Description:</b> <br> ${alert_description}</div>
+            </div>
+            `;
+            });
+            if (json.features.length > 1) {
+              navText.innerText = `${activeAlert} of ${json.features.length}`
+              nav.style.display = 'flex';
+              nav.style.justifyContent = 'center';
+              nav.style.flexDirection = 'column';
+              nav.style.alignItems = 'center';
+            }
+            let alerts_join = alerts.join("");
+            content_element.innerHTML = alerts_join;
           }
-          let alerts_join = alerts.join("");
-          content.innerHTML = alerts_join;
+        });
+    }
+  } else {
+    var feature = map.forEachFeatureAtPixel(evt.pixel,
+      function(feature, layer) {
+        if (layer == outlook_layer) {
+          return feature;
         }
       });
+    if (feature) {
+        var geometry = feature.getGeometry();
+        var coord = geometry.getCoordinates();
+        
+        var content = '<h3>' + feature.get('product_class') + ' Outlook</h3>';
+        content += '<h5>severity ' + feature.get('metobject').severity.value + '</h5>';
+        
+        content_element.innerHTML = content;
+        overlay.setPosition(coord);
+        
+        console.info(feature.getProperties());
+    }
   }
 });
 
