@@ -80,7 +80,6 @@ logger.addHandler(console_handler)
 pcap.setup()
 
 app = Flask(__name__)
-app.logger = logger
 app.config['SOCK_SERVER_OPTIONS'] = {'ping_interval': 25}
 app.config['SQLALCHEMY_ECHO'] =False
 sockets = Sock(app)
