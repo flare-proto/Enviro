@@ -367,6 +367,7 @@ function makeStyle() {
   })
   return s
 }
+makeStyle()
 
 function createPatternFill(text,color) {
   const canvas = document.createElement('canvas');
