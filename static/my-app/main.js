@@ -811,6 +811,7 @@ const ticker = document.getElementById('ticker');
 
   socket.addEventListener('message', (event) => {
     const msg = event.data;
+    msgQueue.push(msg)
     updateTicker();
   });
 
