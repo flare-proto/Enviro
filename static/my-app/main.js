@@ -690,7 +690,9 @@ map.on("singleclick", function (evt) {
     if (feature) {
         var geometry = feature.getGeometry();
         var coord = geometry.getCoordinates();
-        viewInfo.hidden = false
+        if (!viewInfo.classList.contains("visible")) {
+          viewInfo.classList.toggle("visible")
+        }
         var content = '<h3>' + feature.get('product_class') + ' Outlook</h3>';
         var tbl = document.createElement("table")
         
