@@ -321,3 +321,17 @@ iframe {
 .ol-popup-closer:after {
   content: "✖";
 }
+.sidepane {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  background-color: #333;
+  padding: 1rem;
+  transition: transform 0.3s ease;
+  transform: translateX(-100%);
+  z-index: 1000;
+}
+.sidepane.visible {
+  transform: translateX(0);
+}

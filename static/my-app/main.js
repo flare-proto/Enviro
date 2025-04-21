@@ -18,7 +18,9 @@ import Fill from 'ol/style/Fill.js'; //TODO REMOVE ME
 const pixelRatio = DEVICE_PIXEL_RATIO;
 
 let container = document.getElementById("popup");
-let content = document.getElementById("popup-content");
+let content_element = document.getElementById("popup-content");
+let viewInfo = document.getElementById("viewInfo");
+let selectedInfo = document.getElementById("selectedInfo");
 let closer = document.getElementById("popup-closer");
 let activeAlert = 1;
 
@@ -449,20 +451,28 @@ function styleFunction(feature) {
   const severity = feature.get('metobject')?.severity?.value;
 
   let fillColor = 'gray'; // default
+  let strokeColor = 'gray'; // default
   if (severity === 'extreme') {
-    fillColor = 'red';
+    fillColor = '#FF000088';
+    strokeColor = '#FF0000';
   }else if (severity === 'high') {
-    fillColor = 'orange';
+    fillColor = '#FFAA0088';
+    strokeColor = '#FFAA00';
   } else if (severity === 'moderate') {
-    fillColor = 'yellow';
+    fillColor = '#FFFF0088';
+    strokeColor = '#FFFF00';
   } else if (severity === 'minor') {
-    fillColor = 'green';
+    fillColor = '#00FF0088';
+    strokeColor = '#00FF00';
   }
 
   return new Style({
     stroke: new Stroke({
-      color: fillColor,
+      color: strokeColor,
       width: 3,
+    }),
+    fill: new Fill({
+      color: fillColor,
     }),
   });
 }
@@ -610,63 +620,93 @@ closer.onclick = function () {
   return false;
 };
 
+const selOpt = document.getElementById("selection")
 
 map.on("singleclick", function (evt) {
   // reset state
   //nav.style.display = 'none'
-  activeAlert = 1
-  overlay.setPosition(undefined);
-  // get coordinates
-  let coordinate = evt.coordinate;
-  let viewResolution = map.getView().getResolution();
-  let wms_source = alertsO_layer.getSource();
-  let url = wms_source.getFeatureInfoUrl(
-    coordinate,
-    viewResolution,
-    "EPSG:3857", {
-    INFO_FORMAT: "application/json",
-    FEATURE_COUNT: 10
-  }
-  );
-  console.log(url)
-  if (url) {
-    fetch(url)
-      .then(function (response) {
-        return response.json();
-      })
-      .then(function (json) {
-        if (json.features.length > 0) {
-          overlay.setPosition(evt.coordinate);
-          let alerts = json.features.map((e, i) => {
-            let alert_area = e.properties.area;
-            let alert_headline = e.properties.headline;
-            let alert_type = e.properties.alert_type;
-            let alert_description = e.properties.descrip_en;
-            let effective_datetime = e.properties.effective
-            let expires_datetime = (e.properties.expires)
-            return `
-            <div id=alert-${i + 1} ${i > 0 ? "style='display: none;'" : ""}>
-              <b>${alert_area}</b><br>
-              <b><span style="text-transform: capitalize;">${alert_headline}<span></b><br><br>
-              Alert type: <span style="text-transform: capitalize;">${alert_type}</span><br>
-              Effective: ${effective_datetime}<br>
-              Expires: ${expires_datetime}<br>
-              <br>
-              <div class="alert-descrip"><b>Description:</b> <br> ${alert_description}</div>
-           </div>
-          `;
-          });
-          if (json.features.length > 1) {
-            navText.innerText = `${activeAlert} of ${json.features.length}`
-            nav.style.display = 'flex';
-            nav.style.justifyContent = 'center';
-            nav.style.flexDirection = 'column';
-            nav.style.alignItems = 'center';
+  if (selOpt.value == "Alerts") {
+    activeAlert = 1
+    overlay.setPosition(undefined);
+    // get coordinates
+    let coordinate = evt.coordinate;
+    let viewResolution = map.getView().getResolution();
+    let wms_source = alertsO_layer.getSource();
+    let url = wms_source.getFeatureInfoUrl(
+      coordinate,
+      viewResolution,
+      "EPSG:3857", {
+      INFO_FORMAT: "application/json",
+      FEATURE_COUNT: 10
+    }
+    );
+    console.log(url)
+    if (url) {
+      fetch(url)
+        .then(function (response) {
+          return response.json();
+        })
+        .then(function (json) {
+          if (json.features.length > 0) {
+            overlay.setPosition(evt.coordinate);
+            let alerts = json.features.map((e, i) => {
+              let alert_area = e.properties.area;
+              let alert_headline = e.properties.headline;
+              let alert_type = e.properties.alert_type;
+              let alert_description = e.properties.descrip_en;
+              let effective_datetime = e.properties.effective
+              let expires_datetime = (e.properties.expires)
+              return `
+              <div id=alert-${i + 1} ${i > 0 ? "style='display: none;'" : ""}>
+                <b>${alert_area}</b><br>
+                <b><span style="text-transform: capitalize;">${alert_headline}<span></b><br><br>
+                Alert type: <span style="text-transform: capitalize;">${alert_type}</span><br>
+                Effective: ${effective_datetime}<br>
+                Expires: ${expires_datetime}<br>
+                <br>
+                <div class="alert-descrip"><b>Description:</b> <br> ${alert_description}</div>
+            </div>
+            `;
+            });
+            if (json.features.length > 1) {
+              navText.innerText = `${activeAlert} of ${json.features.length}`
+              nav.style.display = 'flex';
+              nav.style.justifyContent = 'center';
+              nav.style.flexDirection = 'column';
+              nav.style.alignItems = 'center';
+            }
+            let alerts_join = alerts.join("");
+            content_element.innerHTML = alerts_join;
           }
-          let alerts_join = alerts.join("");
-          content.innerHTML = alerts_join;
+        });
+    }
+  } else {
+    var feature = map.forEachFeatureAtPixel(evt.pixel,
+      function(feature, layer) {
+        if (layer == outlook_layer) {
+          return feature;
         }
       });
+    if (feature) {
+        var geometry = feature.getGeometry();
+        var coord = geometry.getCoordinates();
+        if (!viewInfo.classList.contains("visible")) {
+          viewInfo.classList.toggle("visible")
+        }
+        var content = '<h3>' + feature.get('product_class') + ' Outlook</h3>';
+        var tbl = document.createElement("table")
+        
+        tbl.innerHTML += '<tr><td>severity</td><td>' + feature.get('metobject').severity.value + '</td></tr>';
+        tbl.innerHTML += '<tr><td>Thunderstorms</td><td>' + feature.get('metobject').thunderstorm.value + '</td></tr>';
+        tbl.innerHTML += '<tr><td>rain</td><td>' + feature.get('metobject').rain.value +" "+feature.get('metobject').rain.unit+ '</td></tr>';
+        tbl.innerHTML += '<tr><td>Hail</td><td>' + feature.get('metobject').hail.value +" "+feature.get('metobject').hail.unit+ '</td></tr>';
+        tbl.innerHTML += '<tr><td>Gust</td><td>' + feature.get('metobject').gust.value +" "+feature.get('metobject').gust.unit+ '</td></tr>';
+        
+        selectedInfo.innerHTML = content;
+        selectedInfo.appendChild(tbl)
+        
+        console.info(feature.getProperties());
+    }
   }
 });
 
