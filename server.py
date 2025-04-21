@@ -161,7 +161,7 @@ iconBindings = {
     "36":"windy",
     
 }
-wsocketsConned = set()
+wsocketsConned:set[queue.Queue] = set()
 alertsMap = {}
 lock = threading.Lock()
 
@@ -169,7 +169,7 @@ def broadcast(message, sender=None):
     with lock:
         for client in list(wsocketsConned):
             if client != sender:  # Optional: don't echo back to sender
-                client.join(message)
+                client.put(message)
 
 RABBITMQ_HOST = pika.URLParameters(config["server"]["amqp"])
 
