@@ -15,7 +15,7 @@ from flask import (Flask, Response, json, jsonify, redirect, render_template,
                    request, send_file, send_from_directory, url_for)
 from flask_cors import CORS, cross_origin
 
-import dbscema
+import dbschema
 import pcap
 
 # Example usage
@@ -158,7 +158,7 @@ def callback_log(ch, method, properties, body):
     logSync.release()
     
 def saveFeature(feature):
-    session = dbscema.Session()
+    session = dbschema.Session()
     dt = datetime.strptime(feature["properties"]["expiration_datetime"], "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc)
     vdt = feature["properties"]["metobject"].get("validity_datetime","")
     if vdt:
@@ -167,7 +167,7 @@ def saveFeature(feature):
         print(feature["properties"]["metobject"])
         edt = datetime.now()
     # Create a token that expires in 1 hour
-    token = dbscema.Outlook(
+    token = dbschema.Outlook(
         outlook_id=feature["id"],
         feature=json.dumps(feature),
         expires_at=dt,
@@ -191,8 +191,8 @@ def callback_nerv_alert(ch, method, properties, body):
     logging.debug(message)
     logging.info(f"{message["event"]} {message["urgency"]}")
     
-    session = dbscema.Session()
-    dbscema.store_alert(session,message)
+    session = dbschema.Session()
+    dbschema.store_alert(session,message)
     session.commit()
     session.close()
 
@@ -253,8 +253,8 @@ def update():
 def alerts():
     alertsDat = []
     
-    session = dbscema.Session()
-    valid_tokens = dbscema.get_active_alert_polygons(session)
+    session = dbschema.Session()
+    valid_tokens = dbschema.get_active_alert_polygons(session)
     session.close()
     
     
@@ -271,8 +271,8 @@ def alerts_og():
 
 @app.route("/api/outlook")
 def outlook():
-    session = dbscema.Session()
-    valid_tokens = session.query(dbscema.Outlook).filter(dbscema.Outlook.expires_at > datetime.utcnow()).filter(dbscema.Outlook.effective_at < datetime.utcnow()).all()
+    session = dbschema.Session()
+    valid_tokens = session.query(dbschema.Outlook).filter(dbschema.Outlook.expires_at > datetime.utcnow()).filter(dbschema.Outlook.effective_at < datetime.utcnow()).all()
     session.close()
     return jsonify({	
 "type":"FeatureCollection",
