@@ -107,13 +107,14 @@ def store_alert(session, alert_dict: dict) -> str:
 
 # --- Get Active Alert Polygons ---
 def get_active_alert_polygons(session) -> list:
-    # Query for polygons from active alerts (not expired and not cancelled)
-    active_polygons = session.query(AlertPolygon).join(Alert).filter(
-        Alert.expires_at > datetime.utcnow(), 
-        AlertPolygon.cancelled_by_id == None
-    ).all()
-    
-    return active_polygons
+    with session.begin():
+        # Query for polygons from active alerts (not expired and not cancelled)
+        active_polygons = session.query(AlertPolygon).join(Alert).filter(
+            Alert.expires_at > datetime.utcnow(), 
+            AlertPolygon.cancelled_by_id == None
+        ).all()
+        
+        return active_polygons
 
 
 
