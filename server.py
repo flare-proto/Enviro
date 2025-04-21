@@ -272,6 +272,13 @@ def update():
 @sockets.route('/api/alerts/ws')
 def echo_socket(ws):
     wsocketsConned.add(ws)
+    ws.send("Envirotron WEB")
+    icon = "?"
+    for i,b in enumerate(windLevels):
+        if b["max"] > weather["cond"].get("wind_speed",0)+0.1:
+            icon=chr(0xe3af+i)
+            break
+    ws.send(f"{weather["cond"]["temperature"]}°C | {weather["cond"]["wind_speed"]} km/h @ {weather['cond']["wind_bearing"]}° {icon}")
     while not ws.closed:
         sleep(1)
     wsocketsConned.remove(ws)
