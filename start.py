@@ -8,7 +8,7 @@ import outlook
 
 dataSync = threading.Condition()
 
-server.startServer(dataSync)
+threading.Thread(target=server.startServer, daemon=True,args=(dataSync,)).start()
 
 dataSync.wait()
 
