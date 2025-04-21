@@ -312,6 +312,15 @@ wspout_stripes.addColorStop(4 / 6, 'orange');
 wspout_stripes.addColorStop(5 / 6, '#00000000');
 wspout_stripes.addColorStop(1, 'orange');
 
+const warnTextShow = [
+  "snowfall",
+  "blowing snow advisory",
+  "winter storm",
+  "blizzard",
+  "snow squall",
+  "waterspout",
+  "tornado"
+]
 
 const warnColors = {
   "snowfall":"#00ffff",
@@ -325,7 +334,7 @@ const warnColors = {
   "arctic outflow":"#03c2fc",
   "extreme cold":"#0004ff",
 
-  "freezing rain":"#002dbf",
+  "freezing rain":"#332dbf",
   "fog":"#80a1ba",
   "rainfall":"#00ff00",
   
@@ -376,7 +385,9 @@ function createPatternFill(text,color) {
   const ctx = canvas.getContext('2d');
   ctx.fillStyle = color
   ctx.font = "20px NerdSpace"
-  ctx.fillText(text,5,125)
+  if (text in warnTextShow) {
+    ctx.fillText(text,5,125)
+  }
 
   const pattern = ctx.createPattern(canvas, 'repeat');
 
