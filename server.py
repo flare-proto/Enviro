@@ -198,9 +198,12 @@ def saveFeature(feature):
     
 def callback_outlook(ch, method, properties, body):
     """Handle incoming RabbitMQ messages."""
-    message = json.loads(body.decode())
-    for i in message["features"]:
-        saveFeature(i)
+    try:
+        message = json.loads(body.decode())
+        for i in message["features"]:
+            saveFeature(i)
+    except Exception as e:
+        logging.exception(e)
     
 def callback_nerv_alert(ch, method, properties, body):
     """Handle incoming RabbitMQ messages."""
