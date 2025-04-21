@@ -19,6 +19,8 @@ const pixelRatio = DEVICE_PIXEL_RATIO;
 
 let container = document.getElementById("popup");
 let content_element = document.getElementById("popup-content");
+let viewInfo = document.getElementById("viewInfo");
+let selectedInfo = document.getElementById("selectedInfo");
 let closer = document.getElementById("popup-closer");
 let activeAlert = 1;
 
@@ -689,11 +691,11 @@ map.on("singleclick", function (evt) {
         overlay.setPosition(evt.coordinate);
         var geometry = feature.getGeometry();
         var coord = geometry.getCoordinates();
-        
+        viewInfo.hidden = false
         var content = '<h3>' + feature.get('product_class') + ' Outlook</h3>';
         content += '<h5>severity ' + feature.get('metobject').severity.value + '</h5>';
         
-        content_element.innerHTML = content;
+        selectedInfo.innerHTML = content;
         overlay.setPosition(coord);
         
         console.info(feature.getProperties());

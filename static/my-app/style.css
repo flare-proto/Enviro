@@ -321,3 +321,9 @@ iframe {
 .ol-popup-closer:after {
   content: "✖";
 }
+.sidepane {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+}
