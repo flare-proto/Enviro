@@ -317,7 +317,8 @@ const warnColors = {
   "snowfall":"#00ffff",
   "blowing snow advisory":"#008fbb",
   
-  "winter storm warning":"#67c9bc",
+  "winter storm":"#67c9bc",
+  
   "blizzard":"#3f92d1",
   "snow squall":"#00e5ff",
   
