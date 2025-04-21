@@ -757,7 +757,7 @@ setInterval(() => {
 const ticker = document.getElementById('ticker');
 const queue = [];
 
-const SCROLL_DURATION = 10000; // in milliseconds (10s = slower, longer scroll)
+const SCROLL_DURATION = 20000; // in milliseconds (10s = slower, longer scroll)
 
 const socket = new WebSocket('/apiws/alertsws');
 
