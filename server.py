@@ -5,6 +5,7 @@ import logging
 import struct
 import threading
 from datetime import datetime, timedelta, timezone
+from time import sleep
 
 import ansi2html
 import ansi2html.style
@@ -352,6 +353,14 @@ def assets(key):
     return send_from_directory("static/my-app/dist/assets/",key)
 
 
-if __name__ == '__main__':
-  threading.Thread(target=consume_messages, daemon=True).start()
-  app.run(host="0.0.0.0")
+def startServer(dataSync:threading.Condition):
+    dataSync.acquire()
+    threading.Thread(target=consume_messages, daemon=True).start()
+    def flaskServer():
+        app.run(host="0.0.0.0")
+    threading.Thread(target=flaskServer, daemon=True).start()
+    sleep(10)
+    logging.info("Server started... release data handlers")
+    dataSync.notify_all()
+    dataSync.release()
+    
