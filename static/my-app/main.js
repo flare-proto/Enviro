@@ -404,8 +404,8 @@ function style_feature_alert(feature, resolution) {
   if (watch_alert.includes(text)) {
     stroke = new Stroke({
       color: wc,
-      width: 5,
-      lineDash: [30, 10,30]  // ← This creates the dashed effect
+      width: 1.5,
+      lineDash: [5, 3,5]  // ← This creates the dashed effect
     })
   } else {
     stroke = new Stroke({ color: wc, width: 1.5 })
