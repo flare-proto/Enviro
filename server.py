@@ -254,14 +254,15 @@ def alerts():
     alertsDat = []
     
     session = dbschema.Session()
-    valid_tokens = dbschema.get_active_alert_polygons(session)
+    with session.begin():
+        valid_tokens = dbschema.get_active_alert_polygons(session)
+        jsonDat = {	
+            "type":"FeatureCollection",
+            "features":[t.geometry_geojson for t in valid_tokens]
+        }
     session.close()
     
-    
-    return jsonify({	
-"type":"FeatureCollection",
-"features":[t.geometry_geojson for t in valid_tokens]
-    })
+    return jsonify(jsonDat)
 
 @app.route("/api/alerts")
 def alerts_og():
