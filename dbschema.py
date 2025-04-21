@@ -10,7 +10,7 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import declarative_base, sessionmaker, relationship
 from datetime import datetime, timedelta
-import uuid
+import uuid,logging
 
 Base = declarative_base()
 
@@ -142,7 +142,7 @@ class Outlook(Base):
 
 # Create a SQLite database file
 DATABASE_URL = 'sqlite:///outlook.db'  # Use a file-based SQLite database
-engine = create_engine(DATABASE_URL, echo=True)
+engine = create_engine(DATABASE_URL)
 Session = sessionmaker(bind=engine)
 
 # Create tables
