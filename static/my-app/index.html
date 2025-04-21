@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/x-icon" href="https://openlayers.org/favicon.ico" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Eel example</title>
+
+  <link rel="stylesheet" href="static/css/main.css">
+</head>
+
+<body>
+  <div id="alerts" class="padtop scale no_overflow" hidden>
+    <div class="cntr">
+      <span id="temps" class="value"></span>
+      <span id="temps_wind" class="value"></span>
+      <span class="value"> - </span>
+      <span id="wind" class="value"></span>
+      <span class="value"> - </span>
+      <span id="cond" class="value"></span>
+    </div>
+    <b>
+      <div id="warnings"></div>
+      <div id="watches"></div>
+      <div id="advisories"></div>
+      <div id="statements"></div>
+      <div id="endings"></div>
+    </b>
+    <p id="allICONS"></p>
+  </div>
+  <div id="mapscrn" class="padtop scale no_overflow ">
+    
+    <div id="map">
+      <div class="ol-overlay-container ol-selectable"
+        style="position: absolute; pointer-events: auto; transform: translate(0%, 0%) translate(502px, 232px);">
+        <div id="popup" class="ol-popup">
+          <a href="#" id="popup-closer" class="ol-popup-closer"></a>
+          <div id="popup-content">
+            <div id="nav" style="margin-top: 0.5rem; display: none;">
+              <div id="nav-btns">
+                <button id="left-btn" class="btn btn-outline-primary btn-sm" disabled="">
+                  <i class="fa fa-arrow-left" aria-hidden="true"></i>
+                </button>
+                <span style="width: 20px; height: auto; display:inline-block;"></span>
+                <button type="button" id="right-btn" class="btn btn-outline-primary btn-sm">
+                  <i class="fa fa-arrow-right" aria-hidden="true"></i>
+                </button>
+              </div>
+              <div style="margin-top: 0.25rem; font-size: 0.8rem;">
+                <p id="nav-text" style="margin-bottom: 0rem;"></p>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+      </div>
+      
+    </div>
+    <div id="checks_map" class="locPing layers"><table id="legend">
+      
+      </table></div>
+    
+  </div>
+
+    <div id="data" class="padtop scale no_overflow" hidden>
+      <img id="shear" class="overlay semi" src="https://wmiradar.com/ahsp/rap/current_run/RAP_HLCYSHR_F06.png">
+      <img id="MUCAPE" class="overlay semi" src="https://wmiradar.com/ahsp/rap/current_run/RAP_MUCAPE_F06.png">
+      <img id="VORT" class="overlay semi" src="https://wmiradar.com/ahsp/rap/current_run/RAP_VORT500_F06.png" hidden>
+      <img id="DEW" class="overlay semi" src="https://wmiradar.com/ahsp/rap/current_run/RAP_DEWP_F06.png" hidden>
+      <img id="MOIST" class="overlay semi" src="https://wmiradar.com/ahsp/rap/current_run/RAP_LIFTMOIST_F06.png" hidden>
+      <img id="DIVERG" class="overlay semi" src="https://wmiradar.com/ahsp/rap/current_run/RAP_DIVCON_F06.png" hidden>
+      <div id="checks" class="layers"></div>
+    </div>
+    <div id="InfoPane" class="padtop scale no_overflow" hidden>
+      <table id="qrhTbl"></table>
+    </div>
+
+    <div class="topnav">
+      <span id="topWarn" class="warnPane twoLineData">
+        <p id="warn" class="no_margin" style="font-size: 20px;display:inline"></p>
+        <p id="warnType" class="no_margin" style="font-size: 20px;display:inline">LOADING</p>
+      </span>
+      <span class="twoLineData">
+        <p id="time" class="no_margin"></p>
+        <p id="date" class="no_margin" style="font-size: 10px;"></p>
+      </span>
+      <span class="twoLineData">
+        <p id="timeLocal" class="no_margin"></p>
+        <p id="dateLocal" class="no_margin" style="font-size: 10px;"></p>
+      </span>
+      <!--<button {% if alrt %}class="active"{% endif %} id="button-key" onclick="update('/static/info/alerts.html')">Alerts</button>
+        !-->
+      <a id="button-key" onclick="swtch('alerts')">Alerts</a>
+      <a id="button-data" onclick="swtch('data')">Data</a>
+      <a id="button-forcast" onclick="swtch('InfoPane')">Info</a>
+      <a id="button-map" onclick="swtch('mapscrn')">Map</a>
+    </div>
+    <script>var panes = {}
+      panes.alerts = document.getElementById("alerts");
+      panes.data = document.getElementById("data");
+      panes.InfoPane = document.getElementById("InfoPane");
+      panes.mapscrn = document.getElementById("mapscrn");
+      function swtch(name) {
+        for (const p in panes) {
+          const element = panes[p];
+          element.hidden = true
+        }
+        panes[name].hidden = false
+      }</script>
+    <script type="module" src="./main.js"></script>
+</body>
+
+</html>

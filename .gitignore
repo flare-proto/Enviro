@@ -1,0 +1,10 @@
+map/my-app/node_modules
+map/my-app/dist
+static/node_modules
+static/ol
+chk/
+cap/
+__pycache__
+__pycache__/pcap.cpython-313.pyc
+alert.db
+outlook.db
