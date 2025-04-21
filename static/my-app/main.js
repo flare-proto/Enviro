@@ -803,7 +803,7 @@ const ticker = document.getElementById('ticker');
   observer.observe(ticker, { attributes: true, attributeFilter: ['style'] });
 
   // WebSocket setup
-  const socket = new WebSocket('/apiws/alerts');
+  const socket = new WebSocket('/apiws/alertsws');
 
   socket.addEventListener('open', () => {
     console.log('[WebSocket] Connected');
