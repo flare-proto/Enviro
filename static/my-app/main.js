@@ -628,7 +628,9 @@ var irtrv = () => {
       .then((response) => response.json())
       .then((json) => {
           sc.innerText = `${json["temperature"]}°C`;
-          wc.innerText = `${json["wind_chill"]}°C`;
+          if (json["wind_chill"]) {
+            wc.innerText = `${json["wind_chill"]}°C`;
+          }
           cnd.innerText = `${weatherTypes[json["icon_code"]]}`
           fetch("/api/conditions/bft")
               .then((rs) => rs.json())
