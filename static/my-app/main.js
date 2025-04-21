@@ -18,7 +18,7 @@ import Fill from 'ol/style/Fill.js'; //TODO REMOVE ME
 const pixelRatio = DEVICE_PIXEL_RATIO;
 
 let container = document.getElementById("popup");
-let content = document.getElementById("popup-content");
+let content_element = document.getElementById("popup-content");
 let closer = document.getElementById("popup-closer");
 let activeAlert = 1;
 
