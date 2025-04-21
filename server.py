@@ -272,7 +272,8 @@ def alerts_og():
 @app.route("/api/outlook")
 def outlook():
     session = dbschema.Session()
-    valid_tokens = session.query(dbschema.Outlook).filter(dbschema.Outlook.expires_at > datetime.utcnow()).filter(dbschema.Outlook.effective_at < datetime.utcnow()).all()
+    with session.begin():
+        valid_tokens = session.query(dbschema.Outlook).filter(dbschema.Outlook.expires_at > datetime.utcnow()).filter(dbschema.Outlook.effective_at < datetime.utcnow()).all()
     session.close()
     return jsonify({	
 "type":"FeatureCollection",
