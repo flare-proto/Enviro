@@ -385,7 +385,7 @@ function createPatternFill(text,color) {
   const ctx = canvas.getContext('2d');
   ctx.fillStyle = color
   ctx.font = "20px NerdSpace"
-  if (text in warnTextShow) {
+  if (warnTextShow.includes(text)) {
     ctx.fillText(text,5,125)
   }
 
