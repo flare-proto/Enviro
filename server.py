@@ -15,11 +15,15 @@ from env_canada import ECWeather
 from flask import (Flask, Response, json, jsonify, redirect, render_template,
                    request, send_file, send_from_directory, url_for)
 from flask_cors import CORS, cross_origin
-from flask import Flask
 from flask_sock import Sock
+from gevent import monkey
 
 import dbschema
 import pcap
+
+monkey.patch_all()
+
+from gevent.pywsgi import WSGIServer
 
 # Example usage
 
@@ -393,10 +397,6 @@ def assets(key):
 
 if __name__ == '__main__':
     threading.Thread(target=consume_messages, daemon=True).start()
-    from gevent import monkey
-    monkey.patch_all()
-
-    from gevent.pywsgi import WSGIServer
 
 
     WSGIServer(('0.0.0.0', 5000), app).serve_forever()
