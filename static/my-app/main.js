@@ -747,7 +747,7 @@ var irtrv = () => {
 
         });
 }
-setInterval(irtrv,15000)
+setInterval(irtrv,1000*60)
 irtrv()
 setInterval(() => {
   alerts_layer.getSource().refresh()
