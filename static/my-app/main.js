@@ -554,7 +554,7 @@ const map = new Map({
   overlays: [overlay],
   view: new View({
     center: fromLonLat([-114, 51]),
-    zoom: 12
+    zoom: 5
   })
 });
 
