@@ -761,12 +761,14 @@ const ticker = document.getElementById('ticker');
 
   socket.addEventListener('open', () => {
     console.log('[WebSocket] Connected');
+    queue.push("Loaded WS");
   });
 
   socket.addEventListener('message', (event) => {
     const msg = event.data;
     queue.push(msg);
   });
+  
 
   // Cycle messages from the queue every few seconds
   setInterval(() => {
