@@ -269,6 +269,13 @@ def alerts_og():
     weather = update()
     return jsonify(weather["alerts"])
 
+@app.route("/api/cds")
+def cds_configured():
+    global weather
+    weather = update()
+    return jsonify([n for n,e in config['sources'].items()])
+
+
 @app.route("/api/outlook")
 def outlook():
     session = dbschema.Session()
