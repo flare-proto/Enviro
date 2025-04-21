@@ -3,7 +3,7 @@ import collections
 import configparser
 import logging
 import struct
-import threading
+import threading,queue
 from datetime import datetime, timedelta, timezone
 from time import sleep
 
@@ -169,10 +169,7 @@ def broadcast(message, sender=None):
     with lock:
         for client in list(wsocketsConned):
             if client != sender:  # Optional: don't echo back to sender
-                try:
-                    client.send(message)
-                except Exception:
-                    wsocketsConned.remove(client)
+                client.join(message)
 
 RABBITMQ_HOST = pika.URLParameters(config["server"]["amqp"])
 
@@ -262,7 +259,6 @@ async def alertMap():
     global alertsMap
     alertsMap = pcap.fetch()
     
-
 @cached(cache=TTLCache(maxsize=1024, ttl=60))
 def update():
     weather = {
@@ -304,7 +300,8 @@ def update():
 def echo_socket(ws:Server):
     logging.info("Socket Connected")
     #ws.receive()
-    wsocketsConned.add(ws)
+    q = queue.Queue()
+    wsocketsConned.add(q)
     ws.send("Envirotron WEB")
     icon = "?"
     for i,b in enumerate(windLevels):
@@ -312,6 +309,12 @@ def echo_socket(ws:Server):
             icon=chr(0xe3af+i)
             break
     ws.send(f"{weather["cond"]["temperature"]}°C | {weather["cond"]["wind_speed"]} km/h @ {weather['cond']["wind_bearing"]}° {icon}")
+    while True:
+        message=q.get()
+        try:
+            ws.send(message)
+        except Exception:
+            wsocketsConned.remove(q)
 
 
 
