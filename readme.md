@@ -36,3 +36,20 @@ CREATE TABLE `formattedAlert` (`id` TEXT PRIMARY KEY UNIQUE, `begins` TEXT, `end
 ```sql
 CREATE TABLE `Alerts` (`key` INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE, `id` TEXT UNIQUE, `data` TEXT)
 ```
+
+### Custom data sources
+```ini
+[sources]
+<NAME> = <Exchange>
+```
+then send 
+```json
+{
+    "type":"feature",
+    "geometry":[],
+    "properties":{
+        "stroke":"...",
+        "fill":"..."
+    }
+}
+```
