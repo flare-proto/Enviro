@@ -310,6 +310,10 @@ const warnTextShow = [
   "tornado"
 ]
 
+const watch_alert = [
+  "squall"
+]
+
 const warnColors = {
   "snowfall":"#00ffff",
   "blowing snow advisory":"#008fbb",
@@ -394,9 +398,19 @@ function style_feature_alert(feature, resolution) {
     wc = "#AAAAAA"
     nf = true
   }
+  var stroke;
+  if (watch_alert.contains(wc)) {
+    stroke = new Stroke({
+      color: wc,
+      width: 1.5,
+      lineDash: [10, 10]  // ← This creates the dashed effect
+    })
+  } else {
+    stroke = new Stroke({ color: wc, width: 1.5 })
+  }
   return new Style({
     fill: createPatternFill(text,wc,nf),//new Fill({ color: fill }),
-    stroke: new Stroke({ color: wc, width: 1.5 }),
+    stroke: stroke,
     
   });
 }
