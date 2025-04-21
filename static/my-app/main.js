@@ -778,7 +778,7 @@ socket.addEventListener('message', (event) => {
 });
 
 function startScroll() {
-  if (queue.length === 0) {
+  if (queue.length == 0) {
     ticker.isScrolling = false;
     return;
   }
