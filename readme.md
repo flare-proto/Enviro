@@ -3,6 +3,15 @@ Really its just a better environment canada alert map, with different colors
 
 THIS ONLY WORKS IN CANADA
 
+## Contributing
+I am happy to except contributions, 
+
+### Posible Changes
+
+- [ ] Support for US alerts
+- [ ] Support for the french
+- [ ] better sourcing of *LOCAL data*
+
 ## Usage
 
 1. Setup a RabbitMQ server

@@ -300,6 +300,15 @@ const vectorLayer = new VectorImageLayer({
   }
 });
 
+const warnTextShow = [
+  "snowfall",
+  "blowing snow advisory",
+  "winter storm",
+  "blizzard",
+  "snow squall",
+  "waterspout",
+  "tornado"
+]
 
 const warnColors = {
   "snowfall":"#00ffff",
@@ -313,7 +322,7 @@ const warnColors = {
   "arctic outflow":"#03c2fc",
   "extreme cold":"#0004ff",
 
-  "freezing rain":"#002dbf",
+  "freezing rain":"#332dbf",
   "fog":"#80a1ba",
   "rainfall":"#00ff00",
   
@@ -355,6 +364,40 @@ function makeStyle() {
   })
   return s
 }
+makeStyle()
+
+function createPatternFill(text,color) {
+  const canvas = document.createElement('canvas');
+  canvas.width = 250;
+  canvas.height = 250;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = color
+  ctx.font = "20px NerdSpace"
+  if (warnTextShow.includes(text)) {
+    ctx.fillText(text,5,125)
+  }
+
+  const pattern = ctx.createPattern(canvas, 'repeat');
+
+  return new Fill({
+    color: pattern
+  });
+}
+
+function style_feature_alert(feature, resolution) {
+  const text = feature.get('warn') || 'Region'; // Or any other attribute
+  var wc = warnColors[text];
+  var fill = "rgba(0,0,0,0)"
+  if (!wc) {
+    fill = "#FFFFFFFF",
+    wc = "#AAAAAA"
+  }
+  return new Style({
+    fill: createPatternFill(text,wc),//new Fill({ color: fill }),
+    stroke: new Stroke({ color: wc, width: 1.5 }),
+    
+  });
+}
 
 const alerts_layer = new VectorImageLayer({
   background: '#00000000',
@@ -363,7 +406,7 @@ const alerts_layer = new VectorImageLayer({
     url: '/api/geojson',
     format: new GeoJSON(),
   }),
-  style: makeStyle(),
+  style: style_feature_alert
 });
 
 const alertsO_layer = new TileLayer({
