@@ -69,7 +69,7 @@ formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
 list_handler.setFormatter(formatter)
 
 logger = logging.getLogger()
-formatter = coloredlogs.ColoredFormatter('AX - %(asctime)s - %(levelname)s - %(message)s')
+formatter = coloredlogs.ColoredFormatter('SV - %(asctime)s - %(levelname)s - %(message)s')
 list_handler.setFormatter(formatter)
 list_handler.setLevel(logging.INFO)
 logger.addHandler(list_handler)
