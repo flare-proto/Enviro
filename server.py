@@ -271,6 +271,7 @@ def update():
 
 @sockets.route('/api/alerts/ws')
 def echo_socket(ws):
+    logging.info("Socket Connected")
     wsocketsConned.add(ws)
     ws.send("Envirotron WEB")
     icon = "?"
