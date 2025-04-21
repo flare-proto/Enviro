@@ -752,3 +752,31 @@ setInterval(() => {
   alerts_layer.getSource().refresh()
   radar_layer.getSource().refresh()
 },1000*5*60)
+
+const ticker = document.getElementById('ticker');
+  const queue = [];
+
+  // Change this to your WebSocket server
+  const socket = new WebSocket('/api/alert/ws');
+
+  socket.addEventListener('open', () => {
+    console.log('[WebSocket] Connected');
+  });
+
+  socket.addEventListener('message', (event) => {
+    const msg = event.data;
+    queue.push(msg);
+  });
+
+  // Cycle messages from the queue every few seconds
+  setInterval(() => {
+    if (queue.length > 0) {
+      const nextMsg = queue.shift();
+      ticker.innerText = nextMsg;
+
+      // Reset animation to replay it
+      ticker.style.animation = 'none';
+      void ticker.offsetWidth; // trigger reflow
+      ticker.style.animation = null;
+    }
+  }, 5000);
