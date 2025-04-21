@@ -774,6 +774,7 @@ const ticker = document.getElementById('ticker');
   setInterval(() => {
     if (queue.length > 0) {
       const nextMsg = queue.shift();
+      console.log(nextMsg)
       ticker.innerText = nextMsg;
 
       // Reset animation to replay it
