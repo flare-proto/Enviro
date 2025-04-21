@@ -152,6 +152,16 @@ iconBindings = {
 }
 wsocketsConned = set()
 alertsMap = {}
+lock = threading.Lock()
+
+def broadcast(message, sender=None):
+    with lock:
+        for client in list(wsocketsConned):
+            if client != sender:  # Optional: don't echo back to sender
+                try:
+                    client.send(message)
+                except Exception:
+                    wsocketsConned.remove(client)
 
 RABBITMQ_HOST = pika.URLParameters(config["server"]["amqp"])
 
@@ -282,10 +292,8 @@ def echo_socket(ws:Server):
             icon=chr(0xe3af+i)
             break
     ws.send(f"{weather["cond"]["temperature"]}°C | {weather["cond"]["wind_speed"]} km/h @ {weather['cond']["wind_bearing"]}° {icon}")
-    while ws.connected:
-        sleep(1)
-    wsocketsConned.remove(ws)
-    
+
+
 
 @app.route("/api/geojson")
 def alerts():
