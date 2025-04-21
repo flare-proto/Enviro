@@ -18,3 +18,12 @@ THIS ONLY WORKS IN CANADA
         - Current station id is Calgary Alberta
 3. Cd into static/my-app and run `npm run build`
 4. Run start.py
+
+### SQL setup
+i broke func at some point
+```sql
+CREATE TABLE `formattedAlert` (`id` TEXT PRIMARY KEY UNIQUE, `begins` TEXT, `ends` TEXT, `areas` TEXT, `urgency` TEXT, `references` TEXT, `msgType` TEXT, `type` TEXT,`desc` TEXT)
+```
+```sql
+CREATE TABLE `Alerts` (`key` INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE, `id` TEXT UNIQUE, `data` TEXT)
+```
