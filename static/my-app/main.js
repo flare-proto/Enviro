@@ -300,18 +300,6 @@ const vectorLayer = new VectorImageLayer({
   }
 });
 
-//TODO REMOVE ME
-const canvas = document.createElement('canvas');
-const context = canvas.getContext('2d');
-const wspout_stripes = context.createLinearGradient(0, 0, 1024 * pixelRatio, 0);
-wspout_stripes.addColorStop(0, 'orange');
-wspout_stripes.addColorStop(1 / 6, '#00000000');
-wspout_stripes.addColorStop(2 / 6, 'orange');
-wspout_stripes.addColorStop(3 / 6, '#00000000');
-wspout_stripes.addColorStop(4 / 6, 'orange');
-wspout_stripes.addColorStop(5 / 6, '#00000000');
-wspout_stripes.addColorStop(1, 'orange');
-
 
 const warnColors = {
   "snowfall":"#00ffff",
