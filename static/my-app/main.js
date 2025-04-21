@@ -760,7 +760,7 @@ const ticker = document.getElementById('ticker');
 
   const protocol = window.location.protocol === "https:" ? "wss" : "ws";
   const host = window.location.host;
-  const path = '/api/alert/ws'; // relative path to your WebSocket endpoint
+  const path = '/apiws/alert'; // relative path to your WebSocket endpoint
 
 
   // Change this to your WebSocket server
