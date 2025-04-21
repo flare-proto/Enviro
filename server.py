@@ -9,6 +9,7 @@ from time import sleep
 
 import ansi2html
 import ansi2html.style
+import coloredlogs
 import pika
 from cachetools import TTLCache, cached
 from env_canada import ECWeather
@@ -67,7 +68,15 @@ list_handler = ListHandler(log_messages)
 formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
 list_handler.setFormatter(formatter)
 
-logging.getLogger().addHandler(list_handler)
+logger = logging.getLogger()
+formatter = coloredlogs.ColoredFormatter('AX - %(asctime)s - %(levelname)s - %(message)s')
+list_handler.setFormatter(formatter)
+list_handler.setLevel(logging.INFO)
+logger.addHandler(list_handler)
+console_handler = logging.StreamHandler()
+console_handler.setLevel(logging.DEBUG)
+console_handler.setFormatter(formatter)
+logger.addHandler(console_handler)
 pcap.setup()
 
 app = Flask(__name__)
