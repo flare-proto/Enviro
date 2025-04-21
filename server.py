@@ -353,15 +353,13 @@ def assets(key):
     return send_from_directory("static/my-app/dist/assets/",key)
 
 
-def startServer(dataSync:threading.Condition):
-    dataSync.acquire()
+def startServer():
     threading.Thread(target=consume_messages, daemon=True).start()
     def flaskServer():
         app.run(host="0.0.0.0")
-    threading.Thread(target=flaskServer, daemon=True).start()
-    sleep(10)
+    svr =threading.Thread(target=flaskServer)
+    svr.start()
+    sleep(7)
     logging.info("Server started... release data handlers")
-    dataSync.notify_all()
-    sleep(10)
-    dataSync.release()
+    return svr
     
