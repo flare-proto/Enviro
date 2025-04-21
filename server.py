@@ -16,14 +16,10 @@ from flask import (Flask, Response, json, jsonify, redirect, render_template,
                    request, send_file, send_from_directory, url_for)
 from flask_cors import CORS, cross_origin
 from flask_sock import Sock
-from gevent import monkey
+from gevent.pywsgi import WSGIServer
 
 import dbschema
 import pcap
-
-monkey.patch_all()
-
-from gevent.pywsgi import WSGIServer
 
 # Example usage
 
