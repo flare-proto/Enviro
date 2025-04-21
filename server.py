@@ -5,6 +5,7 @@ import logging
 import struct
 import threading
 from datetime import datetime, timedelta, timezone
+from time import sleep
 
 import ansi2html
 import ansi2html.style
@@ -14,6 +15,8 @@ from env_canada import ECWeather
 from flask import (Flask, Response, json, jsonify, redirect, render_template,
                    request, send_file, send_from_directory, url_for)
 from flask_cors import CORS, cross_origin
+from flask import Flask
+from flask_sockets import Sockets
 
 import dbschema
 import pcap
@@ -67,6 +70,9 @@ logging.getLogger().addHandler(list_handler)
 pcap.setup()
 
 app = Flask(__name__)
+sockets = Sockets(app)
+
+
 CORS(app,resources=r'/api/*')
 ec_en = ECWeather(station_id=config["server"]["station_id"], language='english')
 types = [
@@ -143,6 +149,7 @@ iconBindings = {
     "36":"windy",
     
 }
+wsocketsConned = set()
 alertsMap = {}
 
 RABBITMQ_HOST = pika.URLParameters(config["server"]["amqp"])
@@ -190,6 +197,9 @@ def callback_nerv_alert(ch, method, properties, body):
     message = json.loads(body.decode())
     logging.debug(message)
     logging.info(f"{message["event"]} {message["urgency"]}")
+    
+    for a in wsocketsConned:
+        a.send(json.dumps(message))
     
     session = dbschema.Session()
     dbschema.store_alert(session,message)
@@ -248,6 +258,14 @@ def update():
     weather["cond"]["ECicon_code"] = ec_en.conditions["icon_code"]["value"]
     weather["cond"]["icon_code"] = iconBindings.get(weather["cond"]["ECicon_code"],"err")
     return weather
+
+@sockets.route('/api/alerts/ws')
+def echo_socket(ws):
+    wsocketsConned.add(ws)
+    while not ws.closed:
+        sleep(1)
+    wsocketsConned.remove(ws)
+    
 
 @app.route("/api/geojson")
 def alerts():
@@ -355,5 +373,8 @@ def assets(key):
 
 
 if __name__ == '__main__':
-  threading.Thread(target=consume_messages, daemon=True).start()
-  app.run(host="0.0.0.0")
+    threading.Thread(target=consume_messages, daemon=True).start()
+    from gevent import pywsgi
+    from geventwebsocket.handler import WebSocketHandler
+    server = pywsgi.WSGIServer(('0.0.0.0', 5000), app, handler_class=WebSocketHandler)
+    server.serve_forever()

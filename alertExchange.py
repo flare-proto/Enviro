@@ -28,6 +28,7 @@ def parse_cap_for_alert_exchange(cap_xml):
     certainty = info.findtext('cap:certainty', default='', namespaces=ns)
     areaDesc = info.findtext('cap:area/cap:areaDesc', default='', namespaces=ns)
     references = root.findtext('cap:references', default='', namespaces=ns)
+    description = info.findtext('cap:description', default='', namespaces=ns)
 
     # Timestamps
     effective = info.findtext('cap:effective', default='', namespaces=ns)
@@ -69,6 +70,7 @@ def parse_cap_for_alert_exchange(cap_xml):
         'references': references,
         'effective_at': effective,
         'expires_at': expires,
+        'description':description,
         'geojson_polygons': geojson_polygons
     }
 
