@@ -200,8 +200,9 @@ def callback_outlook(ch, method, properties, body):
     """Handle incoming RabbitMQ messages."""
     try:
         message = json.loads(body.decode())
-        for i in message["features"]:
-            saveFeature(i)
+        for i,f in enumerate(message["features"]):
+            f["id"] = f["id"]+i
+            saveFeature(f)
     except Exception as e:
         logging.exception(e)
     
