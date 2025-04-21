@@ -451,16 +451,16 @@ function styleFunction(feature) {
   let fillColor = 'gray'; // default
   let strokeColor = 'gray'; // default
   if (severity === 'extreme') {
-    fillColor = '#FF0000AA';
+    fillColor = '#FF000088';
     strokeColor = '#FF0000';
   }else if (severity === 'high') {
-    fillColor = '#FFAA00AA';
+    fillColor = '#FFAA0088';
     strokeColor = '#FFAA00';
   } else if (severity === 'moderate') {
-    fillColor = '#FFFF00AA';
+    fillColor = '#FFFF0088';
     strokeColor = '#FFFF00';
   } else if (severity === 'minor') {
-    fillColor = '#00FF00AA';
+    fillColor = '#00FF0088';
     strokeColor = '#00FF00';
   }
 
