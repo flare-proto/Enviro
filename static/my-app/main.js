@@ -625,7 +625,7 @@ const selOpt = document.getElementById("selection")
 map.on("singleclick", function (evt) {
   // reset state
   //nav.style.display = 'none'
-  if (selOpt.value == "ECCC") {
+  if (selOpt.value == "Alerts") {
     activeAlert = 1
     overlay.setPosition(undefined);
     // get coordinates
