@@ -757,6 +757,8 @@ setInterval(() => {
 const ticker = document.getElementById('ticker');
 const queue = [];
 
+const currentconds = document.getElementById("currentconds")
+
 const SCROLL_DURATION = 20000; // in milliseconds (10s = slower, longer scroll)
 
 const socket = new WebSocket('/apiws/alertsws');
@@ -772,8 +774,7 @@ socket.addEventListener('message', (event) => {
 
 function startScroll() {
   if (queue.length === 0) {
-    ticker.isScrolling = false;
-    return;
+    queue.push(currentconds.innerHTML);
   }
 
   const message = queue.shift();
