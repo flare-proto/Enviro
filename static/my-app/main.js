@@ -368,6 +368,53 @@ function makeStyle() {
   return s
 }
 
+function style_feature_alert(feature, resolution) {
+  const text = feature.get('warn') || 'Region'; // Or any other attribute
+  var wc = warnColors[text];
+  var fill = "rgba(0,0,0,0)"
+  if (!wc) {
+    fill = "#FFFFFFFF",
+    wc = "#AAAAAA"
+  }
+  return new Style({
+    fill: new Fill({ color: fill }),
+    stroke: new Stroke({ color: wc, width: 1.5 }),
+    renderer: function (coords, renderState) {
+      const ctx = renderState.context;
+      const pixelRatio = renderState.pixelRatio;
+      const geom = feature.getGeometry();
+      const polygon = geom.clone().transform('EPSG:3857', renderState.coordinateToPixelTransform);
+      const extent = polygon.getExtent();
+
+      // Create Path2D for clipping to the polygon
+      const path = new Path2D();
+      const flatCoords = polygon.getCoordinates()[0]; // outer ring only
+      if (!flatCoords) return;
+
+      path.moveTo(flatCoords[0][0], flatCoords[0][1]);
+      for (let i = 1; i < flatCoords.length; i++) {
+        path.lineTo(flatCoords[i][0], flatCoords[i][1]);
+      }
+      path.closePath();
+
+      ctx.save();
+      ctx.clip(path); // Clip to polygon
+      ctx.fillStyle = '#000';
+      ctx.globalAlpha = 0.3;
+      ctx.font = `${14 * pixelRatio}px sans-serif`;
+
+      const spacing = 100;
+      for (let x = extent[0]; x < extent[2]; x += spacing) {
+        for (let y = extent[1]; y < extent[3]; y += spacing) {
+          ctx.fillText(text, x, y);
+        }
+      }
+
+      ctx.restore();
+    }
+  });
+}
+
 const alerts_layer = new VectorImageLayer({
   background: '#00000000',
   imageRatio: 2,
@@ -375,7 +422,7 @@ const alerts_layer = new VectorImageLayer({
     url: '/api/geojson',
     format: new GeoJSON(),
   }),
-  style: makeStyle(),
+  style: style_feature_alert
 });
 
 const alertsO_layer = new TileLayer({
