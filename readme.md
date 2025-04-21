@@ -6,11 +6,12 @@ THIS ONLY WORKS IN CANADA
 ## Contributing
 I am happy to except contributions, 
 
-### Posible Changes
+### Possible Changes
 
 - [ ] Support for US alerts
 - [ ] Support for the french
 - [ ] better sourcing of *LOCAL data*
+- [ ] auto data refresh on map
 
 ## Usage
 
