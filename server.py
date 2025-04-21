@@ -199,7 +199,7 @@ def callback_nerv_alert(ch, method, properties, body):
     logging.info(f"{message["event"]} {message["urgency"]}")
     
     for a in wsocketsConned:
-        a.send(json.dumps(message))
+        a.send(message["broadcast_message"])
     
     session = dbschema.Session()
     dbschema.store_alert(session,message)
