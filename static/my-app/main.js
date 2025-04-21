@@ -591,7 +591,7 @@ function makesat(name) {
 }
 makeBindLyr("Alerts",alerts_layer)
 makeBindLyr("ECCC Alerts",alertsO_layer)(false)
-makeBindLyr("Bounds",vectorLayer)
+makeBindLyr("Bounds",vectorLayer)(false)
 makeBindLyr("Radar",radar_layer)
 makeBindLyr("Outlook",outlook_layer)
 makesat("Desaturate")
