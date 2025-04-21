@@ -15,7 +15,7 @@ from env_canada import ECWeather
 from flask import (Flask, Response, json, jsonify, redirect, render_template,
                    request, send_file, send_from_directory, url_for)
 from flask_cors import CORS, cross_origin
-from flask_sock import Sock
+from flask_sock import Sock,Server
 from gevent.pywsgi import WSGIServer
 
 import dbschema
@@ -271,7 +271,7 @@ def update():
     return weather
 
 @sockets.route('/apiws/alertsws')
-def echo_socket(ws):
+def echo_socket(ws:Server):
     logging.info("Socket Connected")
     #ws.receive()
     wsocketsConned.add(ws)
@@ -282,7 +282,7 @@ def echo_socket(ws):
             icon=chr(0xe3af+i)
             break
     ws.send(f"{weather["cond"]["temperature"]}°C | {weather["cond"]["wind_speed"]} km/h @ {weather['cond']["wind_bearing"]}° {icon}")
-    while not ws.closed:
+    while ws.connected:
         sleep(1)
     wsocketsConned.remove(ws)
     
