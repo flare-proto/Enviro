@@ -177,24 +177,33 @@ def callback_log(ch, method, properties, body):
     
 def saveFeature(feature):
     session = dbschema.Session()
-    dt = datetime.strptime(feature["properties"]["expiration_datetime"], "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc)
-    vdt = feature["properties"]["metobject"].get("validity_datetime","")
-    if vdt:
-        edt = datetime.strptime(vdt, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc)
-    else:
-        print(feature["properties"]["metobject"])
-        edt = datetime.now()
-    # Create a token that expires in 1 hour
-    token = dbschema.Outlook(
-        outlook_id=feature["id"],
-        feature=json.dumps(feature),
-        expires_at=dt,
-        effective_at=edt
-    )
+    with session.begin():
+        dt = datetime.strptime(feature["properties"]["expiration_datetime"], "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc)
+        vdt = feature["properties"]["metobject"].get("validity_datetime", "")
+        if vdt:
+            edt = datetime.strptime(vdt, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc)
+        else:
+            print(feature["properties"]["metobject"])
+            edt = datetime.now(timezone.utc)
 
-    session.add(token)
-    session.commit()
-    session.close()
+        stmt = insert(dbschema.Outlook).values(
+            outlook_id=feature["id"],
+            feature=json.dumps(feature),
+            expires_at=dt,
+            effective_at=edt
+        )
+
+        # On conflict with outlook_id, update the feature, expires_at, and effective_at
+        stmt = stmt.on_conflict_do_update(
+            index_elements=['outlook_id'],
+            set_={
+                "feature": stmt.excluded.feature,
+                "expires_at": stmt.excluded.expires_at,
+                "effective_at": stmt.excluded.effective_at,
+            }
+        )
+
+        session.execute(stmt)
     
 def callback_outlook(ch, method, properties, body):
     """Handle incoming RabbitMQ messages."""
