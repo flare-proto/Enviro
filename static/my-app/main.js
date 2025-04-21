@@ -311,7 +311,9 @@ const warnTextShow = [
 ]
 
 const watch_alert = [
-  "squall"
+  "squall",
+  "blowing snow advisory",
+  "weather"
 ]
 
 const warnColors = {
