@@ -37,9 +37,9 @@ def list_json_files():
             start = line.find('href="') + 6
             end = line.find('"', start)
             href = line[start:end]
-            if href.endswith('.json') and ('day1' in href or 'day2' in href):
+            if href.endswith('.json'):
                 files.append(href)
-    return sorted(files)
+    return files
 
 def download(url):
     return requests.get(urljoin(BASE_URL, url)).content
@@ -62,13 +62,15 @@ def write_stored_hash(filename, h):
         f.write(h)
 
 def check_and_publish():
-    print(f"[{datetime.now()}] Checking thunderstorm outlooks...")
+    
     ensure_hash_dir()
     connection = pika.BlockingConnection(testSrv)
     
     channel = connection.channel()
+    print(f"[{datetime.now()}] Checking thunderstorm outlooks...")
     try:
         for file in list_json_files():
+            print(f"downloading {file}")
             content = download(file)
             content_hash = hash_content(content)
             stored_hash = read_stored_hash(file)
@@ -84,7 +86,7 @@ def check_and_publish():
             else:
                 print(f"No change: {file}")
     except Exception as e:
-        (f"[ERROR] {e}")
+        print(f"[ERROR] {e}")
     connection.close()
 
 def start_outlook_watcher():
