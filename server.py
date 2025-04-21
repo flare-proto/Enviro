@@ -229,8 +229,6 @@ def callback_outlook(ch, method, properties, body):
 def callback_nerv_alert(ch, method, properties, body):
     """Handle incoming RabbitMQ messages."""
     message = json.loads(body.decode())
-    logging.debug(message)
-    logging.info(f"{message["event"]} {message["urgency"]}")
     
     broadcast(message["broadcast_message"])
     
