@@ -370,8 +370,8 @@ function makeStyle() {
 
 function createPatternFill(text,color) {
   const canvas = document.createElement('canvas');
-  canvas.width = 30;
-  canvas.height = 30;
+  canvas.width = 100;
+  canvas.height = 100;
   const ctx = canvas.getContext('2d');
   ctx.fillStyle = color
   ctx.fillText(text,5,5)
