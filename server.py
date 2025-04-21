@@ -208,8 +208,7 @@ def callback_nerv_alert(ch, method, properties, body):
     logging.debug(message)
     logging.info(f"{message["event"]} {message["urgency"]}")
     
-    for a in wsocketsConned:
-        a.send(message["broadcast_message"])
+    broadcast(message["broadcast_message"])
     
     session = dbschema.Session()
     dbschema.store_alert(session,message)
@@ -274,9 +273,8 @@ def update():
             icon=chr(0xe3af+i)
             break
     
-    breif = f"{weather["cond"]["temperature"]}°C | {weather["cond"]["wind_speed"]} km/h @ {weather['cond']["wind_bearing"]}° {icon}"
-    for a in wsocketsConned:
-        a.send(breif)
+    brief = f"{weather["cond"]["temperature"]}°C | {weather["cond"]["wind_speed"]} km/h @ {weather['cond']["wind_bearing"]}° {icon}"
+    broadcast(brief)
     
     return weather
 
