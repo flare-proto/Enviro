@@ -8,3 +8,4 @@ __pycache__
 __pycache__/pcap.cpython-313.pyc
 alert.db
 outlook.db
+outlook_hashes/
