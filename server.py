@@ -425,5 +425,4 @@ def assets(key):
 if __name__ == '__main__':
     threading.Thread(target=consume_messages, daemon=True,name="AMQP SERVER RECV").start()
 
-
-    WSGIServer(('0.0.0.0', 5000), app).serve_forever()
+    app.run("0.0.0.0")
