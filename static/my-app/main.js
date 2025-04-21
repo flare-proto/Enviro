@@ -754,39 +754,64 @@ setInterval(() => {
 },1000*5*60)
 
 
-
 const ticker = document.getElementById('ticker');
-  const queue = [];
+  const speed = 100; // pixels per second
+  const maxLoops = 3;
+  let msgQueue = ['📡 Waiting for alerts...'];
+  let loopCount = 0;
 
-  const protocol = window.location.protocol === "https:" ? "wss" : "ws";
-  const host = window.location.host;
-  const path = '/apiws/alerts'; // relative path to your WebSocket endpoint
+  function updateTicker() {
+    const content = msgQueue.map(m => `[󰼯] ${m}`).join('  ') + '  ';
+    ticker.innerText = content;
 
+    requestAnimationFrame(() => {
+      const width = ticker.scrollWidth;
+      const duration = width / speed;
+      ticker.style.animationDuration = `${duration}s`;
 
-  // Change this to your WebSocket server
-  const socket = new WebSocket(`${protocol}://${host}${path}`);
+      // Store for manual fallback loop timer
+      ticker.dataset.loopDuration = duration;
+    });
+  }
+
+  function resetTicker() {
+    if (msgQueue.length > 1) {
+      msgQueue.shift(); // Remove oldest
+      loopCount = 0;
+      updateTicker();
+    }
+  }
+
+  // Optional fallback loop counter (works even if animationiteration doesn’t)
+  setInterval(() => {
+    loopCount++;
+    if (loopCount >= maxLoops) resetTicker();
+  }, 1000); // We'll update this after ticker loads
+
+  // Update the interval once we know the scroll duration
+  function syncLoopTimer() {
+    const duration = parseFloat(ticker.dataset.loopDuration || '60');
+    clearInterval(window._tickerLoopInterval);
+    window._tickerLoopInterval = setInterval(() => {
+      loopCount++;
+      if (loopCount >= maxLoops) resetTicker();
+    }, duration * 1000);
+  }
+
+  // Observe animation duration changes to resync loop counter
+  const observer = new MutationObserver(syncLoopTimer);
+  observer.observe(ticker, { attributes: true, attributeFilter: ['style'] });
+
+  // WebSocket setup
+  const socket = new WebSocket('/apiws/alerts');
 
   socket.addEventListener('open', () => {
     console.log('[WebSocket] Connected');
-    queue.push("Loaded WS");
   });
 
   socket.addEventListener('message', (event) => {
     const msg = event.data;
-    queue.push(msg);
+    updateTicker();
   });
-  
 
-  // Cycle messages from the queue every few seconds
-  setInterval(() => {
-    if (queue.length > 0) {
-      const nextMsg = queue.shift();
-      console.log(nextMsg)
-      ticker.innerText = nextMsg;
-
-      // Reset animation to replay it
-      ticker.style.animation = 'none';
-      void ticker.offsetWidth; // trigger reflow
-      ticker.style.animation = null;
-    }
-  }, 5000);
+  updateTicker();
