@@ -68,7 +68,7 @@ def store_alert(session, alert_dict: dict) -> str:
             "areaDesc": alert_dict["areaDesc"]
         }
     )
-    session.add(alert)
+    
 
     # Add new polygons if any
     for geom in alert_dict.get("geojson_polygons", []):
@@ -95,12 +95,14 @@ def store_alert(session, alert_dict: dict) -> str:
                 if referenced_alert.expires_at is None or referenced_alert.expires_at > datetime.utcnow():
                     referenced_alert.expires_at = datetime.utcnow()
                     session.add(referenced_alert)
+                if alert_dict["urgency"] == "Past":
+                    alert.expires_at = datetime.utcnow()
 
             elif msg_type == "expire":
                 # Manually expire the referenced alert
                 referenced_alert.expires_at = datetime.utcnow()
                 session.add(referenced_alert)
-
+    session.add(alert)
     session.commit()
     return alert_id
 
