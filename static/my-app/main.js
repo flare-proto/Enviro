@@ -371,12 +371,12 @@ makeStyle()
 
 function createPatternFill(text,color) {
   const canvas = document.createElement('canvas');
-  canvas.width = 200;
-  canvas.height = 200;
+  canvas.width = 250;
+  canvas.height = 250;
   const ctx = canvas.getContext('2d');
   ctx.fillStyle = color
-  ctx.font = "25px NerdSpace"
-  ctx.fillText(text,5,100)
+  ctx.font = "20px NerdSpace"
+  ctx.fillText(text,5,125)
 
   const pattern = ctx.createPattern(canvas, 'repeat');
 
