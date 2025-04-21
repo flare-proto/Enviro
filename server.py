@@ -70,6 +70,7 @@ logging.getLogger().addHandler(list_handler)
 pcap.setup()
 
 app = Flask(__name__)
+app.config['SOCK_SERVER_OPTIONS'] = {'ping_interval': 25}
 sockets = Sock(app)
 
 
