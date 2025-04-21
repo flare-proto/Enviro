@@ -755,64 +755,39 @@ setInterval(() => {
 
 
 const ticker = document.getElementById('ticker');
-  const speed = 100; // pixels per second
-  const maxLoops = 3;
-  let msgQueue = ['📡 Waiting for alerts...'];
-  let loopCount = 0;
+const queue = [];
 
-  function updateTicker() {
-    const content = msgQueue.map(m => `[󰼯] ${m}`).join('  ') + '  ';
-    ticker.innerText = content;
+const SCROLL_DURATION = 10000; // in milliseconds (10s = slower, longer scroll)
 
-    requestAnimationFrame(() => {
-      const width = ticker.scrollWidth;
-      const duration = width / speed;
-      ticker.style.animationDuration = `${duration}s`;
+const socket = new WebSocket('/apiws/alertsws');
 
-      // Store for manual fallback loop timer
-      ticker.dataset.loopDuration = duration;
-    });
+socket.addEventListener('open', () => {
+  console.log('[WebSocket] Connected');
+});
+
+socket.addEventListener('message', (event) => {
+  queue.push(event.data);
+  if (!ticker.isScrolling) startScroll(); // Start if not already scrolling
+});
+
+function startScroll() {
+  if (queue.length === 0) {
+    ticker.isScrolling = false;
+    return;
   }
 
-  function resetTicker() {
-    if (msgQueue.length > 1) {
-      msgQueue.shift(); // Remove oldest
-      loopCount = 0;
-      updateTicker();
-    }
-  }
+  const message = queue.shift();
+  ticker.textContent = message;
 
-  // Optional fallback loop counter (works even if animationiteration doesn’t)
-  setInterval(() => {
-    loopCount++;
-    if (loopCount >= maxLoops) resetTicker();
-  }, 1000); // We'll update this after ticker loads
+  // Reset animation
+  ticker.style.animation = 'none';
+  ticker.offsetHeight; // trigger reflow
+  ticker.style.animation = `scroll ${SCROLL_DURATION}ms linear`;
 
-  // Update the interval once we know the scroll duration
-  function syncLoopTimer() {
-    const duration = parseFloat(ticker.dataset.loopDuration || '60');
-    clearInterval(window._tickerLoopInterval);
-    window._tickerLoopInterval = setInterval(() => {
-      loopCount++;
-      if (loopCount >= maxLoops) resetTicker();
-    }, duration * 1000);
-  }
+  ticker.isScrolling = true;
 
-  // Observe animation duration changes to resync loop counter
-  const observer = new MutationObserver(syncLoopTimer);
-  observer.observe(ticker, { attributes: true, attributeFilter: ['style'] });
-
-  // WebSocket setup
-  const socket = new WebSocket('/apiws/alertsws');
-
-  socket.addEventListener('open', () => {
-    console.log('[WebSocket] Connected');
-  });
-
-  socket.addEventListener('message', (event) => {
-    const msg = event.data;
-    msgQueue.push(msg)
-    updateTicker();
-  });
-
-  updateTicker();
+  // Wait for scroll to finish before showing next
+  setTimeout(() => {
+    startScroll();
+  }, SCROLL_DURATION);
+}
