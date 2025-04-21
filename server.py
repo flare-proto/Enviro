@@ -15,8 +15,9 @@ from env_canada import ECWeather
 from flask import (Flask, Response, json, jsonify, redirect, render_template,
                    request, send_file, send_from_directory, url_for)
 from flask_cors import CORS, cross_origin
-from flask_sock import Sock,Server
+from flask_sock import Server, Sock
 from gevent.pywsgi import WSGIServer
+from sqlalchemy.dialects.postgresql import insert
 
 import dbschema
 import pcap
