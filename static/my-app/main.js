@@ -701,6 +701,7 @@ map.on("singleclick", function (evt) {
         tbl.innerHTML += '<tr><td>Gust</td><td>' + feature.get('metobject').gust.value +" "+feature.get('metobject').gust.unit+ '</td></tr>';
         
         selectedInfo.innerHTML = content;
+        selectedInfo.appendChild(tbl)
         
         console.info(feature.getProperties());
     }
