@@ -269,7 +269,7 @@ def update():
     
     return weather
 
-@sockets.route('/api/alerts/ws')
+@sockets.route('/apiws/alerts')
 def echo_socket(ws):
     logging.info("Socket Connected")
     #ws.receive()
