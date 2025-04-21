@@ -401,7 +401,7 @@ function style_feature_alert(feature, resolution) {
     nf = true
   }
   var stroke;
-  if (watch_alert.contains(wc)) {
+  if (watch_alert.includes(wc)) {
     stroke = new Stroke({
       color: wc,
       width: 1.5,
