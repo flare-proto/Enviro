@@ -798,16 +798,3 @@ function startScroll() {
     startScroll();
   }, SCROLL_DURATION);
 }
-setTimeout(() => {
-  fetch('https://dd.weather.gc.ca/airmet-sigmet/CA/data/FC/FOCN45.CWUL')
-  .then(response => {
-    if (!response.ok) throw new Error("Network response was not ok");
-    return response.text();
-  })
-  .then(data => {
-    queuepush(data);
-  })
-  .catch(error => {
-    console.error(error);
-  });
-},1000)
