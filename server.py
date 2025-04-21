@@ -362,5 +362,6 @@ def startServer(dataSync:threading.Condition):
     sleep(10)
     logging.info("Server started... release data handlers")
     dataSync.notify_all()
+    sleep(10)
     dataSync.release()
     
