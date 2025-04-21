@@ -753,11 +753,18 @@ setInterval(() => {
   radar_layer.getSource().refresh()
 },1000*5*60)
 
+
+
 const ticker = document.getElementById('ticker');
   const queue = [];
 
+  const protocol = window.location.protocol === "https:" ? "wss" : "ws";
+  const host = window.location.host;
+  const path = '/api/alert/ws'; // relative path to your WebSocket endpoint
+
+
   // Change this to your WebSocket server
-  const socket = new WebSocket('/api/alert/ws');
+  const socket = new WebSocket(`${protocol}://${host}${path}`);
 
   socket.addEventListener('open', () => {
     console.log('[WebSocket] Connected');
