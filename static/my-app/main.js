@@ -696,7 +696,6 @@ map.on("singleclick", function (evt) {
         content += '<h5>severity ' + feature.get('metobject').severity.value + '</h5>';
         
         selectedInfo.innerHTML = content;
-        overlay.setPosition(coord);
         
         console.info(feature.getProperties());
     }
