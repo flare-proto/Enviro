@@ -300,18 +300,6 @@ const vectorLayer = new VectorImageLayer({
   }
 });
 
-//TODO REMOVE ME
-const canvas = document.createElement('canvas');
-const context = canvas.getContext('2d');
-const wspout_stripes = context.createLinearGradient(0, 0, 1024 * pixelRatio, 0);
-wspout_stripes.addColorStop(0, 'orange');
-wspout_stripes.addColorStop(1 / 6, '#00000000');
-wspout_stripes.addColorStop(2 / 6, 'orange');
-wspout_stripes.addColorStop(3 / 6, '#00000000');
-wspout_stripes.addColorStop(4 / 6, 'orange');
-wspout_stripes.addColorStop(5 / 6, '#00000000');
-wspout_stripes.addColorStop(1, 'orange');
-
 const warnTextShow = [
   "snowfall",
   "blowing snow advisory",
@@ -671,7 +659,9 @@ var irtrv = () => {
       .then((response) => response.json())
       .then((json) => {
           sc.innerText = `${json["temperature"]}°C`;
-          wc.innerText = `${json["wind_chill"]}°C`;
+          if (json["wind_chill"]) {
+            wc.innerText = `${json["wind_chill"]}°C`;
+          }
           cnd.innerText = `${weatherTypes[json["icon_code"]]}`
           fetch("/api/conditions/bft")
               .then((rs) => rs.json())
