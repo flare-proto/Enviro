@@ -16,7 +16,7 @@ from flask import (Flask, Response, json, jsonify, redirect, render_template,
                    request, send_file, send_from_directory, url_for)
 from flask_cors import CORS, cross_origin
 from flask import Flask
-from flask_sockets import Sockets
+from flask_sock import Sock
 
 import dbschema
 import pcap
@@ -70,7 +70,7 @@ logging.getLogger().addHandler(list_handler)
 pcap.setup()
 
 app = Flask(__name__)
-sockets = Sockets(app)
+sockets = Sock(app)
 
 
 CORS(app,resources=r'/api/*')
@@ -272,6 +272,7 @@ def update():
 @sockets.route('/api/alerts/ws')
 def echo_socket(ws):
     logging.info("Socket Connected")
+    #ws.receive()
     wsocketsConned.add(ws)
     ws.send("Envirotron WEB")
     icon = "?"
@@ -391,7 +392,10 @@ def assets(key):
 
 if __name__ == '__main__':
     threading.Thread(target=consume_messages, daemon=True).start()
-    from gevent import pywsgi
-    from geventwebsocket.handler import WebSocketHandler
-    server = pywsgi.WSGIServer(('0.0.0.0', 5000), app, handler_class=WebSocketHandler)
-    server.serve_forever()
+    from gevent import monkey
+    monkey.patch_all()
+
+    from gevent.pywsgi import WSGIServer
+
+
+    WSGIServer(('0.0.0.0', 5000), app).serve_forever()
