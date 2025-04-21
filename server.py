@@ -257,7 +257,13 @@ def update():
     weather["cond"]["ECicon_code"] = ec_en.conditions["icon_code"]["value"]
     weather["cond"]["icon_code"] = iconBindings.get(weather["cond"]["ECicon_code"],"err")
     
-    breif = f"{weather["cond"]["temperature"]}°C | {weather["cond"]["wind_speed"]} km/h @ {weather['cond']["wind_bearing"]}°"
+    icon = "?"
+    for i,b in enumerate(windLevels):
+        if b["max"] > weather["cond"].get("wind_speed",0)+0.1:
+            icon=chr(0xe3af+i)
+            break
+    
+    breif = f"{weather["cond"]["temperature"]}°C | {weather["cond"]["wind_speed"]} km/h @ {weather['cond']["wind_bearing"]}° {icon}"
     for a in wsocketsConned:
         a.send(breif)
     
@@ -353,7 +359,6 @@ def utf8_integer_to_unicode(n):
 
 @app.route("/api/conditions/bft")
 def conditionsbft():
-    print(b'')
     for i,b in enumerate(windLevels):
         if b["max"] > weather["cond"].get("wind_speed",0)+0.1:
             return jsonify({"scale":i,"icon":chr(0xe3af+i)})
