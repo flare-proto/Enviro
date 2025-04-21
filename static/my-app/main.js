@@ -368,19 +368,13 @@ function makeStyle() {
   return s
 }
 
-function createPatternFill() {
+function createPatternFill(text,color) {
   const canvas = document.createElement('canvas');
-  canvas.width = 10;
-  canvas.height = 10;
+  canvas.width = 30;
+  canvas.height = 30;
   const ctx = canvas.getContext('2d');
-
-  ctx.fillStyle = 'white';
-  ctx.fillRect(0, 0, 10, 10);
-  ctx.strokeStyle = 'black';
-  ctx.beginPath();
-  ctx.moveTo(0, 0);
-  ctx.lineTo(10, 10);
-  ctx.stroke();
+  ctx.fillStyle = color
+  ctx.fillText(text,5,5)
 
   const pattern = ctx.createPattern(canvas, 'repeat');
 
@@ -398,7 +392,7 @@ function style_feature_alert(feature, resolution) {
     wc = "#AAAAAA"
   }
   return new Style({
-    fill: createPatternFill(),//new Fill({ color: fill }),
+    fill: createPatternFill(text,wc),//new Fill({ color: fill }),
     stroke: new Stroke({ color: wc, width: 1.5 }),
     
   });
