@@ -127,8 +127,7 @@ alert_references = Table(
 class Outlook(Base):
     __tablename__ = 'outlooks'
 
-    id = Column(Integer, primary_key=True)
-    outlook_id = Column(String, nullable=False)
+    outlook_id = Column(String, primary_key=True)
     feature = Column(String, nullable=False)
     effective_at = Column(DateTime, default=datetime.utcnow)
     expires_at = Column(DateTime, nullable=False)
