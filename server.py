@@ -185,7 +185,6 @@ def saveFeature(feature):
     session.commit()
     session.close()
     
-    
 def callback_outlook(ch, method, properties, body):
     """Handle incoming RabbitMQ messages."""
     message = json.loads(body.decode())
@@ -257,6 +256,11 @@ def update():
         weather["cond"][c] = ec_en.conditions[c]["value"]
     weather["cond"]["ECicon_code"] = ec_en.conditions["icon_code"]["value"]
     weather["cond"]["icon_code"] = iconBindings.get(weather["cond"]["ECicon_code"],"err")
+    
+    breif = f"{weather["cond"]["temperature"]}°C | {weather["cond"]["wind_speed"]} km/h @ {weather['cond']["wind_bearing"]}°"
+    for a in wsocketsConned:
+        a.send(breif)
+    
     return weather
 
 @sockets.route('/api/alerts/ws')
