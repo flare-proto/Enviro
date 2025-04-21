@@ -12,6 +12,7 @@ I am happy to except contributions,
 - [ ] Support for the french
 - [ ] better sourcing of *LOCAL data*
 - [ ] auto data refresh on map
+- [ ] Fix alerts.db
 
 ## Usage
 
