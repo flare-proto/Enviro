@@ -201,7 +201,7 @@ def callback_outlook(ch, method, properties, body):
     try:
         message = json.loads(body.decode())
         for i,f in enumerate(message["features"]):
-            f["id"] = f["id"]+i
+            f["id"] = f"{f["id"]}_{i}"
             saveFeature(f)
     except Exception as e:
         logging.exception(e)
