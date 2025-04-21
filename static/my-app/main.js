@@ -563,6 +563,10 @@ function makeBindLyr(name,o) {
     check.addEventListener('change', (event) => {
         o.setVisible(check.checked);
       })
+    return function(vis) {
+      o.setVisible(vis);
+      check.checked = vis
+    }
 }
 function makesat(name) {
   var data = document.createElement("p");
@@ -586,7 +590,7 @@ function makesat(name) {
     })
 }
 makeBindLyr("Alerts",alerts_layer)
-makeBindLyr("ECCC Alerts",alertsO_layer)
+makeBindLyr("ECCC Alerts",alertsO_layer)(false)
 makeBindLyr("Bounds",vectorLayer)
 makeBindLyr("Radar",radar_layer)
 makeBindLyr("Outlook",outlook_layer)
