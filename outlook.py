@@ -61,7 +61,7 @@ def write_stored_hash(filename, h):
     with open(get_hash_path(filename), 'w') as f:
         f.write(h)
 
-def check_and_publish(channel):
+def check_and_publish():
     print(f"[{datetime.now()}] Checking thunderstorm outlooks...")
     ensure_hash_dir()
     connection = pika.BlockingConnection(testSrv)
@@ -87,12 +87,11 @@ def check_and_publish(channel):
         (f"[ERROR] {e}")
     connection.close()
 
-def start_outlook_watcher(channel):
-    check_and_publish(channel)
+def start_outlook_watcher():
+    check_and_publish()
+    while True:
+        time.sleep(CHECK_INTERVAL)
+        check_and_publish()
 
-    def loop():
-        while True:
-            time.sleep(CHECK_INTERVAL)
-            check_and_publish(channel)
-
-    threading.Thread(target=loop, daemon=True).start()
+if __name__ == "__main__":
+    start_outlook_watcher()
