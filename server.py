@@ -340,7 +340,7 @@ def alertsall():
     session = dbschema.Session()
     with session.begin():
         valid_tokens = dbschema.get_alert(session)
-        jsonDat = [i['properties'] for i in valid_tokens]
+        jsonDat = [i.properties for i in valid_tokens]
     session.close()
     
     return jsonify(jsonDat)
