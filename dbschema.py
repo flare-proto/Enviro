@@ -117,6 +117,13 @@ def get_active_alert_polygons(session) -> list:
     
     return active_polygons
 
+def get_alert(session) -> list:
+    # Query for polygons from active alerts (not expired and not cancelled)
+    active_polygons = session.query(Alert).filter(
+        Alert.expires_at > datetime.utcnow(), 
+    ).all()
+    
+    return active_polygons
 
 
 
