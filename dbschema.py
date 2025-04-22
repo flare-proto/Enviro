@@ -65,7 +65,8 @@ def store_alert(session, alert_dict: dict) -> str:
             "urgency": alert_dict["urgency"],
             "severity": alert_dict["severity"],
             "certainty": alert_dict["certainty"],
-            "areaDesc": alert_dict["areaDesc"]
+            "areaDesc": alert_dict["areaDesc"],
+            "broadcast_message":alert_dict["broadcast_message"]
         }
     )
     
