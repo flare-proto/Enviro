@@ -303,7 +303,6 @@ def update():
             break
     
     brief = f"{weather["cond"]["temperature"]}°C | {weather["cond"]["wind_speed"]} km/h @ {weather['cond']["wind_bearing"]}° {icon}"
-    broadcast(brief)
     
     return weather
 
