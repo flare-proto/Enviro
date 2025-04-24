@@ -729,7 +729,7 @@ var irtrv = () => {
               .then((rs) => rs.json())
               .then((bft) => {
                   wnd.innerText = `[ ${bft["icon"]} ] ${json["wind_speed"]} km/h at ${json["wind_bearing"]}°`
-                  queuepush(`Current Conditions: ${json["temperature"]}°C - ${weatherTypes[json["icon_code"]]} - [ ${bft["icon"]} ] ${json["wind_speed"]} km/h at ${json["wind_bearing"]}°`)
+                  queue.push(`Current Conditions: ${json["temperature"]}°C - ${weatherTypes[json["icon_code"]]} - [ ${bft["icon"]} ] ${json["wind_speed"]} km/h at ${json["wind_bearing"]}°`)
               })
       });
       fetch("/api/alerts")
@@ -756,7 +756,7 @@ setInterval(() => {
 
 
 const ticker      = document.getElementById('ticker');
-  const queue       = [];
+  var queue       = [];
   const SPEED_PPS   = 120;        // <-- pixels per second you want to travel
   const socket      = new WebSocket('/apiws/alerts');
 
