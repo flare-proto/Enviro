@@ -323,7 +323,8 @@ def echo_socket(ws:Server):
         message=q.get()
         try:
             ws.send(message)
-        except Exception:
+        except Exception as e:
+            logging.info(f"Socket Disconected {e}")
             wsocketsConned.remove(q)
 
 
