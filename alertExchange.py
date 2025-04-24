@@ -110,7 +110,7 @@ def on_message(ch, method, properties, body, alert_channel):
             body=json.dumps(alert),
             properties=pika.BasicProperties(content_type='application/json')
         )
-        if alert["broadcast_message"]:
+        if alert["broadcast_message"] or alert["description"]:
             logger.debug(alert["broadcast_message"])
             alert_channel.basic_publish(
                 exchange='feed',
