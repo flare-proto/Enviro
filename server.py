@@ -169,6 +169,7 @@ def broadcast(message, sender=None):
     with lock:
         for client in list(wsocketsConned):
             if client != sender:  # Optional: don't echo back to sender
+                logging.info(message)
                 client.put(message)
 
 RABBITMQ_HOST = pika.URLParameters(config["server"]["amqp"])
@@ -322,6 +323,7 @@ def echo_socket(ws:Server):
     while True:
         message=q.get()
         try:
+            
             ws.send(message)
         except Exception as e:
             logging.info(f"Socket Disconected {e}")
