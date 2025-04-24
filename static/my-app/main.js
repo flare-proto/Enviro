@@ -774,8 +774,8 @@ function queuepush(d) {
 
 socket.addEventListener('message', (event) => {
   console.log(event);
-  const lines = text.split("\n");
-  for (const ln of event.data) {
+  const lines = event.data.split("\n");
+  for (const ln of lines) {
     queuepush(ln)// Start if not already scrolling
   }
 });
