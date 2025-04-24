@@ -304,7 +304,6 @@ const vectorLayer = new VectorImageLayer({
 
 const warnTextShow = [
   "snowfall",
-  "blowing snow advisory",
   "winter storm",
   "blizzard",
   "snow squall",
