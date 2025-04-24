@@ -208,13 +208,18 @@ def callback_nerv_alert(ch, method, properties, body):
     logging.debug(message)
     logging.info(f"{message["event"]} {message["urgency"]}")
     
-    broadcast(message["broadcast_message"])
+    #broadcast(message["broadcast_message"])
     
     session = dbschema.Session()
     dbschema.store_alert(session,message)
     session.commit()
     session.close()
 
+def callback_feed(ch, method, properties, body):
+    """Handle incoming RabbitMQ messages."""
+    message = body.decode()
+    broadcast(message)
+    
 def consume_messages():
     """Start consuming messages from RabbitMQ."""
     connection = pika.BlockingConnection(RABBITMQ_HOST)
@@ -229,7 +234,12 @@ def consume_messages():
     channel.queue_declare(queue='weather-alerts', exclusive=True)
     channel.queue_bind(exchange='alerts', queue='weather-alerts', routing_key='alerts.*.*.*')
     
+    channel.queue_declare(queue='live-feed', exclusive=True)
+    channel.queue_bind(exchange='feed', queue='live-feed', routing_key='*.*')
+    
     channel.basic_consume(queue='weather-alerts', on_message_callback=callback_nerv_alert, auto_ack=True)
+    
+    channel.basic_consume(queue='live-feed', on_message_callback=callback_feed, auto_ack=True)
     
     channel.basic_consume(queue=result.method.queue, on_message_callback=callback_outlook, auto_ack=True)
     
