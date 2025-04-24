@@ -304,7 +304,6 @@ const vectorLayer = new VectorImageLayer({
 
 const warnTextShow = [
   "snowfall",
-  "blowing snow advisory",
   "winter storm",
   "blizzard",
   "snow squall",
@@ -314,13 +313,13 @@ const warnTextShow = [
 
 const watch_alert = [
   "squall",
-  "blowing snow advisory",
+  "blowing snow",
   "weather"
 ]
 
 const warnColors = {
   "snowfall":"#00ffff",
-  "blowing snow advisory":"#008fbb",
+  "blowing snow":"#008fbb",
   
   "winter storm":"#67c9bc",
   
@@ -554,7 +553,7 @@ const map = new Map({
   overlays: [overlay],
   view: new View({
     center: fromLonLat([-114, 51]),
-    zoom: 12
+    zoom: 5
   })
 });
 

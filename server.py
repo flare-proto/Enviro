@@ -3,20 +3,22 @@ import collections
 import configparser
 import logging
 import struct
-import threading
+import threading,queue
 from datetime import datetime, timedelta, timezone
 from time import sleep
 
 import ansi2html
 import ansi2html.style
+import coloredlogs
 import pika
 from cachetools import TTLCache, cached
 from env_canada import ECWeather
 from flask import (Flask, Response, json, jsonify, redirect, render_template,
                    request, send_file, send_from_directory, url_for)
 from flask_cors import CORS, cross_origin
-from flask_sock import Sock,Server
+from flask_sock import Server, Sock
 from gevent.pywsgi import WSGIServer
+from sqlalchemy.dialects.postgresql import insert
 
 import dbschema
 import pcap
@@ -66,11 +68,20 @@ list_handler = ListHandler(log_messages)
 formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
 list_handler.setFormatter(formatter)
 
-logging.getLogger().addHandler(list_handler)
+logger = logging.getLogger()
+formatter = coloredlogs.ColoredFormatter('SV - %(asctime)s - %(levelname)s - %(message)s')
+list_handler.setFormatter(formatter)
+list_handler.setLevel(logging.INFO)
+logger.addHandler(list_handler)
+console_handler = logging.StreamHandler()
+console_handler.setLevel(logging.DEBUG)
+console_handler.setFormatter(formatter)
+logger.addHandler(console_handler)
 pcap.setup()
 
 app = Flask(__name__)
 app.config['SOCK_SERVER_OPTIONS'] = {'ping_interval': 25}
+app.config['SQLALCHEMY_ECHO'] =False
 sockets = Sock(app)
 
 
@@ -150,7 +161,7 @@ iconBindings = {
     "36":"windy",
     
 }
-wsocketsConned = set()
+wsocketsConned:set[queue.Queue] = set()
 alertsMap = {}
 lock = threading.Lock()
 
@@ -158,10 +169,7 @@ def broadcast(message, sender=None):
     with lock:
         for client in list(wsocketsConned):
             if client != sender:  # Optional: don't echo back to sender
-                try:
-                    client.send(message)
-                except Exception:
-                    wsocketsConned.remove(client)
+                client.put(message)
 
 RABBITMQ_HOST = pika.URLParameters(config["server"]["amqp"])
 
@@ -177,36 +185,47 @@ def callback_log(ch, method, properties, body):
     
 def saveFeature(feature):
     session = dbschema.Session()
-    dt = datetime.strptime(feature["properties"]["expiration_datetime"], "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc)
-    vdt = feature["properties"]["metobject"].get("validity_datetime","")
-    if vdt:
-        edt = datetime.strptime(vdt, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc)
-    else:
-        print(feature["properties"]["metobject"])
-        edt = datetime.now()
-    # Create a token that expires in 1 hour
-    token = dbschema.Outlook(
-        outlook_id=feature["id"],
-        feature=json.dumps(feature),
-        expires_at=dt,
-        effective_at=edt
-    )
+    with session.begin():
+        dt = datetime.strptime(feature["properties"]["expiration_datetime"], "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc)
+        vdt = feature["properties"]["metobject"].get("validity_datetime", "")
+        if vdt:
+            edt = datetime.strptime(vdt, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc)
+        else:
+            print(feature["properties"]["metobject"])
+            edt = datetime.now(timezone.utc)
 
-    session.add(token)
-    session.commit()
-    session.close()
+        stmt = insert(dbschema.Outlook).values(
+            outlook_id=feature["id"],
+            feature=json.dumps(feature),
+            expires_at=dt,
+            effective_at=edt
+        )
+
+        # On conflict with outlook_id, update the feature, expires_at, and effective_at
+        stmt = stmt.on_conflict_do_update(
+            index_elements=['outlook_id'],
+            set_={
+                "feature": stmt.excluded.feature,
+                "expires_at": stmt.excluded.expires_at,
+                "effective_at": stmt.excluded.effective_at,
+            }
+        )
+
+        session.execute(stmt)
     
 def callback_outlook(ch, method, properties, body):
     """Handle incoming RabbitMQ messages."""
-    message = json.loads(body.decode())
-    for i in message["features"]:
-        saveFeature(i)
+    try:
+        message = json.loads(body.decode())
+        for i,f in enumerate(message["features"]):
+            f["id"] = f"{f["id"]}_{i}"
+            saveFeature(f)
+    except Exception as e:
+        logging.exception(e)
     
 def callback_nerv_alert(ch, method, properties, body):
     """Handle incoming RabbitMQ messages."""
     message = json.loads(body.decode())
-    logging.debug(message)
-    logging.info(f"{message["event"]} {message["urgency"]}")
     
     #broadcast(message["broadcast_message"])
     
@@ -250,7 +269,6 @@ async def alertMap():
     global alertsMap
     alertsMap = pcap.fetch()
     
-
 @cached(cache=TTLCache(maxsize=1024, ttl=60))
 def update():
     weather = {
@@ -292,7 +310,8 @@ def update():
 def echo_socket(ws:Server):
     logging.info("Socket Connected")
     #ws.receive()
-    wsocketsConned.add(ws)
+    q = queue.Queue()
+    wsocketsConned.add(q)
     ws.send("Envirotron WEB")
     icon = "?"
     for i,b in enumerate(windLevels):
@@ -300,6 +319,12 @@ def echo_socket(ws:Server):
             icon=chr(0xe3af+i)
             break
     ws.send(f"{weather["cond"]["temperature"]}°C | {weather["cond"]["wind_speed"]} km/h @ {weather['cond']["wind_bearing"]}° {icon}")
+    while True:
+        message=q.get()
+        try:
+            ws.send(message)
+        except Exception:
+            wsocketsConned.remove(q)
 
 
 
@@ -314,6 +339,18 @@ def alerts():
             "type":"FeatureCollection",
             "features":[t.geometry_geojson for t in valid_tokens]
         }
+    session.close()
+    
+    return jsonify(jsonDat)
+
+@app.route("/api/alerts/all")
+def alertsall():
+    alertsDat = []
+    
+    session = dbschema.Session()
+    with session.begin():
+        valid_tokens = dbschema.get_alert(session)
+        jsonDat = [i.properties for i in valid_tokens]
     session.close()
     
     return jsonify(jsonDat)
@@ -408,7 +445,6 @@ def assets(key):
 
 
 if __name__ == '__main__':
-    threading.Thread(target=consume_messages, daemon=True).start()
+    threading.Thread(target=consume_messages, daemon=True,name="AMQP SERVER RECV").start()
 
-
-    WSGIServer(('0.0.0.0', 5000), app).serve_forever()
+    app.run("0.0.0.0")

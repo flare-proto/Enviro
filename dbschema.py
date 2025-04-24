@@ -10,7 +10,7 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import declarative_base, sessionmaker, relationship
 from datetime import datetime, timedelta
-import uuid
+import uuid,logging
 
 Base = declarative_base()
 
@@ -65,10 +65,11 @@ def store_alert(session, alert_dict: dict) -> str:
             "urgency": alert_dict["urgency"],
             "severity": alert_dict["severity"],
             "certainty": alert_dict["certainty"],
-            "areaDesc": alert_dict["areaDesc"]
+            "areaDesc": alert_dict["areaDesc"],
+            "broadcast_message":alert_dict["broadcast_message"]
         }
     )
-    session.add(alert)
+    
 
     # Add new polygons if any
     for geom in alert_dict.get("geojson_polygons", []):
@@ -95,12 +96,14 @@ def store_alert(session, alert_dict: dict) -> str:
                 if referenced_alert.expires_at is None or referenced_alert.expires_at > datetime.utcnow():
                     referenced_alert.expires_at = datetime.utcnow()
                     session.add(referenced_alert)
+                if alert_dict["urgency"] == "Past":
+                    alert.expires_at = datetime.utcnow()
 
             elif msg_type == "expire":
                 # Manually expire the referenced alert
                 referenced_alert.expires_at = datetime.utcnow()
                 session.add(referenced_alert)
-
+    session.add(alert)
     session.commit()
     return alert_id
 
@@ -115,6 +118,13 @@ def get_active_alert_polygons(session) -> list:
     
     return active_polygons
 
+def get_alert(session) -> list:
+    # Query for polygons from active alerts (not expired and not cancelled)
+    active_polygons = session.query(Alert).filter(
+        Alert.expires_at > datetime.utcnow(), 
+    ).all()
+    
+    return active_polygons
 
 
 
@@ -140,7 +150,7 @@ class Outlook(Base):
 
 # Create a SQLite database file
 DATABASE_URL = 'sqlite:///outlook.db'  # Use a file-based SQLite database
-engine = create_engine(DATABASE_URL, echo=True)
+engine = create_engine(DATABASE_URL)
 Session = sessionmaker(bind=engine)
 
 # Create tables
