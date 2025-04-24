@@ -110,12 +110,12 @@ def on_message(ch, method, properties, body, alert_channel):
             body=json.dumps(alert),
             properties=pika.BasicProperties(content_type='application/json')
         )
-        if alert["broadcast_message"] or alert["description"]:
+        if alert["broadcast_message"]:
             logger.debug(alert["broadcast_message"])
             alert_channel.basic_publish(
                 exchange='feed',
                 routing_key=f"AX.{alert['event']}",
-                body=f"{alert["broadcast_message"]} | {alert["description"]}"
+                body=alert["broadcast_message"]
             )
 
         logger.info(f"Published alert: {alert['event']} → {routing_key}")
