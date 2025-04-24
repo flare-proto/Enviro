@@ -754,50 +754,34 @@ setInterval(() => {
 },1000*5*60)
 
 
-const ticker = document.getElementById('ticker');
-const queue = [];
 
-const currentconds = document.getElementById("currentconds")
+const ticker      = document.getElementById('ticker');
+  const queue       = [];
+  const SPEED_PPS   = 120;        // <-- pixels per second you want to travel
+  const socket      = new WebSocket('/apiws/alerts');
 
-const SCROLL_DURATION = 20000; // in milliseconds (10s = slower, longer scroll)
+  socket.addEventListener('message', e => {
+    queue.push(e.data);
+    if(!ticker.isScrolling) playNext();
+  });
 
-const socket = new WebSocket('/apiws/alertsws');
+  /** Scroll one message then recurse */
+  function playNext(){
+    if(queue.length===0){ ticker.isScrolling=false; return; }
+    ticker.isScrolling = true;
+    ticker.textContent = queue.shift();
 
-socket.addEventListener('open', () => {
-  console.log('[WebSocket] Connected');
-});
+    // allow the browser to lay out the new text so offsetWidth is correct
+    requestAnimationFrame(()=>{
 
-function queuepush(d) {
-  queue.push(d);
-  if (!ticker.isScrolling) startScroll();
-}
+      const distance   = ticker.offsetWidth + window.innerWidth; // px to travel
+      const durationMs = distance / SPEED_PPS * 1000;            // px / (px/s)
 
-socket.addEventListener('message', (event) => {
-  console.log(event);
-  const lines = event.data.split("\n");
-  for (const ln of lines) {
-    queuepush(ln)// Start if not already scrolling
+      ticker.style.animation = 'none';
+      // force reflow
+      void ticker.offsetWidth;
+      ticker.style.animation = `scroll ${durationMs}ms linear`;
+
+      setTimeout(playNext, durationMs);
+    });
   }
-});
-
-function startScroll() {
-  if (queue.length == 0) {
-    ticker.isScrolling = false;
-    return;
-  }
-
-  const message = queue.shift();
-  ticker.textContent = message;
-
-  // Reset animation
-  ticker.style.animation = 'none';
-  ticker.offsetHeight; // trigger reflow
-  ticker.style.animation = `scroll ${SCROLL_DURATION}ms linear`;
-
-  ticker.isScrolling = true;
-
-  // Wait for scroll to finish before showing next
-  setTimeout(() => {
-    startScroll();
-  }, SCROLL_DURATION);
-}
