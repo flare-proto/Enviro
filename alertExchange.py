@@ -115,7 +115,7 @@ def on_message(ch, method, properties, body, alert_channel):
             alert_channel.basic_publish(
                 exchange='feed',
                 routing_key=f"AX.{alert['event']}",
-                body=alert["broadcast_message"]
+                body=f"{alert["broadcast_message"]} | {alert["description"]}"
             )
 
         logger.info(f"Published alert: {alert['event']} → {routing_key}")
