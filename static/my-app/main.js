@@ -773,7 +773,7 @@ function queuepush(d) {
 }
 
 socket.addEventListener('message', (event) => {
-  console.log(event.data);
+  console.log(event);
   queuepush(event.data)// Start if not already scrolling
 });
 
