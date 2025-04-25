@@ -12,6 +12,7 @@ import connLog
 config = configparser.ConfigParser()
 config.read("config.ini")
 logger = logging.Logger("AX")
+logger.level = logging.DEBUG
 
 def parse_cap_for_alert_exchange(cap_xml):
     ns = {'cap': 'urn:oasis:names:tc:emergency:cap:1.2'}
@@ -109,6 +110,13 @@ def on_message(ch, method, properties, body, alert_channel):
             body=json.dumps(alert),
             properties=pika.BasicProperties(content_type='application/json')
         )
+        if alert["broadcast_message"]:
+            logger.debug(alert["broadcast_message"])
+            alert_channel.basic_publish(
+                exchange='feed',
+                routing_key=f"AX.{alert['event']}",
+                body=alert["broadcast_message"]
+            )
 
         logger.info(f"Published alert: {alert['event']} → {routing_key}")
         ch.basic_ack(delivery_tag=method.delivery_tag)

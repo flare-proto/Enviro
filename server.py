@@ -169,6 +169,7 @@ def broadcast(message, sender=None):
     with lock:
         for client in list(wsocketsConned):
             if client != sender:  # Optional: don't echo back to sender
+                #logging.info(message)
                 client.put(message)
 
 RABBITMQ_HOST = pika.URLParameters(config["server"]["amqp"])
@@ -227,13 +228,18 @@ def callback_nerv_alert(ch, method, properties, body):
     """Handle incoming RabbitMQ messages."""
     message = json.loads(body.decode())
     
-    broadcast(message["broadcast_message"])
+    #broadcast(message["broadcast_message"])
     
     session = dbschema.Session()
     dbschema.store_alert(session,message)
     session.commit()
     session.close()
 
+def callback_feed(ch, method, properties, body):
+    """Handle incoming RabbitMQ messages."""
+    message = body.decode()
+    broadcast(message)
+    
 def consume_messages():
     """Start consuming messages from RabbitMQ."""
     connection = pika.BlockingConnection(RABBITMQ_HOST)
@@ -248,7 +254,12 @@ def consume_messages():
     channel.queue_declare(queue='weather-alerts', exclusive=True)
     channel.queue_bind(exchange='alerts', queue='weather-alerts', routing_key='alerts.*.*.*')
     
+    channel.queue_declare(queue='live-feed', exclusive=True)
+    channel.queue_bind(exchange='feed', queue='live-feed', routing_key='*.*')
+    
     channel.basic_consume(queue='weather-alerts', on_message_callback=callback_nerv_alert, auto_ack=True)
+    
+    channel.basic_consume(queue='live-feed', on_message_callback=callback_feed, auto_ack=True)
     
     channel.basic_consume(queue=result.method.queue, on_message_callback=callback_outlook, auto_ack=True)
     
@@ -292,11 +303,10 @@ def update():
             break
     
     brief = f"{weather["cond"]["temperature"]}°C | {weather["cond"]["wind_speed"]} km/h @ {weather['cond']["wind_bearing"]}° {icon}"
-    broadcast(brief)
     
     return weather
 
-@sockets.route('/apiws/alertsws')
+@sockets.route('/apiws/alerts')
 def echo_socket(ws:Server):
     logging.info("Socket Connected")
     #ws.receive()
@@ -312,8 +322,10 @@ def echo_socket(ws:Server):
     while True:
         message=q.get()
         try:
+            
             ws.send(message)
-        except Exception:
+        except Exception as e:
+            logging.info(f"Socket Disconected {e}")
             wsocketsConned.remove(q)
 
 
