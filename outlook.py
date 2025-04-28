@@ -73,7 +73,7 @@ def check_and_publish():
             print(f"downloading {file}")
             content = download(file)
             
-            ver = str(file).removesuffix(".json")[-2:-1]
+            ver = str(file).removesuffix(".json")[-2:]
             
             content_hash = hash_content(content)
             stored_hash = read_stored_hash(file)
