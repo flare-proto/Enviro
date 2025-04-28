@@ -1,13 +1,22 @@
-import os,logging,re,json,sqlite3
-import merge as mg
+import json
+import logging
+import os
+import re
+import sqlite3
+import xml.etree.ElementTree as ET
+
+from dateutil import parser
 from shapely.geometry import Point, Polygon
 from shapely.geometry.polygon import orient
-import xml.etree.ElementTree as ET
-from dateutil import parser
+
+import merge as mg
+
 logging.basicConfig(level=logging.INFO)
 
 
-import datetime,requests
+import datetime
+
+import requests
 from bs4 import BeautifulSoup
 
 issu = ("CWNT","CWWG","CWVR")

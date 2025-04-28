@@ -2,8 +2,9 @@ import asyncio
 import collections
 import configparser
 import logging
+import queue
 import struct
-import threading,queue
+import threading
 from datetime import datetime, timedelta, timezone
 from time import sleep
 
@@ -369,18 +370,6 @@ def outlook():
     session = dbschema.Session()
     with session.begin():
         valid_tokens = session.query(dbschema.Outlook).filter(dbschema.Outlook.expires_at > datetime.utcnow()).filter(dbschema.Outlook.effective_at < datetime.utcnow()).all()
-        jsonDat = {	
-            "type":"FeatureCollection",
-            "features":[json.loads(t.feature) for t in valid_tokens]
-        }
-    session.close()
-    return jsonify(jsonDat)
-
-@app.route("/api/outlook/all")
-def outlookf():
-    session = dbschema.Session()
-    with session.begin():
-        valid_tokens = session.query(dbschema.Outlook).all()
         jsonDat = {	
             "type":"FeatureCollection",
             "features":[json.loads(t.feature) for t in valid_tokens]
