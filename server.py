@@ -376,7 +376,7 @@ def outlook():
     return jsonify(jsonDat)
 
 @app.route("/api/outlook/future")
-def outlook():
+def outlookf():
     session = dbschema.Session()
     with session.begin():
         valid_tokens = session.query(dbschema.Outlook).filter(dbschema.Outlook.expires_at > datetime.utcnow()).all()
