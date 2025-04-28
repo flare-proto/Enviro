@@ -479,7 +479,7 @@ function styleFunction(feature) {
 const outlook_layer = new VectorImageLayer({
   opacity: 1,
   source: new VectorSource({
-    url: '/api/outlook',
+    url: '/api/outlook/v1',
     format: new GeoJSON(),
   }),
   style: styleFunction
