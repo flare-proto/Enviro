@@ -375,6 +375,18 @@ def outlook():
     session.close()
     return jsonify(jsonDat)
 
+@app.route("/api/outlook/future")
+def outlook():
+    session = dbschema.Session()
+    with session.begin():
+        valid_tokens = session.query(dbschema.Outlook).filter(dbschema.Outlook.expires_at > datetime.utcnow()).all()
+        jsonDat = {	
+            "type":"FeatureCollection",
+            "features":[json.loads(t.feature) for t in valid_tokens]
+        }
+    session.close()
+    return jsonify(jsonDat)
+
 @app.route("/api/alerts/top")
 def top_alert():
     if len(weather["alerts"]):
