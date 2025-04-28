@@ -192,7 +192,7 @@ def saveFeature(feature):
         if vdt:
             edt = datetime.strptime(vdt, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc)
         else:
-            print(feature["properties"]["metobject"])
+            #print(feature["properties"]["metobject"])
             edt = datetime.now(timezone.utc)
 
         stmt = insert(dbschema.Outlook).values(
@@ -218,8 +218,8 @@ def callback_outlook(ch, method, properties, body):
     """Handle incoming RabbitMQ messages."""
     try:
         message = json.loads(body.decode())
-        logger.info("RECV OUTLOOK")
-        for i,f in enumerate(message["features"]):
+        logger.info(f"RECV OUTLOOK {message["ver"]}")
+        for i,f in enumerate(message["cont"]["features"]):
             f["id"] = f"{f["id"]}_{i}"
             saveFeature(f)
     except Exception as e:

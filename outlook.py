@@ -72,15 +72,21 @@ def check_and_publish():
         for file in list_json_files():
             print(f"downloading {file}")
             content = download(file)
+            
+            ver = str(file).removesuffix(".json")[-2:-1]
+            
             content_hash = hash_content(content)
             stored_hash = read_stored_hash(file)
-
+            jsonDat = json.loads(content)
             if content_hash != stored_hash:
                 print(f"New outlook: {file}")
                 channel.basic_publish(
                     exchange='outlook',
                     routing_key='',
-                    body=content
+                    body=json.dumps({
+                        "ver":ver,
+                        "cont":jsonDat
+                    })
                 )
                 write_stored_hash(file, content_hash)
             else:
