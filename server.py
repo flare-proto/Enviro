@@ -367,11 +367,11 @@ def alerts_og():
     weather = update()
     return jsonify(weather["alerts"])
 
-@app.route("/api/outlook")
-def outlook():
+@app.route("/api/outlook/<ver>")
+def outlook(ver):
     session = dbschema.Session()
     with session.begin():
-        valid_tokens = session.query(dbschema.Outlook).filter(dbschema.Outlook.expires_at > datetime.utcnow()).filter(dbschema.Outlook.effective_at < datetime.utcnow()).all()
+        valid_tokens = session.query(dbschema.Outlook).filter(dbschema.Outlook.ver ==ver).filter(dbschema.Outlook.expires_at > datetime.utcnow()).filter(dbschema.Outlook.effective_at < datetime.utcnow()).all()
         jsonDat = {	
             "type":"FeatureCollection",
             "features":[json.loads(t.feature) for t in valid_tokens]
