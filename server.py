@@ -247,9 +247,9 @@ def consume_messages():
 
     channel.basic_consume(queue="log", on_message_callback=callback_log, auto_ack=True)
 
-    result = channel.queue_declare(queue='', exclusive=True)
+    result = channel.queue_declare(queue='outlooks-feed', exclusive=True)
     channel.queue_bind(exchange='outlook',
-                    queue=result.method.queue)
+                    queue="outlooks-feed")
     
     channel.queue_declare(queue='weather-alerts', exclusive=True)
     channel.queue_bind(exchange='alerts', queue='weather-alerts', routing_key='alerts.*.*.*')
@@ -261,7 +261,7 @@ def consume_messages():
     
     channel.basic_consume(queue='live-feed', on_message_callback=callback_feed, auto_ack=True)
     
-    channel.basic_consume(queue=result.method.queue, on_message_callback=callback_outlook, auto_ack=True)
+    channel.basic_consume(queue="outlooks-feed", on_message_callback=callback_outlook, auto_ack=True)
     
     print("Waiting for messages...")
     channel.start_consuming()  # Blocking call
