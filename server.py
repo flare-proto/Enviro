@@ -218,6 +218,7 @@ def callback_outlook(ch, method, properties, body):
     """Handle incoming RabbitMQ messages."""
     try:
         message = json.loads(body.decode())
+        logger.info("RECV OUTLOOK")
         for i,f in enumerate(message["features"]):
             f["id"] = f"{f["id"]}_{i}"
             saveFeature(f)
