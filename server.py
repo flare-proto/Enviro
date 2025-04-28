@@ -388,7 +388,7 @@ def outlooklk(id):
     session = dbschema.Session()
     with session.begin():
         valid_tokens = session.query(dbschema.Outlook).filter(
-            dbschema.Outlook.outlook_id ==id).all()
+            id in dbschema.Outlook.outlook_id).all()
         jsonDat = {
             "outlooks":[{
                 "valid":t.effective_at ,
