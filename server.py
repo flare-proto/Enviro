@@ -384,7 +384,7 @@ def outlook(ver):
     return jsonify(jsonDat)
 
 @app.route("/api/outlook/lookup/<id>")
-def outlook(id):
+def outlooklk(id):
     session = dbschema.Session()
     with session.begin():
         valid_tokens = session.query(dbschema.Outlook).filter(
