@@ -389,11 +389,14 @@ def outlooklk(id):
     with session.begin():
         valid_tokens = session.query(dbschema.Outlook).filter(
             dbschema.Outlook.outlook_id ==id).all()
-        jsonDat = [{
-            "valid":t.effective_at ,
-            "exp":t.expires_at,
-            "ver":t.ver
-        }for t in valid_tokens]
+        jsonDat = {
+            "outlooks":[{
+                "valid":t.effective_at ,
+                "exp":t.expires_at,
+                "ver":t.ver
+            }for t in valid_tokens],
+            "now":datetime.utcnow()
+        }
     session.close()
     return jsonify(jsonDat)
 
