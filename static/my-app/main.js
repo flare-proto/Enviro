@@ -694,10 +694,12 @@ map.on("singleclick", function (evt) {
         }
         var content = '<h3>' + feature.get('product_class') + ' Outlook</h3>';
         var tbl = document.createElement("table")
-        
-        tbl.innerHTML += '<tr><td>severity</td><td>' + feature.get('metobject').severity.value + '</td></tr>';
+        tbl.innerHTML += '<tr><td>Published</td><td>' + feature.publication_datetime +'</td></tr>';
+        tbl.innerHTML += '<tr><td>Valid</td><td>' + feature.validity_datetime +'</td></tr>';
+        tbl.innerHTML += '<tr><td>Ends</td><td>' + feature.expiration_datetime +'</td></tr>';
+        tbl.innerHTML += '<tr><td>Severity</td><td>' + feature.get('metobject').severity.value + '</td></tr>';
         tbl.innerHTML += '<tr><td>Thunderstorms</td><td>' + feature.get('metobject').thunderstorm.value + '</td></tr>';
-        tbl.innerHTML += '<tr><td>rain</td><td>' + feature.get('metobject').rain.value +" "+feature.get('metobject').rain.unit+ '</td></tr>';
+        tbl.innerHTML += '<tr><td>Rain</td><td>' + feature.get('metobject').rain.value +" "+feature.get('metobject').rain.unit+ '</td></tr>';
         tbl.innerHTML += '<tr><td>Hail</td><td>' + feature.get('metobject').hail.value +" "+feature.get('metobject').hail.unit+ '</td></tr>';
         tbl.innerHTML += '<tr><td>Gust</td><td>' + feature.get('metobject').gust.value +" "+feature.get('metobject').gust.unit+ '</td></tr>';
         
