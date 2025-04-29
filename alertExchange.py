@@ -142,16 +142,22 @@ def start_cap_topic_relay(source_queue='alert_cap', exchange='alerts'):
     logger.addHandler(console_handler)
     
     alert_channel = connection.channel()
-
+    
+    channel.queue_declare(queue='alert-cap-ax', exclusive=True)
+    channel.queue_bind(exchange='alert-cap',
+                    queue="alert-cap-ax")
+    
     alert_channel.exchange_declare(exchange=exchange, exchange_type='topic', durable=True)
-    channel.queue_declare(queue=source_queue, durable=True)
+
     channel.basic_qos(prefetch_count=1)
+    
+    
 
     def callback(ch, method, properties, body):
         on_message(ch, method, properties, body, alert_channel)
 
-    channel.basic_consume(queue=source_queue, on_message_callback=callback)
-    logger.info(f"Listening on '{source_queue}' and publishing to topic exchange '{exchange}'")
+    channel.basic_consume(queue="alert-cap-ax", on_message_callback=callback)
+    logger.info(f"Listening on 'alert-cap-ax' and publishing to topic exchange '{exchange}'")
     channel.start_consuming()
 
 if __name__ == "__main__":
