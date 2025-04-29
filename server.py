@@ -373,10 +373,12 @@ def outlook(ver):
 
 @app.route("/api/outlook/lookup/<id>")
 def outlooklk(id):
+    id = request.args.get("id",None)
     session = dbschema.Session()
     with session.begin():
         valid_tokens = session.query(dbschema.Outlook).filter(
             dbschema.Outlook.outlook_id.contains(id)).all()
+        
         jsonDat = {
             "outlooks":[{
                 "valid":t.effective_at ,
