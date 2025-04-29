@@ -189,7 +189,7 @@ def saveFeature(feature):
     session = dbschema.Session()
     with session.begin():
         dt = datetime.fromisoformat((feature["properties"]["expiration_datetime"]).replace('Z', '+00:00'))
-        vdt = feature["properties"]["metobject"].get("validity_datetime", "")
+        vdt = feature["properties"].get("validity_datetime", "")
         if vdt:
             edt = datetime.fromisoformat(vdt.replace('Z', '+00:00'))
         else:
