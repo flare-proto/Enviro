@@ -188,12 +188,13 @@ def callback_log(ch, method, properties, body):
 def saveFeature(feature):
     session = dbschema.Session()
     with session.begin():
-        dt = datetime.strptime(feature["properties"]["expiration_datetime"], "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc)
+        dt = datetime.fromisoformat((feature["properties"]["expiration_datetime"]).replace('Z', '+00:00'))
         vdt = feature["properties"]["metobject"].get("validity_datetime", "")
         if vdt:
-            edt = datetime.strptime(vdt, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc)
+            edt = datetime.fromisoformat(vdt.replace('Z', '+00:00'))
         else:
             #print(feature["properties"]["metobject"])
+            logger.warning(f"{feature["id"]} No Time")
             edt = datetime.now(timezone.utc)
 
         stmt = insert(dbschema.Outlook).values(
