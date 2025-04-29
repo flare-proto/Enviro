@@ -699,6 +699,7 @@ map.on("singleclick", function (evt) {
         tbl.innerHTML += '<tr><td>Ends</td><td>' + feature.get("expiration_datetime") +'</td></tr>';
         tbl.innerHTML += '<tr><td>Severity</td><td>' + feature.get('metobject').severity.value + '</td></tr>';
         tbl.innerHTML += '<tr><td>Thunderstorms</td><td>' + feature.get('metobject').thunderstorm.value + '</td></tr>';
+        tbl.innerHTML += '<tr><td>Tornados</td><td>' + feature.get('metobject').tornado_risk.value + '</td></tr>';
         tbl.innerHTML += '<tr><td>Rain</td><td>' + feature.get('metobject').rain.value +" "+feature.get('metobject').rain.unit+ '</td></tr>';
         tbl.innerHTML += '<tr><td>Hail</td><td>' + feature.get('metobject').hail.value +" "+feature.get('metobject').hail.unit+ '</td></tr>';
         tbl.innerHTML += '<tr><td>Gust</td><td>' + feature.get('metobject').gust.value +" "+feature.get('metobject').gust.unit+ '</td></tr>';
