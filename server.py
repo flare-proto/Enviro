@@ -428,13 +428,6 @@ def outNetLog():
         
     return streamLog()
 
-def utf8_integer_to_unicode(n):
-    #s= hex(n)
-    #if len(s) % 2:
-    #    s= '0'+s
-    #return s.decode('hex').decode('utf-8')
-    return struct.pack(">H",n)
-
 @app.route("/api/conditions/bft")
 def conditionsbft():
     for i,b in enumerate(windLevels):
