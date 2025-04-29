@@ -123,7 +123,7 @@ def callback(ch, method, properties, body):
     logger.info(f"Received alert {A}, Downloading")
     try:
         R,n = cache(cur,dd+path)
-        channel.basic_publish("","alert_cap",json.dumps({
+        channel.basic_publish("alert-cap","",json.dumps({
             "typ":"dat",
             "data":R
         }),pika.BasicProperties(content_type='text/json',
@@ -165,7 +165,7 @@ def downloader():
         while True:
             for i in range(10):
                 time.sleep(30)
-            channel.basic_publish("","alert_cap",json.dumps({
+            channel.basic_publish("alert-cap","",json.dumps({
                     "typ":"merge",
                     "data":"..."
                 }),pika.BasicProperties(content_type='text/json',
