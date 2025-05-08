@@ -2,8 +2,9 @@ import asyncio
 import collections
 import configparser
 import logging
+import queue
 import struct
-import threading,queue
+import threading
 from datetime import datetime, timedelta, timezone
 from time import sleep
 
@@ -187,12 +188,13 @@ def callback_log(ch, method, properties, body):
 def saveFeature(feature):
     session = dbschema.Session()
     with session.begin():
-        dt = datetime.strptime(feature["properties"]["expiration_datetime"], "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc)
-        vdt = feature["properties"]["metobject"].get("validity_datetime", "")
+        dt = datetime.fromisoformat((feature["properties"]["expiration_datetime"]).replace('Z', '+00:00'))
+        vdt = feature["properties"].get("validity_datetime", "")
         if vdt:
-            edt = datetime.strptime(vdt, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc)
+            edt = datetime.fromisoformat(vdt.replace('Z', '+00:00'))
         else:
             #print(feature["properties"]["metobject"])
+            logger.warning(f"{feature["id"]} No Time")
             edt = datetime.now(timezone.utc)
 
         stmt = insert(dbschema.Outlook).values(
@@ -349,18 +351,6 @@ def alerts():
     
     return jsonify(jsonDat)
 
-@app.route("/api/alerts/all")
-def alertsall():
-    alertsDat = []
-    
-    session = dbschema.Session()
-    with session.begin():
-        valid_tokens = dbschema.get_alert(session)
-        jsonDat = [i.properties for i in valid_tokens]
-    session.close()
-    
-    return jsonify(jsonDat)
-
 @app.route("/api/alerts")
 def alerts_og():
     global weather
@@ -376,8 +366,10 @@ def outlook(ver):
     with session.begin():
         valid_tokens = session.query(dbschema.Outlook).filter(
             dbschema.Outlook.ver ==ver,
+          
             dbschema.Outlook.expires_at > now,
             dbschema.Outlook.effective_at < now).all()
+
         jsonDat = {	
             "type":"FeatureCollection",
             "features":[json.loads(t.feature) for t in valid_tokens]
@@ -385,14 +377,19 @@ def outlook(ver):
     session.close()
     return jsonify(jsonDat)
 
-@app.route("/api/outlook/all")
-def outlookf():
+@app.route("/api/outlook/lookup/<id>")
+def outlooklk(id):
     session = dbschema.Session()
     with session.begin():
-        valid_tokens = session.query(dbschema.Outlook).all()
-        jsonDat = {	
-            "type":"FeatureCollection",
-            "features":[json.loads(t.feature) for t in valid_tokens]
+        valid_tokens = session.query(dbschema.Outlook).filter(
+            dbschema.Outlook.outlook_id.contains(id)).all()
+        jsonDat = {
+            "outlooks":[{
+                "valid":t.effective_at ,
+                "exp":t.expires_at,
+                "ver":t.ver
+            }for t in valid_tokens],
+            "now":datetime.utcnow()
         }
     session.close()
     return jsonify(jsonDat)
@@ -437,13 +434,6 @@ def outNetLog():
         
     return streamLog()
 
-def utf8_integer_to_unicode(n):
-    #s= hex(n)
-    #if len(s) % 2:
-    #    s= '0'+s
-    #return s.decode('hex').decode('utf-8')
-    return struct.pack(">H",n)
-
 @app.route("/api/conditions/bft")
 def conditionsbft():
     for i,b in enumerate(windLevels):
@@ -467,6 +457,9 @@ def main():
 def assets(key):
     return send_from_directory("static/my-app/dist/assets/",key)
 
+@app.route('/favicon.ico')
+def favicon(key):
+    return send_from_directory("static/favicon.ico")
 
 if __name__ == '__main__':
     threading.Thread(target=consume_messages, daemon=True,name="AMQP SERVER RECV").start()

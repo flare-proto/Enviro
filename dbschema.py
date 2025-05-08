@@ -1,16 +1,19 @@
-from sqlalchemy import Column, Integer, String, DateTime, create_engine,ForeignKey,Table
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker,relationship
 from datetime import datetime
+
+from sqlalchemy import (Column, DateTime, ForeignKey, Integer, String, Table,
+                        create_engine)
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import relationship, sessionmaker
 
 Base = declarative_base()
 
-from sqlalchemy import (
-    create_engine, Column, String, DateTime, ForeignKey, JSON
-)
-from sqlalchemy.orm import declarative_base, sessionmaker, relationship
+import logging
+import uuid
 from datetime import datetime, timedelta
-import uuid,logging
+
+from sqlalchemy import (JSON, Column, DateTime, ForeignKey, String,
+                        create_engine)
+from sqlalchemy.orm import declarative_base, relationship, sessionmaker
 
 Base = declarative_base()
 

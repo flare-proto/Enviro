@@ -101,7 +101,7 @@ def fetch():
                 for r,name in result:
                     R,n = cache(cur,r)
                     dat.append(R)
-                    channel.basic_publish("","alert_cap",json.dumps({
+                    channel.basic_publish("alert-cap","",json.dumps({
                         "typ":"dat",
                         "data":R
                     }),pika.BasicProperties(content_type='text/json',
@@ -111,11 +111,7 @@ def fetch():
             conn.commit()
             conn.close()
     lookback = 1
-    channel.basic_publish("","alert_cap",json.dumps({
-                    "typ":"merge",
-                    "data":"..."
-                }),pika.BasicProperties(content_type='text/json',
-                                           delivery_mode=pika.DeliveryMode.Transient))
+
     logger.info(f"Downloaded {newCapDownloaded} alerts")
 def callback(ch, method, properties, body):
     conn = sqlite3.connect("alert.db")
@@ -127,16 +123,11 @@ def callback(ch, method, properties, body):
     logger.info(f"Received alert {A}, Downloading")
     try:
         R,n = cache(cur,dd+path)
-        channel.basic_publish("","alert_cap",json.dumps({
+        channel.basic_publish("alert-cap","",json.dumps({
             "typ":"dat",
             "data":R
         }),pika.BasicProperties(content_type='text/json',
                                 delivery_mode=pika.DeliveryMode.Transient))
-        channel.basic_publish("","alert_cap",json.dumps({
-                        "typ":"merge",
-                        "data":"..."
-                    }),pika.BasicProperties(content_type='text/json',
-                                            delivery_mode=pika.DeliveryMode.Transient))
     except BaseException as e:
         logger.warning(f"Failed to download {e}")
     conn.commit()
@@ -174,7 +165,7 @@ def downloader():
         while True:
             for i in range(10):
                 time.sleep(30)
-            channel.basic_publish("","alert_cap",json.dumps({
+            channel.basic_publish("alert-cap","",json.dumps({
                     "typ":"merge",
                     "data":"..."
                 }),pika.BasicProperties(content_type='text/json',
