@@ -794,4 +794,5 @@ const ticker      = document.getElementById('ticker');
 var outs = document.getElementById("outlookOff")
 outs.onchange = () => {
   outlooksrc.setUrl(`/api/outlook/v1?offset=${outs.value}`)
+  outlooksrc.refresh();
 }
