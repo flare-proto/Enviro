@@ -475,13 +475,13 @@ function styleFunction(feature) {
     }),
   });
 }
-
+const outlooksrc = new VectorSource({
+  url: '/api/outlook/v1',
+  format: new GeoJSON(),
+})
 const outlook_layer = new VectorImageLayer({
   opacity: 1,
-  source: new VectorSource({
-    url: '/api/outlook/v1',
-    format: new GeoJSON(),
-  }),
+  source: outlooksrc,
   style: styleFunction
 })
 
@@ -788,3 +788,10 @@ const ticker      = document.getElementById('ticker');
       setTimeout(playNext, durationMs);
     });
   }
+
+
+
+var outs = document.getElementById("outlookOff")
+outs.onchange = () => {
+  outlooksrc.setUrl(`/api/outlook/v1?offset=${outs.value}`)
+}
