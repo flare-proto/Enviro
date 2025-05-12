@@ -22,7 +22,7 @@ from gevent.pywsgi import WSGIServer
 from sqlalchemy.dialects.postgresql import insert
 
 import dbschema
-import pcap
+import pcap,merge
 
 # Example usage
 
@@ -348,7 +348,7 @@ def alerts():
             "features":[t.geometry_geojson for t in valid_tokens]
         }
     session.close()
-    
+    jsonDat =merge.merge_polygons_by_warn(jsonDat)
     return jsonify(jsonDat)
 
 @app.route("/api/alerts")
