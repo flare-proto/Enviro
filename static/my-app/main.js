@@ -393,7 +393,7 @@ function createPatternFill(text,color,nf) {
     ctx.fillText(text,5,125)
   }
   if (warnHAZShow.includes(text)) {
-    ctx.lineWidth=176;
+    ctx.lineWidth=75;
     
     ctx.beginPath();
 
