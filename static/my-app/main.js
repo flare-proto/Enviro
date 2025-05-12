@@ -381,8 +381,10 @@ makeStyle()
 
 function createPatternFill(text,color,nf) {
   const canvas = document.createElement('canvas');
-  canvas.width = 250;
-  canvas.height = 250;
+  const w = 250;
+  const h = 250;
+  canvas.width = w;
+  canvas.height = h;
   const ctx = canvas.getContext('2d');
   ctx.fillStyle = color
   ctx.strokeStyle = color
@@ -393,8 +395,17 @@ function createPatternFill(text,color,nf) {
   if (warnHAZShow.includes(text)) {
     ctx.lineWidth=176;
     
+    ctx.beginPath();
+
+    // Line through top left and bottom right corners
     ctx.moveTo(0, 0);
-    ctx.lineTo(250, 250);
+    ctx.lineTo(w, h);
+    // Line through top right corner to add missing pixels
+    ctx.moveTo(0, -h);
+    ctx.lineTo(w * 2, h);
+    // Line through bottom left corner to add missing pixels
+    ctx.moveTo(-w, 0);
+    ctx.lineTo(w, h * 2);
 
     // Draw the Path
     ctx.stroke();
