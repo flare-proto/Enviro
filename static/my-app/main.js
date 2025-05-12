@@ -311,6 +311,11 @@ const warnTextShow = [
   "tornado"
 ]
 
+const warnHAZShow = [
+  "waterspout",
+  "tornado"
+]
+
 const watch_alert = [
   "squall",
   "blowing snow",
@@ -380,9 +385,19 @@ function createPatternFill(text,color,nf) {
   canvas.height = 250;
   const ctx = canvas.getContext('2d');
   ctx.fillStyle = color
+  ctx.strokeStyle = color
   ctx.font = "20px NerdSpace"
   if (warnTextShow.includes(text) || nf) {
     ctx.fillText(text,5,125)
+  }
+  if (warnHAZShow.includes(text)) {
+    ctx.lineWidth=176;
+    
+    ctx.moveTo(0, 0);
+    ctx.lineTo(300, 150);
+
+    // Draw the Path
+    ctx.stroke();
   }
 
   const pattern = ctx.createPattern(canvas, 'repeat');
