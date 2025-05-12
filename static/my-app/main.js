@@ -394,7 +394,7 @@ function createPatternFill(text,color,nf) {
     ctx.lineWidth=176;
     
     ctx.moveTo(0, 0);
-    ctx.lineTo(300, 150);
+    ctx.lineTo(250, 250);
 
     // Draw the Path
     ctx.stroke();
