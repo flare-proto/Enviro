@@ -240,6 +240,7 @@ def callback_nws_outlook(ch, method:pika.spec.Basic.Deliver, properties:pika.fra
             message = json.loads(body.decode())
             logger.info(f"RECV NWS OUTLOOK {method.routing_key}")
             for i,feature in enumerate(message["cont"]["features"]):
+                logger.info(f"NWS OUTLOOK {method.routing_key} #{i}")
                 dt = datetime.strptime(feature["properties"]["EXPIRE"], "%Y%m%d%H%M")
                 edt =datetime.strptime(feature["properties"]["VALID"], "%Y%m%d%H%M")
                 stmt = insert(dbschema.NWSOutlook).values(
