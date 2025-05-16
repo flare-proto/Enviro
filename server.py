@@ -414,11 +414,13 @@ def NWSoutlook(route):
     now += timedelta(hours=offsetH)
     session = dbschema.Session()
     with session.begin():
-        valid_tokens = session.query(dbschema.NWSOutlook).filter(
-            dbschema.NWSOutlook.route == route,
-          
-            dbschema.NWSOutlook.expires_at > now,
-            dbschema.NWSOutlook.effective_at < now).all()
+        q = session.query(dbschema.NWSOutlook).filter(
+            dbschema.NWSOutlook.route == route)
+        if not request.args.get("notime",False):
+            q=q.filter(
+                dbschema.NWSOutlook.expires_at > now,
+                dbschema.NWSOutlook.effective_at < now)
+        valid_tokens = q.all()
 
         jsonDat = {	
             "type":"FeatureCollection",
