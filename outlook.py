@@ -61,6 +61,30 @@ def write_stored_hash(filename, h):
     with open(get_hash_path(filename), 'w') as f:
         f.write(h)
 
+nws = [
+    "day1otlk_torn.lyr.geojson"
+]
+
+BASE_URL_NWS = "https://www.spc.noaa.gov/products/outlook/"
+
+def NWS(channel):
+    for file in nws:
+        content = requests.get(urljoin(BASE_URL_NWS, file)).content
+        content_hash = hash_content(content)
+        stored_hash = read_stored_hash(file)
+        jsonDat = json.loads(content)
+        if content_hash != stored_hash:
+            print(f"New NWS outlook: {file}")
+            channel.basic_publish(
+                exchange='outlook',
+                routing_key='',
+                body=json.dumps({
+                    "ver":"v1",
+                    "cont":jsonDat
+                })
+            )
+            write_stored_hash(file, content_hash)
+
 def check_and_publish():
     
     ensure_hash_dir()
@@ -69,6 +93,7 @@ def check_and_publish():
     channel = connection.channel()
     print(f"[{datetime.now()}] Checking thunderstorm outlooks...")
     try:
+        NWS(channel)
         for file in list_json_files():
             print(f"downloading {file}")
             content = download(file)
