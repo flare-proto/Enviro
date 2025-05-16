@@ -19,6 +19,8 @@ from flask import (Flask, Response, json, jsonify, redirect, render_template,
 from flask_cors import CORS, cross_origin
 from flask_sock import Server, Sock
 from gevent.pywsgi import WSGIServer
+import pika.frame
+import pika.spec
 from sqlalchemy.dialects.postgresql import insert
 
 import dbschema
@@ -229,6 +231,28 @@ def callback_outlook(ch, method, properties, body):
             saveFeature(f)
     except Exception as e:
         logging.exception(e)
+        
+def callback_nws_outlook(ch, method:pika.spec.Basic.Deliver, properties:pika.frame.Header, body):
+    """Handle incoming RabbitMQ messages."""
+
+    try:
+        message = json.loads(body.decode())
+        logger.info(f"RECV NWS OUTLOOK {method.routing_key}")
+        for i,feature in enumerate(message["cont"]["features"]):
+            session = dbschema.Session()
+            with session.begin():
+                logger.info(f"NWS OUTLOOK {method.routing_key} #{i}")
+                dt = datetime.strptime(feature["properties"]["EXPIRE"], "%Y%m%d%H%M")
+                edt =datetime.strptime(feature["properties"]["VALID"], "%Y%m%d%H%M")
+                o = dbschema.NWSOutlook(
+                    feature=json.dumps(feature),
+                    expires_at=dt,
+                    effective_at=edt,
+                    route=method.routing_key
+                )
+                session.add(o)
+    except Exception as e:
+        logger.exception(e)
     
 def callback_nerv_alert(ch, method, properties, body):
     """Handle incoming RabbitMQ messages."""
@@ -255,7 +279,11 @@ def consume_messages():
 
     result = channel.queue_declare(queue='outlooks-feed', exclusive=True)
     channel.queue_bind(exchange='outlook',
-                    queue="outlooks-feed")
+                    queue="outlooks-feed",routing_key="outlook.ECCC")
+    
+    result = channel.queue_declare(queue='outlooks-feed-nws', exclusive=True)
+    channel.queue_bind(exchange='outlook',
+                    queue="outlooks-feed-nws",routing_key="outlook.NWS.*")
     
     channel.queue_declare(queue='weather-alerts', exclusive=True)
     channel.queue_bind(exchange='alerts', queue='weather-alerts', routing_key='alerts.*.*.*')
@@ -268,6 +296,8 @@ def consume_messages():
     channel.basic_consume(queue='live-feed', on_message_callback=callback_feed, auto_ack=True)
     
     channel.basic_consume(queue="outlooks-feed", on_message_callback=callback_outlook, auto_ack=True)
+    
+    channel.basic_consume(queue="outlooks-feed-nws", on_message_callback=callback_nws_outlook, auto_ack=True)
     
     print("Waiting for messages...")
     channel.start_consuming()  # Blocking call
@@ -369,6 +399,28 @@ def outlook(ver):
           
             dbschema.Outlook.expires_at > now,
             dbschema.Outlook.effective_at < now).all()
+
+        jsonDat = {	
+            "type":"FeatureCollection",
+            "features":[json.loads(t.feature) for t in valid_tokens]
+        }
+    session.close()
+    return jsonify(jsonDat)
+
+@app.route("/api/nws/outlook/<route>")
+def NWSoutlook(route):
+    offsetH = int(request.args.get("offset","0"))
+    now  = datetime.utcnow()
+    now += timedelta(hours=offsetH)
+    session = dbschema.Session()
+    with session.begin():
+        q = session.query(dbschema.NWSOutlook).filter(
+            dbschema.NWSOutlook.route == route)
+        if not request.args.get("notime",False):
+            q=q.filter(
+                dbschema.NWSOutlook.expires_at > now,
+                dbschema.NWSOutlook.effective_at < now)
+        valid_tokens = q.all()
 
         jsonDat = {	
             "type":"FeatureCollection",

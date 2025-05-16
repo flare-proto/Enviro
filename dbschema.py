@@ -149,6 +149,19 @@ class Outlook(Base):
 
     def is_in_effect(self):
         return datetime.utcnow() >= self.expires_at and datetime.utcnow() <= self.effective_at
+    
+class NWSOutlook(Base):
+    __tablename__ = 'NWSoutlooks'
+
+    outlook_id = Column(Integer, primary_key=True,autoincrement=True)
+    feature = Column(String, nullable=False)
+    effective_at = Column(DateTime, default=datetime.utcnow)
+    expires_at = Column(DateTime, nullable=False)
+    
+    route = Column(String, nullable=False)
+
+    def is_in_effect(self):
+        return datetime.utcnow() >= self.expires_at and datetime.utcnow() <= self.effective_at
 
 
 # --- Example setup below ---
