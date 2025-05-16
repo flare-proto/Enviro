@@ -62,7 +62,7 @@ def write_stored_hash(filename, h):
         f.write(h)
 
 nws = [
-    ("day1otlk_torn.lyr.geojson","d1_torn")
+    ("day1otlk_torn.lyr.geojson","d1_torn"),
     ("day1otlk_cat.lyr.geojson","d1_cat")
 ]
 
