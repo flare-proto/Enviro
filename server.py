@@ -84,7 +84,7 @@ pcap.setup()
 
 app = Flask(__name__)
 app.config['SOCK_SERVER_OPTIONS'] = {'ping_interval': 25}
-#app.config['SQLALCHEMY_ECHO'] =False
+app.config['SQLALCHEMY_ECHO'] =True
 sockets = Sock(app)
 
 
