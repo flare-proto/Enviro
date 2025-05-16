@@ -410,6 +410,26 @@ def outlook(ver):
     session.close()
     return jsonify(jsonDat)
 
+@app.route("/api/nws/outlook/<route>")
+def NWSoutlook(route):
+    offsetH = int(request.args.get("offset","0"))
+    now  = datetime.utcnow()
+    now += timedelta(hours=offsetH)
+    session = dbschema.Session()
+    with session.begin():
+        valid_tokens = session.query(dbschema.NWSOutlook).filter(
+            dbschema.NWSOutlook.route == route,
+          
+            dbschema.NWSOutlook.expires_at > now,
+            dbschema.NWSOutlook.effective_at < now).all()
+
+        jsonDat = {	
+            "type":"FeatureCollection",
+            "features":[json.loads(t.feature) for t in valid_tokens]
+        }
+    session.close()
+    return jsonify(jsonDat)
+
 @app.route("/api/outlook/lookup/<id>")
 def outlooklk(id):
     session = dbschema.Session()
