@@ -19,6 +19,8 @@ from flask import (Flask, Response, json, jsonify, redirect, render_template,
 from flask_cors import CORS, cross_origin
 from flask_sock import Server, Sock
 from gevent.pywsgi import WSGIServer
+import pika.frame
+import pika.spec
 from sqlalchemy.dialects.postgresql import insert
 
 import dbschema
@@ -229,6 +231,37 @@ def callback_outlook(ch, method, properties, body):
             saveFeature(f)
     except Exception as e:
         logging.exception(e)
+        
+def callback_nws_outlook(ch, method:pika.spec.Basic.Deliver, properties:pika.frame.Header, body):
+    """Handle incoming RabbitMQ messages."""
+    session = dbschema.Session()
+    with session.begin():
+        try:
+            message = json.loads(body.decode())
+            logger.info(f"RECV NWS OUTLOOK {message["ver"]}")
+            for i,feature in enumerate(message["cont"]["features"]):
+                feature["id"] = f"{feature["id"]}_{i}"
+                dt = datetime.strptime(feature["properties"]["EXPIRE"], "%Y%m%d%H%M")
+                edt =datetime.strptime(feature["properties"]["VALID"], "%Y%m%d%H%M")
+                stmt = insert(dbschema.NWSOutlook).values(
+                    feature=json.dumps(feature),
+                    expires_at=dt,
+                    effective_at=edt,
+                    route=method.routing_key
+                )
+
+                # On conflict with outlook_id, update the feature, expires_at, and effective_at
+                stmt = stmt.on_conflict_do_update(
+                    index_elements=['outlook_id'],
+                    set_={
+                        "feature": stmt.excluded.feature,
+                        "expires_at": stmt.excluded.expires_at,
+                        "effective_at": stmt.excluded.effective_at,
+                        "route":stmt.excluded.route,
+                    }
+                )
+        except Exception as e:
+            logging.exception(e)
     
 def callback_nerv_alert(ch, method, properties, body):
     """Handle incoming RabbitMQ messages."""
