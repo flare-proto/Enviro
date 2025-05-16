@@ -306,6 +306,8 @@ def consume_messages():
     
     channel.basic_consume(queue="outlooks-feed", on_message_callback=callback_outlook, auto_ack=True)
     
+    channel.basic_consume(queue="outlooks-feed-nws", on_message_callback=callback_nws_outlook, auto_ack=True)
+    
     print("Waiting for messages...")
     channel.start_consuming()  # Blocking call
 
