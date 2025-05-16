@@ -531,7 +531,7 @@ const outlooks_nws_src = new VectorSource({
   format: new GeoJSON(),
 })
 const outlook_nws_layer = new VectorImageLayer({
-  opacity: 0.75,
+  opacity: 0.5,
   source: outlooks_nws_src,
   style: NWSstyleFunction
 })
