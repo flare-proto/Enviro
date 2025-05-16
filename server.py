@@ -84,7 +84,7 @@ pcap.setup()
 
 app = Flask(__name__)
 app.config['SOCK_SERVER_OPTIONS'] = {'ping_interval': 25}
-app.config['SQLALCHEMY_ECHO'] =True
+app.config['SQLALCHEMY_ECHO'] =False
 sockets = Sock(app)
 
 
@@ -244,23 +244,13 @@ def callback_nws_outlook(ch, method:pika.spec.Basic.Deliver, properties:pika.fra
                 logger.info(f"NWS OUTLOOK {method.routing_key} #{i}")
                 dt = datetime.strptime(feature["properties"]["EXPIRE"], "%Y%m%d%H%M")
                 edt =datetime.strptime(feature["properties"]["VALID"], "%Y%m%d%H%M")
-                stmt = insert(dbschema.NWSOutlook).values(
+                o = dbschema.NWSOutlook(
                     feature=json.dumps(feature),
                     expires_at=dt,
                     effective_at=edt,
                     route=method.routing_key
                 )
-
-                # On conflict with outlook_id, update the feature, expires_at, and effective_at
-                stmt = stmt.on_conflict_do_update(
-                    index_elements=['outlook_id'],
-                    set_={
-                        "feature": stmt.excluded.feature,
-                        "expires_at": stmt.excluded.expires_at,
-                        "effective_at": stmt.excluded.effective_at,
-                        "route":stmt.excluded.route,
-                    }
-                )
+                session.add(o)
     except Exception as e:
         logger.exception(e)
     
