@@ -501,6 +501,19 @@ function styleFunction(feature) {
     }),
   });
 }
+
+function NWSstyleFunction(feature) {
+  return new Style({
+    stroke: new Stroke({
+      color: feature.stroke,
+      width: 3,
+    }),
+    fill: new Fill({
+      color: feature.fill,
+    }),
+  });
+}
+
 const outlooksrc = new VectorSource({
   url: '/api/outlook/v1',
   format: new GeoJSON(),
@@ -518,7 +531,7 @@ const outlooks_nws_src = new VectorSource({
 const outlook_nws_layer = new VectorImageLayer({
   opacity: 1,
   source: outlooks_nws_src,
-  style: styleFunction
+  style: NWSstyleFunction
 })
 
 radar_layer.getSource().on("imageloaderror", () => {
