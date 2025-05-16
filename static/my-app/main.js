@@ -776,7 +776,7 @@ map.on("singleclick", function (evt) {
         if (!viewInfo.classList.contains("visible")) {
           viewInfo.classList.toggle("visible")
         }
-        var content = '<h3>' + feature.get('product_class') + ' Outlook</h3>';
+        var content = '<h3>' + OutlookNWSType.value + ' Outlook</h3>';
         var tbl = document.createElement("table")
         tbl.innerHTML += '<tr><td>Published</td><td>' + feature.get("ISSUE") +'</td></tr>';
         tbl.innerHTML += '<tr><td>Valid</td><td>' + feature.get("VALID") +'</td></tr>';
