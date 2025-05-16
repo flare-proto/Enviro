@@ -1,19 +1,19 @@
-from bdb import effective
 import configparser
 import hashlib
-import json,sqlite3
+import json
 import os
-import time
+import sqlite3
 import threading
-from datetime import datetime
+import time
+from bdb import effective
+from datetime import datetime, timedelta
 from urllib.parse import urljoin
 
 import pika
 import requests
-from sqlalchemy import Column, Integer, String, DateTime, create_engine
+from sqlalchemy import Column, DateTime, Integer, String, create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
-from datetime import datetime, timedelta
 
 CONFIG_FILE = 'config.ini'
 
@@ -72,15 +72,21 @@ def check_and_publish():
         for file in list_json_files():
             print(f"downloading {file}")
             content = download(file)
+            
+            ver = str(file).removesuffix(".json")[-2:]
+            
             content_hash = hash_content(content)
             stored_hash = read_stored_hash(file)
-
+            jsonDat = json.loads(content)
             if content_hash != stored_hash:
                 print(f"New outlook: {file}")
                 channel.basic_publish(
                     exchange='outlook',
                     routing_key='',
-                    body=content
+                    body=json.dumps({
+                        "ver":ver,
+                        "cont":jsonDat
+                    })
                 )
                 write_stored_hash(file, content_hash)
             else:

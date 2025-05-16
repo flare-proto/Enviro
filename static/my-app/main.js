@@ -311,6 +311,11 @@ const warnTextShow = [
   "tornado"
 ]
 
+const warnHAZShow = [
+  "waterspout",
+  "tornado"
+]
+
 const watch_alert = [
   "squall",
   "blowing snow",
@@ -376,13 +381,34 @@ makeStyle()
 
 function createPatternFill(text,color,nf) {
   const canvas = document.createElement('canvas');
-  canvas.width = 250;
-  canvas.height = 250;
+  const w = 250;
+  const h = 250;
+  canvas.width = w;
+  canvas.height = h;
   const ctx = canvas.getContext('2d');
   ctx.fillStyle = color
+  ctx.strokeStyle = color
   ctx.font = "20px NerdSpace"
   if (warnTextShow.includes(text) || nf) {
     ctx.fillText(text,5,125)
+  }
+  if (warnHAZShow.includes(text)) {
+    ctx.lineWidth=75;
+    
+    ctx.beginPath();
+
+    // Line through top left and bottom right corners
+    ctx.moveTo(0, 0);
+    ctx.lineTo(w, h);
+    // Line through top right corner to add missing pixels
+    ctx.moveTo(0, -h);
+    ctx.lineTo(w * 2, h);
+    // Line through bottom left corner to add missing pixels
+    ctx.moveTo(-w, 0);
+    ctx.lineTo(w, h * 2);
+
+    // Draw the Path
+    ctx.stroke();
   }
 
   const pattern = ctx.createPattern(canvas, 'repeat');
@@ -475,13 +501,13 @@ function styleFunction(feature) {
     }),
   });
 }
-
+const outlooksrc = new VectorSource({
+  url: '/api/outlook/v1',
+  format: new GeoJSON(),
+})
 const outlook_layer = new VectorImageLayer({
   opacity: 1,
-  source: new VectorSource({
-    url: '/api/outlook',
-    format: new GeoJSON(),
-  }),
+  source: outlooksrc,
   style: styleFunction
 })
 
@@ -694,10 +720,13 @@ map.on("singleclick", function (evt) {
         }
         var content = '<h3>' + feature.get('product_class') + ' Outlook</h3>';
         var tbl = document.createElement("table")
-        
-        tbl.innerHTML += '<tr><td>severity</td><td>' + feature.get('metobject').severity.value + '</td></tr>';
+        tbl.innerHTML += '<tr><td>Published</td><td>' + feature.get("publication_datetime") +'</td></tr>';
+        tbl.innerHTML += '<tr><td>Valid</td><td>' + feature.get("validity_datetime") +'</td></tr>';
+        tbl.innerHTML += '<tr><td>Ends</td><td>' + feature.get("expiration_datetime") +'</td></tr>';
+        tbl.innerHTML += '<tr><td>Severity</td><td>' + feature.get('metobject').severity.value + '</td></tr>';
         tbl.innerHTML += '<tr><td>Thunderstorms</td><td>' + feature.get('metobject').thunderstorm.value + '</td></tr>';
-        tbl.innerHTML += '<tr><td>rain</td><td>' + feature.get('metobject').rain.value +" "+feature.get('metobject').rain.unit+ '</td></tr>';
+        tbl.innerHTML += '<tr><td>Tornados</td><td>' + feature.get('metobject').tornado_risk.value + '</td></tr>';
+        tbl.innerHTML += '<tr><td>Rain</td><td>' + feature.get('metobject').rain.value +" "+feature.get('metobject').rain.unit+ '</td></tr>';
         tbl.innerHTML += '<tr><td>Hail</td><td>' + feature.get('metobject').hail.value +" "+feature.get('metobject').hail.unit+ '</td></tr>';
         tbl.innerHTML += '<tr><td>Gust</td><td>' + feature.get('metobject').gust.value +" "+feature.get('metobject').gust.unit+ '</td></tr>';
         
@@ -785,3 +814,11 @@ const ticker      = document.getElementById('ticker');
       setTimeout(playNext, durationMs);
     });
   }
+
+
+
+var outs = document.getElementById("outlookOff")
+outs.onchange = () => {
+  outlooksrc.setUrl(`/api/outlook/v1?offset=${outs.value}`)
+  outlooksrc.refresh();
+}

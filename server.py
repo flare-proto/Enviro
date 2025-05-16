@@ -2,8 +2,9 @@ import asyncio
 import collections
 import configparser
 import logging
+import queue
 import struct
-import threading,queue
+import threading
 from datetime import datetime, timedelta, timezone
 from time import sleep
 
@@ -187,19 +188,21 @@ def callback_log(ch, method, properties, body):
 def saveFeature(feature):
     session = dbschema.Session()
     with session.begin():
-        dt = datetime.strptime(feature["properties"]["expiration_datetime"], "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc)
-        vdt = feature["properties"]["metobject"].get("validity_datetime", "")
+        dt = datetime.fromisoformat((feature["properties"]["expiration_datetime"]).replace('Z', '+00:00'))
+        vdt = feature["properties"].get("validity_datetime", "")
         if vdt:
-            edt = datetime.strptime(vdt, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc)
+            edt = datetime.fromisoformat(vdt.replace('Z', '+00:00'))
         else:
-            print(feature["properties"]["metobject"])
+            #print(feature["properties"]["metobject"])
+            logger.warning(f"{feature["id"]} No Time")
             edt = datetime.now(timezone.utc)
 
         stmt = insert(dbschema.Outlook).values(
             outlook_id=feature["id"],
             feature=json.dumps(feature),
             expires_at=dt,
-            effective_at=edt
+            effective_at=edt,
+            ver=feature["ver"]
         )
 
         # On conflict with outlook_id, update the feature, expires_at, and effective_at
@@ -209,6 +212,7 @@ def saveFeature(feature):
                 "feature": stmt.excluded.feature,
                 "expires_at": stmt.excluded.expires_at,
                 "effective_at": stmt.excluded.effective_at,
+                "ver": stmt.excluded.ver,
             }
         )
 
@@ -218,8 +222,10 @@ def callback_outlook(ch, method, properties, body):
     """Handle incoming RabbitMQ messages."""
     try:
         message = json.loads(body.decode())
-        for i,f in enumerate(message["features"]):
+        logger.info(f"RECV OUTLOOK {message["ver"]}")
+        for i,f in enumerate(message["cont"]["features"]):
             f["id"] = f"{f["id"]}_{i}"
+            f['ver'] = message["ver"]
             saveFeature(f)
     except Exception as e:
         logging.exception(e)
@@ -247,9 +253,9 @@ def consume_messages():
 
     channel.basic_consume(queue="log", on_message_callback=callback_log, auto_ack=True)
 
-    result = channel.queue_declare(queue='', exclusive=True)
+    result = channel.queue_declare(queue='outlooks-feed', exclusive=True)
     channel.queue_bind(exchange='outlook',
-                    queue=result.method.queue)
+                    queue="outlooks-feed")
     
     channel.queue_declare(queue='weather-alerts', exclusive=True)
     channel.queue_bind(exchange='alerts', queue='weather-alerts', routing_key='alerts.*.*.*')
@@ -261,7 +267,7 @@ def consume_messages():
     
     channel.basic_consume(queue='live-feed', on_message_callback=callback_feed, auto_ack=True)
     
-    channel.basic_consume(queue=result.method.queue, on_message_callback=callback_outlook, auto_ack=True)
+    channel.basic_consume(queue="outlooks-feed", on_message_callback=callback_outlook, auto_ack=True)
     
     print("Waiting for messages...")
     channel.start_consuming()  # Blocking call
@@ -345,32 +351,45 @@ def alerts():
     
     return jsonify(jsonDat)
 
-@app.route("/api/alerts/all")
-def alertsall():
-    alertsDat = []
-    
-    session = dbschema.Session()
-    with session.begin():
-        valid_tokens = dbschema.get_alert(session)
-        jsonDat = [i.properties for i in valid_tokens]
-    session.close()
-    
-    return jsonify(jsonDat)
-
 @app.route("/api/alerts")
 def alerts_og():
     global weather
     weather = update()
     return jsonify(weather["alerts"])
 
-@app.route("/api/outlook")
-def outlook():
+@app.route("/api/outlook/<ver>")
+def outlook(ver):
+    offsetH = int(request.args.get("offset","0"))
+    now  = datetime.utcnow()
+    now += timedelta(hours=offsetH)
     session = dbschema.Session()
     with session.begin():
-        valid_tokens = session.query(dbschema.Outlook).filter(dbschema.Outlook.expires_at > datetime.utcnow()).filter(dbschema.Outlook.effective_at < datetime.utcnow()).all()
+        valid_tokens = session.query(dbschema.Outlook).filter(
+            dbschema.Outlook.ver ==ver,
+          
+            dbschema.Outlook.expires_at > now,
+            dbschema.Outlook.effective_at < now).all()
+
         jsonDat = {	
             "type":"FeatureCollection",
             "features":[json.loads(t.feature) for t in valid_tokens]
+        }
+    session.close()
+    return jsonify(jsonDat)
+
+@app.route("/api/outlook/lookup/<id>")
+def outlooklk(id):
+    session = dbschema.Session()
+    with session.begin():
+        valid_tokens = session.query(dbschema.Outlook).filter(
+            dbschema.Outlook.outlook_id.contains(id)).all()
+        jsonDat = {
+            "outlooks":[{
+                "valid":t.effective_at ,
+                "exp":t.expires_at,
+                "ver":t.ver
+            }for t in valid_tokens],
+            "now":datetime.utcnow()
         }
     session.close()
     return jsonify(jsonDat)
@@ -415,13 +434,6 @@ def outNetLog():
         
     return streamLog()
 
-def utf8_integer_to_unicode(n):
-    #s= hex(n)
-    #if len(s) % 2:
-    #    s= '0'+s
-    #return s.decode('hex').decode('utf-8')
-    return struct.pack(">H",n)
-
 @app.route("/api/conditions/bft")
 def conditionsbft():
     for i,b in enumerate(windLevels):
@@ -445,6 +457,9 @@ def main():
 def assets(key):
     return send_from_directory("static/my-app/dist/assets/",key)
 
+@app.route('/favicon.ico')
+def favicon(key):
+    return send_from_directory("static/favicon.ico")
 
 if __name__ == '__main__':
     threading.Thread(target=consume_messages, daemon=True,name="AMQP SERVER RECV").start()

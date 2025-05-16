@@ -1,5 +1,8 @@
-import logging,pika
+import logging
+
+import pika
 import pika.connection
+
 class ConnHandler(logging.Handler):
     def __init__(self, ch):
         super().__init__()

@@ -1,5 +1,6 @@
 import geopandas as gpd
-from shapely.geometry import shape, mapping
+from shapely.geometry import mapping, shape
+
 
 def merge_polygons_by_warn(input_geojson: dict) -> dict:
     #Merge neighboring polygons in a GeoJSON-like dictionary
