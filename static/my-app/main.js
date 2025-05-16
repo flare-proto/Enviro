@@ -511,6 +511,16 @@ const outlook_layer = new VectorImageLayer({
   style: styleFunction
 })
 
+const outlooks_nws_src = new VectorSource({
+  url: '/api/nws/outlook/outlook.NWS.d1_torn',
+  format: new GeoJSON(),
+})
+const outlook_nws_layer = new VectorImageLayer({
+  opacity: 1,
+  source: outlooks_nws_src,
+  style: styleFunction
+})
+
 radar_layer.getSource().on("imageloaderror", () => {
   getRadarStartEndTime().then(data => {
     currentTime = startTime = data[0];
@@ -570,10 +580,12 @@ const map = new Map({
   layers: [
     tile,
     vectorLayer,
+    outlook_layer,
+    outlook_nws_layer,
     alerts_layer,
     alertsO_layer,
     radar_layer,
-    outlook_layer
+    
     
   ],
   overlays: [overlay],
@@ -629,6 +641,7 @@ makeBindLyr("ECCC Alerts",alertsO_layer)(false)
 makeBindLyr("Bounds",vectorLayer)(false)
 makeBindLyr("Radar",radar_layer)
 makeBindLyr("Outlook",outlook_layer)
+makeBindLyr("NWS Outlook",outlook_nws_layer)
 makesat("Desaturate")
 
 
@@ -821,4 +834,6 @@ var outs = document.getElementById("outlookOff")
 outs.onchange = () => {
   outlooksrc.setUrl(`/api/outlook/v1?offset=${outs.value}`)
   outlooksrc.refresh();
+  outlooks_nws_src.setUrl(`/api/nws/outlook/outlook.NWS.d1_torn?offset=${outs.value}`)
+  outlooks_nws_src.refresh();
 }
