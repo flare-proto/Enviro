@@ -153,7 +153,7 @@ class Outlook(Base):
 class NWSOutlook(Base):
     __tablename__ = 'NWSoutlooks'
 
-    outlook_id = Column(int, primary_key=True,autoincrement=True)
+    outlook_id = Column(Integer, primary_key=True,autoincrement=True)
     feature = Column(String, nullable=False)
     effective_at = Column(DateTime, default=datetime.utcnow)
     expires_at = Column(DateTime, nullable=False)
