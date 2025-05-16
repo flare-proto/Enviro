@@ -62,13 +62,13 @@ def write_stored_hash(filename, h):
         f.write(h)
 
 nws = [
-    "day1otlk_torn.lyr.geojson"
+    ("day1otlk_torn.lyr.geojson","d1_torn")
 ]
 
 BASE_URL_NWS = "https://www.spc.noaa.gov/products/outlook/"
 
 def NWS(channel):
-    for file in nws:
+    for file,rte in nws:
         content = requests.get(urljoin(BASE_URL_NWS, file)).content
         content_hash = hash_content(content)
         stored_hash = read_stored_hash(file)
@@ -77,7 +77,7 @@ def NWS(channel):
             print(f"New NWS outlook: {file}")
             channel.basic_publish(
                 exchange='outlook',
-                routing_key='outlook.NWS',
+                routing_key=f'outlook.NWS.{rte}',
                 body=json.dumps({
                     "ver":"v1",
                     "cont":jsonDat
