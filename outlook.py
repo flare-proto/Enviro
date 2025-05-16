@@ -77,7 +77,7 @@ def NWS(channel):
             print(f"New NWS outlook: {file}")
             channel.basic_publish(
                 exchange='outlook',
-                routing_key='',
+                routing_key='outlook.NWS',
                 body=json.dumps({
                     "ver":"v1",
                     "cont":jsonDat
@@ -107,7 +107,7 @@ def check_and_publish():
                 print(f"New outlook: {file}")
                 channel.basic_publish(
                     exchange='outlook',
-                    routing_key='',
+                    routing_key='outlook.ECCC',
                     body=json.dumps({
                         "ver":ver,
                         "cont":jsonDat
