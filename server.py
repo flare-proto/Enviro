@@ -234,12 +234,13 @@ def callback_outlook(ch, method, properties, body):
         
 def callback_nws_outlook(ch, method:pika.spec.Basic.Deliver, properties:pika.frame.Header, body):
     """Handle incoming RabbitMQ messages."""
-    session = dbschema.Session()
-    with session.begin():
-        try:
-            message = json.loads(body.decode())
-            logger.info(f"RECV NWS OUTLOOK {method.routing_key}")
-            for i,feature in enumerate(message["cont"]["features"]):
+
+    try:
+        message = json.loads(body.decode())
+        logger.info(f"RECV NWS OUTLOOK {method.routing_key}")
+        for i,feature in enumerate(message["cont"]["features"]):
+            session = dbschema.Session()
+            with session.begin():
                 logger.info(f"NWS OUTLOOK {method.routing_key} #{i}")
                 dt = datetime.strptime(feature["properties"]["EXPIRE"], "%Y%m%d%H%M")
                 edt =datetime.strptime(feature["properties"]["VALID"], "%Y%m%d%H%M")
@@ -260,8 +261,8 @@ def callback_nws_outlook(ch, method:pika.spec.Basic.Deliver, properties:pika.fra
                         "route":stmt.excluded.route,
                     }
                 )
-        except Exception as e:
-            logger.exception(e)
+    except Exception as e:
+        logger.exception(e)
     
 def callback_nerv_alert(ch, method, properties, body):
     """Handle incoming RabbitMQ messages."""
