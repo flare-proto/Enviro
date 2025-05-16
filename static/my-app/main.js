@@ -733,7 +733,7 @@ map.on("singleclick", function (evt) {
           }
         });
     }
-  } else {
+  } else if (selOpt.value == "Outlooks") {
     var feature = map.forEachFeatureAtPixel(evt.pixel,
       function(feature, layer) {
         if (layer == outlook_layer) {
@@ -757,6 +757,32 @@ map.on("singleclick", function (evt) {
         tbl.innerHTML += '<tr><td>Rain</td><td>' + feature.get('metobject').rain.value +" "+feature.get('metobject').rain.unit+ '</td></tr>';
         tbl.innerHTML += '<tr><td>Hail</td><td>' + feature.get('metobject').hail.value +" "+feature.get('metobject').hail.unit+ '</td></tr>';
         tbl.innerHTML += '<tr><td>Gust</td><td>' + feature.get('metobject').gust.value +" "+feature.get('metobject').gust.unit+ '</td></tr>';
+        
+        selectedInfo.innerHTML = content;
+        selectedInfo.appendChild(tbl)
+        
+        console.info(feature.getProperties());
+    }
+  } else if (selOpt.value == "NWSOutlooks") {
+    var feature = map.forEachFeatureAtPixel(evt.pixel,
+      function(feature, layer) {
+        if (layer == outlook_nws_layer) {
+          return feature;
+        }
+      });
+    if (feature) {
+        var geometry = feature.getGeometry();
+        var coord = geometry.getCoordinates();
+        if (!viewInfo.classList.contains("visible")) {
+          viewInfo.classList.toggle("visible")
+        }
+        var content = '<h3>' + feature.get('product_class') + ' Outlook</h3>';
+        var tbl = document.createElement("table")
+        tbl.innerHTML += '<tr><td>Published</td><td>' + feature.get("ISSUE") +'</td></tr>';
+        tbl.innerHTML += '<tr><td>Valid</td><td>' + feature.get("VALID") +'</td></tr>';
+        tbl.innerHTML += '<tr><td>Ends</td><td>' + feature.get("EXPIRE") +'</td></tr>';
+        tbl.innerHTML += '<tr><td>Risk</td><td>' + feature.get('LABEL2') +'</td></tr>';
+
         
         selectedInfo.innerHTML = content;
         selectedInfo.appendChild(tbl)
