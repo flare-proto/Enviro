@@ -290,6 +290,10 @@ def consume_messages():
     channel.queue_bind(exchange='outlook',
                     queue="outlooks-feed",routing_key="outlook.ECCC")
     
+    result = channel.queue_declare(queue='outlooks-feed-nws', exclusive=True)
+    channel.queue_bind(exchange='outlook',
+                    queue="outlooks-feed-nws",routing_key="outlook.NWS.*")
+    
     channel.queue_declare(queue='weather-alerts', exclusive=True)
     channel.queue_bind(exchange='alerts', queue='weather-alerts', routing_key='alerts.*.*.*')
     
