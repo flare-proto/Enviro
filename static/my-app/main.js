@@ -505,11 +505,11 @@ function styleFunction(feature) {
 function NWSstyleFunction(feature) {
   return new Style({
     stroke: new Stroke({
-      color: feature.stroke,
+      color: feature.get("stroke"),
       width: 3,
     }),
     fill: new Fill({
-      color: feature.fill,
+      color: feature.get("fill"),
     }),
   });
 }
@@ -529,7 +529,7 @@ const outlooks_nws_src = new VectorSource({
   format: new GeoJSON(),
 })
 const outlook_nws_layer = new VectorImageLayer({
-  opacity: 1,
+  opacity: 0.75,
   source: outlooks_nws_src,
   style: NWSstyleFunction
 })
