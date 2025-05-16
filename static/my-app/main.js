@@ -275,6 +275,8 @@ makeBind("DIVERG")
 //endregion
 
 
+const OutlookNWSType = document.getElementById("OutlookNWSType")
+
 
 async function getRadarStartEndTime() {
   let response = await fetch('https://geo.weather.gc.ca/geomet/?lang=en&service=WMS&request=GetCapabilities&version=1.3.0&LAYERS=RADAR_1KM_RRAI&t=' + new Date().getTime())
@@ -525,7 +527,7 @@ const outlook_layer = new VectorImageLayer({
 })
 
 const outlooks_nws_src = new VectorSource({
-  url: '/api/nws/outlook/outlook.NWS.d1_torn',
+  url: `/api/nws/outlook/outlook.NWS.d1_${OutlookNWSType.value}`,
   format: new GeoJSON(),
 })
 const outlook_nws_layer = new VectorImageLayer({
@@ -847,6 +849,10 @@ var outs = document.getElementById("outlookOff")
 outs.onchange = () => {
   outlooksrc.setUrl(`/api/outlook/v1?offset=${outs.value}`)
   outlooksrc.refresh();
-  outlooks_nws_src.setUrl(`/api/nws/outlook/outlook.NWS.d1_torn?offset=${outs.value}`)
+  outlooks_nws_src.setUrl(`/api/nws/outlook/outlook.NWS.d1_${OutlookNWSType.value}?offset=${outs.value}`)
+  outlooks_nws_src.refresh();
+}
+OutlookNWSType.onchange = () => {
+  outlooks_nws_src.setUrl(`/api/nws/outlook/outlook.NWS.d1_${OutlookNWSType.value}?offset=${outs.value}`)
   outlooks_nws_src.refresh();
 }
