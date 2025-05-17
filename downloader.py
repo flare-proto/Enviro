@@ -8,7 +8,6 @@ import threading
 import time
 
 import coloredlogs
-import env_canada
 import pika
 import requests
 from bs4 import BeautifulSoup
