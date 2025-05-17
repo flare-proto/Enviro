@@ -409,6 +409,7 @@ def alerts_og():
 @app.route("/api/outlook/<ver>")
 def outlook(ver):
     """Active Canadian thunderstorm outlooks
+    ---
     parameters:
       - name: version
         in: path
@@ -449,6 +450,7 @@ def outlook(ver):
 @app.route("/api/nws/outlook/<route>")
 def NWSoutlook(route):
     """Active NWS outlooks
+    ---
     parameters:
       - name: route
         in: path
