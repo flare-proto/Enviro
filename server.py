@@ -502,15 +502,6 @@ def conditionsbft():
         if b["max"] > weather["cond"].get("wind_speed",0)+0.1:
             return jsonify({"scale":i,"icon":chr(0xe3af+i)})
 
-@app.route("/api/tso")
-def tso():
-    pass
-
-
-@app.route('/bar')
-def bar():
-    return render_template('bar.html')
-
 @app.route('/')
 def main():
     return send_from_directory("static/my-app/dist/","index.html")
