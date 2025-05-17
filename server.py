@@ -509,6 +509,15 @@ def NWSoutlook(route):
 
 @app.route("/api/alerts/top")
 def top_alert():
+    """Most Major Local Alert
+    TODO result
+    Expect this endpoint to change in the near future
+    ---
+    responses:
+      200:
+        description: Json
+
+    """
     if len(weather["alerts"]):
         return json.dumps(weather["alerts"][0])
     return json.dumps( {
