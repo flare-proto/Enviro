@@ -105,7 +105,7 @@ def on_message(ch, method, properties, body, alert_channel):
         routing_key = build_routing_key(alert)
 
         alert_channel.basic_publish(
-            exchange='alerts',
+            exchange='enviro',
             routing_key=routing_key,
             body=json.dumps(alert),
             properties=pika.BasicProperties(content_type='application/json')
@@ -113,8 +113,8 @@ def on_message(ch, method, properties, body, alert_channel):
         if alert["broadcast_message"]:
             logger.debug(alert["broadcast_message"])
             alert_channel.basic_publish(
-                exchange='feed',
-                routing_key=f"AX.{alert['event']}",
+                exchange='enviro',
+                routing_key=f"feed.{routing_key}",
                 body=alert["broadcast_message"]
             )
 
@@ -144,10 +144,10 @@ def start_cap_topic_relay(source_queue='alert_cap', exchange='alerts'):
     alert_channel = connection.channel()
     
     channel.queue_declare(queue='alert-cap-ax', exclusive=True)
-    channel.queue_bind(exchange='alerts',
+    channel.queue_bind(exchange='enviro',
                     queue="alert-cap-ax",routing_key="cap")
     
-    alert_channel.exchange_declare(exchange=exchange, exchange_type='topic', durable=True)
+
 
     channel.basic_qos(prefetch_count=1)
     

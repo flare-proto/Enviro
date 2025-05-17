@@ -279,18 +279,18 @@ def consume_messages():
     channel.basic_consume(queue="log", on_message_callback=callback_log, auto_ack=True)
 
     result = channel.queue_declare(queue='outlooks-feed', exclusive=True)
-    channel.queue_bind(exchange='outlook',
+    channel.queue_bind(exchange='enviro',
                     queue="outlooks-feed",routing_key="outlook.ECCC")
     
     result = channel.queue_declare(queue='outlooks-feed-nws', exclusive=True)
-    channel.queue_bind(exchange='outlook',
+    channel.queue_bind(exchange='enviro',
                     queue="outlooks-feed-nws",routing_key="outlook.NWS.*")
     
     channel.queue_declare(queue='weather-alerts', exclusive=True)
-    channel.queue_bind(exchange='alerts', queue='weather-alerts', routing_key='alerts.*.*.*')
+    channel.queue_bind(exchange='enviro', queue='weather-alerts', routing_key='alerts.*.*.*')
     
     channel.queue_declare(queue='live-feed', exclusive=True)
-    channel.queue_bind(exchange='feed', queue='live-feed', routing_key='*.*')
+    channel.queue_bind(exchange='enviro', queue='live-feed', routing_key='feed.#')
     
     channel.basic_consume(queue='weather-alerts', on_message_callback=callback_nerv_alert, auto_ack=True)
     
