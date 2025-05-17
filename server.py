@@ -417,10 +417,12 @@ def NWSoutlook(route):
     with session.begin():
         q = session.query(dbschema.NWSOutlook).filter(
             dbschema.NWSOutlook.route == route)
+        
         if not request.args.get("notime",False):
             q=q.filter(
                 dbschema.NWSOutlook.expires_at > now,
                 dbschema.NWSOutlook.effective_at < now)
+            
         if request.args.get("sortLatest",False):
             q=q.order_by(desc(dbschema.NWSOutlook.effective_at))
             latest_effective_at = q.limit(1).one().effective_at
@@ -435,23 +437,6 @@ def NWSoutlook(route):
         jsonDat = {	
             "type":"FeatureCollection",
             "features":[json.loads(t.feature) for t in valid_tokens]
-        }
-    session.close()
-    return jsonify(jsonDat)
-
-@app.route("/api/outlook/lookup/<id>")
-def outlooklk(id):
-    session = dbschema.Session()
-    with session.begin():
-        valid_tokens = session.query(dbschema.Outlook).filter(
-            dbschema.Outlook.outlook_id.contains(id)).all()
-        jsonDat = {
-            "outlooks":[{
-                "valid":t.effective_at ,
-                "exp":t.expires_at,
-                "ver":t.ver
-            }for t in valid_tokens],
-            "now":datetime.utcnow()
         }
     session.close()
     return jsonify(jsonDat)
