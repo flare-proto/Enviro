@@ -527,7 +527,7 @@ const outlook_layer = new VectorImageLayer({
 })
 
 const outlooks_nws_src = new VectorSource({
-  url: `/api/nws/outlook/outlook.NWS.d1_${OutlookNWSType.value}`,
+  url: `/api/nws/outlook/outlook.NWS.d1_${OutlookNWSType.value}?sortLatest=true`,
   format: new GeoJSON(),
 })
 const outlook_nws_layer = new VectorImageLayer({
@@ -875,10 +875,10 @@ var outs = document.getElementById("outlookOff")
 outs.onchange = () => {
   outlooksrc.setUrl(`/api/outlook/v1?offset=${outs.value}`)
   outlooksrc.refresh();
-  outlooks_nws_src.setUrl(`/api/nws/outlook/outlook.NWS.d1_${OutlookNWSType.value}?offset=${outs.value}`)
+  outlooks_nws_src.setUrl(`/api/nws/outlook/outlook.NWS.d1_${OutlookNWSType.value}?sortLatest=true&offset=${outs.value}`)
   outlooks_nws_src.refresh();
 }
 OutlookNWSType.onchange = () => {
-  outlooks_nws_src.setUrl(`/api/nws/outlook/outlook.NWS.d1_${OutlookNWSType.value}?offset=${outs.value}`)
+  outlooks_nws_src.setUrl(`/api/nws/outlook/outlook.NWS.d1_${OutlookNWSType.value}?sortLatest=true&offset=${outs.value}`)
   outlooks_nws_src.refresh();
 }
