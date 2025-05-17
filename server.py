@@ -423,7 +423,7 @@ def NWSoutlook(route):
                 dbschema.NWSOutlook.effective_at < now)
         if request.args.get("sortLatest",False):
             q=q.order_by(desc(dbschema.NWSOutlook.effective_at))
-            latest_effective_at = q.limit(1).scalar()
+            latest_effective_at = q.limit(1).one().effective_at
             q = session.query(dbschema.NWSOutlook).filter(
                 dbschema.NWSOutlook.route == route)
             q=q.filter(
