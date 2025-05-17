@@ -520,7 +520,7 @@ def assets(key):
     return send_from_directory("static/my-app/dist/assets/",key)
 
 @app.route('/favicon.ico')
-def favicon(key):
+def favicon():
     return send_from_directory("static/favicon.ico")
 
 if __name__ == '__main__':
