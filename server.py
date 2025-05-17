@@ -424,7 +424,6 @@ def outlook(ver):
         required: false
         default: all
         description: Time Offset in hours
-    ---
     responses:
       200:
         description: Geojson
@@ -472,8 +471,6 @@ def NWSoutlook(route):
         required: false
         default: all
         description: Only get latest by effective time
-        
-    ---
     responses:
       200:
         description: Geojson
