@@ -144,8 +144,8 @@ def start_cap_topic_relay(source_queue='alert_cap', exchange='alerts'):
     alert_channel = connection.channel()
     
     channel.queue_declare(queue='alert-cap-ax', exclusive=True)
-    channel.queue_bind(exchange='alert-cap',
-                    queue="alert-cap-ax")
+    channel.queue_bind(exchange='alert',
+                    queue="alert-cap-ax",routing_key="cap")
     
     alert_channel.exchange_declare(exchange=exchange, exchange_type='topic', durable=True)
 
