@@ -422,7 +422,14 @@ def NWSoutlook(route):
                 dbschema.NWSOutlook.expires_at > now,
                 dbschema.NWSOutlook.effective_at < now)
         if request.args.get("sortLatest",False):
-            q=q.order_by(desc(dbschema.NWSOutlook.effective_at)).limit(1)
+            q=q.order_by(desc(dbschema.NWSOutlook.effective_at))
+            latest_effective_at = q.limit(1).scalar()
+            q = session.query(dbschema.NWSOutlook).filter(
+                dbschema.NWSOutlook.route == route)
+            q=q.filter(
+                dbschema.NWSOutlook.effective_at == latest_effective_at
+            )
+            
         valid_tokens = q.all()
 
         jsonDat = {	
