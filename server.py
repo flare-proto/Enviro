@@ -15,6 +15,7 @@ import pika.frame
 import pika.spec
 from cachetools import TTLCache, cached
 from env_canada import ECWeather
+from env_canada import ec_weather
 from flasgger import Swagger
 from flask import (Flask, Response, json, jsonify, redirect, render_template,
                    request, send_file, send_from_directory, url_for)
@@ -402,6 +403,7 @@ def alerts_og():
         examples:
           result: ['red', 'green', 'blue']
     """
+    ec_weather.closest_site(ec_weather.s)
     global weather
     weather = update()
     return jsonify(weather["alerts"])
