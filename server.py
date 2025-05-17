@@ -12,20 +12,22 @@ import ansi2html
 import ansi2html.style
 import coloredlogs
 import pika
+import pika.frame
+import pika.spec
 from cachetools import TTLCache, cached
 from env_canada import ECWeather
+from flasgger import Swagger
 from flask import (Flask, Response, json, jsonify, redirect, render_template,
                    request, send_file, send_from_directory, url_for)
 from flask_cors import CORS, cross_origin
 from flask_sock import Server, Sock
 from gevent.pywsgi import WSGIServer
-import pika.frame
-import pika.spec
-from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy import desc
+from sqlalchemy.dialects.postgresql import insert
 
 import dbschema
-import pcap,merge
+import merge
+import pcap
 
 # Example usage
 
@@ -87,6 +89,7 @@ app = Flask(__name__)
 app.config['SOCK_SERVER_OPTIONS'] = {'ping_interval': 25}
 app.config['SQLALCHEMY_ECHO'] =False
 sockets = Sock(app)
+swagger = Swagger(app)
 
 
 CORS(app,resources=r'/api/*')
