@@ -101,7 +101,7 @@ def fetch():
                 for r,name in result:
                     R,n = cache(cur,r)
                     dat.append(R)
-                    channel.basic_publish("alert-cap","",json.dumps({
+                    channel.basic_publish("alert","cap",json.dumps({
                         "typ":"dat",
                         "data":R
                     }),pika.BasicProperties(content_type='text/json',
