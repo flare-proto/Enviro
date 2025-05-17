@@ -395,6 +395,7 @@ def alerts():
 def alerts_og():
     """Local Alerts
     TODO result
+    Expect this endpoint to change in the near future
     ---
     responses:
       200:
