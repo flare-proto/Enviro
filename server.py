@@ -15,6 +15,7 @@ import pika.frame
 import pika.spec
 from cachetools import TTLCache, cached
 from env_canada import ECWeather
+from flasgger import Swagger
 from flask import (Flask, Response, json, jsonify, redirect, render_template,
                    request, send_file, send_from_directory, url_for)
 from flask_cors import CORS, cross_origin
@@ -87,6 +88,7 @@ app = Flask(__name__)
 app.config['SOCK_SERVER_OPTIONS'] = {'ping_interval': 25}
 app.config['SQLALCHEMY_ECHO'] =False
 sockets = Sock(app)
+swagger = Swagger(app)
 
 
 CORS(app,resources=r'/api/*')
@@ -369,6 +371,12 @@ def echo_socket(ws:Server):
 
 @app.route("/api/geojson")
 def alerts():
+    """Active Canadian alerts
+    ---
+    responses:
+      200:
+        description: Geojson
+    """
     alertsDat = []
     
     session = dbschema.Session()
@@ -384,12 +392,42 @@ def alerts():
 
 @app.route("/api/alerts")
 def alerts_og():
+    """Local Alerts
+    TODO result
+    Expect this endpoint to change in the near future
+    ---
+    responses:
+      200:
+        description: Json List with active alerts
+        examples:
+          result: ['red', 'green', 'blue']
+    """
     global weather
     weather = update()
     return jsonify(weather["alerts"])
 
 @app.route("/api/outlook/<ver>")
 def outlook(ver):
+    """Active Canadian thunderstorm outlooks
+    ---
+    parameters:
+      - name: version
+        in: path
+        type: string
+        enum: ['V1', 'V2', 'V3']
+        required: true
+        default: all
+      - name: offset
+        in: query
+        type: string
+        enum: ['-12','0', '+12', '+24']
+        required: false
+        default: all
+        description: Time Offset in hours
+    responses:
+      200:
+        description: Geojson
+    """
     offsetH = int(request.args.get("offset","0"))
     now  = datetime.utcnow()
     now += timedelta(hours=offsetH)
@@ -410,6 +448,33 @@ def outlook(ver):
 
 @app.route("/api/nws/outlook/<route>")
 def NWSoutlook(route):
+    """Active NWS outlooks
+    ---
+    parameters:
+      - name: route
+        in: path
+        type: string
+        enum: ['outlook.NWS.d1_torn', 'outlook.NWS.d1_cat']
+        required: true
+        default: all
+      - name: offset
+        in: query
+        type: string
+        enum: ['-12','0', '+12', '+24']
+        required: false
+        default: all
+        description: Time Offset in hours
+      - name: sortLatest
+        in: query
+        type: string
+        enum: ['False','True']
+        required: false
+        default: all
+        description: Only get latest by effective time
+    responses:
+      200:
+        description: Geojson
+    """
     offsetH = int(request.args.get("offset","0"))
     now  = datetime.utcnow()
     now += timedelta(hours=offsetH)
@@ -418,17 +483,18 @@ def NWSoutlook(route):
         q = session.query(dbschema.NWSOutlook).filter(
             dbschema.NWSOutlook.route == route)
         
-        if not request.args.get("notime",False):
+        if not bool(request.args.get("notime",False)):
             q=q.filter(
                 dbschema.NWSOutlook.expires_at > now,
                 dbschema.NWSOutlook.effective_at < now)
             
-        if request.args.get("sortLatest",False):
+        if bool(request.args.get("sortLatest",False)):
             q=q.order_by(desc(dbschema.NWSOutlook.effective_at))
             latest_effective_at = q.limit(1).one().effective_at
             q = session.query(dbschema.NWSOutlook).filter(
                 dbschema.NWSOutlook.route == route)
             q=q.filter(
+                dbschema.NWSOutlook.expires_at > now,
                 dbschema.NWSOutlook.effective_at == latest_effective_at
             )
             
@@ -443,6 +509,15 @@ def NWSoutlook(route):
 
 @app.route("/api/alerts/top")
 def top_alert():
+    """Most Major Local Alert
+    TODO result
+    Expect this endpoint to change in the near future
+    ---
+    responses:
+      200:
+        description: Json
+
+    """
     if len(weather["alerts"]):
         return json.dumps(weather["alerts"][0])
     return json.dumps( {
@@ -453,6 +528,51 @@ def top_alert():
     
 @app.route("/api/conditions")
 def conditions():
+    """Local Condtions
+    ---
+    responses:
+      200:
+        description: Successful response with local weather data
+        content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ECicon_code:
+                    type: string
+                    example: "10"
+                  dewpoint:
+                    type: number
+                    format: float
+                    example: 4.7
+                  icon_code:
+                    type: string
+                    example: "thunderstorm"
+                  temperature:
+                    type: number
+                    format: float
+                    example: 8.5
+                  wind_bearing:
+                    type: integer
+                    example: 170
+                  wind_chill:
+                    type: number
+                    format: float
+                    nullable: true
+                    example: null
+                  wind_speed:
+                    type: number
+                    format: float
+                    example: 13
+                required:
+                  - ECicon_code
+                  - dewpoint
+                  - icon_code
+                  - temperature
+                  - wind_bearing
+                  - wind_chill
+                  - wind_speed
+    """
     return jsonify(weather["cond"])
 
 @app.route("/log")
@@ -483,6 +603,30 @@ def outNetLog():
 
 @app.route("/api/conditions/bft")
 def conditionsbft():
+    """Get wind icon and Beaufort scale
+    ---
+    responses:
+        '200':
+          description: Successful response with wind data
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  icon:
+                    type: string
+                    description: Unicode character representing wind icon
+                    example: "\ue3b2"
+                  scale:
+                    type: integer
+                    description: Wind strength on the Beaufort scale (0–12)
+                    minimum: 0
+                    maximum: 12
+                    example: 3
+                required:
+                  - icon
+                  - scale
+    """
     for i,b in enumerate(windLevels):
         if b["max"] > weather["cond"].get("wind_speed",0)+0.1:
             return jsonify({"scale":i,"icon":chr(0xe3af+i)})
