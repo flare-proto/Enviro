@@ -22,6 +22,7 @@ from gevent.pywsgi import WSGIServer
 import pika.frame
 import pika.spec
 from sqlalchemy.dialects.postgresql import insert
+from sqlalchemy import desc
 
 import dbschema
 import pcap,merge
@@ -420,6 +421,8 @@ def NWSoutlook(route):
             q=q.filter(
                 dbschema.NWSOutlook.expires_at > now,
                 dbschema.NWSOutlook.effective_at < now)
+        if request.args.get("sortLatest",False):
+            q=q.order_by(desc(dbschema.NWSOutlook.effective_at)).limit(1)
         valid_tokens = q.all()
 
         jsonDat = {	
