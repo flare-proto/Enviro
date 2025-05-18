@@ -162,13 +162,13 @@ def downloader():
         channel_env.basic_consume(queue=queue_name, on_message_callback=callback, auto_ack=True)
         threading.Thread(target=run,daemon=True).start()
         while True:
-            for i in range(10):
-                time.sleep(30)
-            channel.basic_publish("alerts","cap",json.dumps({
-                    "typ":"merge",
-                    "data":"..."
-                }),pika.BasicProperties(content_type='text/json',
-                                           delivery_mode=pika.DeliveryMode.Transient))
+            time.sleep(5)
+            connection.process_data_events()
+            #channel.basic_publish("alerts","cap",json.dumps({
+            #        "typ":"merge",
+            #        "data":"..."
+            #    }),pika.BasicProperties(content_type='text/json',
+            #                               delivery_mode=pika.DeliveryMode.Transient))
     except BaseException as e:
         if not isinstance(e,KeyboardInterrupt):
             logger.critical(f"{type(e)} {e}")
