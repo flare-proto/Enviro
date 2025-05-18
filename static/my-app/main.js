@@ -170,6 +170,7 @@ for (const key in watch) {
     }
 }
 
+var localActiveAlerts = {}
 
 const weatherTypes = {
   cloudy: "󰖐",
@@ -248,13 +249,34 @@ var types = [
     "statements",
     "endings"
 ]
+
 function alerts_warn(type,id,title) {
-    let a = document.createElement("div")
-    a.classList.add(type)
-    a.id = id
-    a.innerHTML = `<h3>${alerts[id]["symbols"]} ${title}</h3>`
-    document.getElementById(`${type}`).appendChild(a)
+    if (localActiveAlerts[id]==null) {
+      let a = document.createElement("div")
+      a.classList.add(type)
+      a.id = id
+      a.innerHTML = `<h3>${alerts[id]["symbols"]} ${title}</h3>`
+      document.getElementById(`${type}`).appendChild(a)
+      localActiveAlerts[id]==a
+    }
   }
+
+function alert_local(json) {
+  let actives = []
+  for (const element of json) {
+      alerts_warn(element.class,element.mapped,element.title)
+      actives.push(element.mapped);
+  }
+  
+  for (const element of localActiveAlerts) {
+    if (actives.includes(element.id)) {
+
+    }else{
+      localActiveAlerts[element.id] = null;
+      element.remove();
+    }
+  }
+}
 
 var qrhTbl =document.getElementById("qrhTbl")
 for (var element in weatherTypes) {
@@ -839,9 +861,7 @@ var irtrv = () => {
               document.getElementById(`${type}`).innerHTML = ""
           }
           if (json.length > 0) {
-              for (const element of json) {
-                  alerts_warn(element.class,element.mapped,element.title)
-              }
+              alert_local(json)
           }
 
         });
