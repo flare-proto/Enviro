@@ -126,7 +126,8 @@ def store_alert(session:sqlalchemy.orm.Session, alert_dict: dict) -> str:
     try:
         session.add(alert)
         session.flush()  # Required to assign `alert.id` before setting foreign keys
-    except: pass
+    except:
+        session.rollback()
 
     # Add new polygons
     polygons = []
