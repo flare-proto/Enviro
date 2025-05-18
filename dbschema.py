@@ -2,12 +2,12 @@ import logging
 import uuid
 from datetime import datetime, timedelta
 
-from sqlalchemy import (Column, DateTime, ForeignKey, Integer, String, Table,JSON,
-                        create_engine)
-import sqlalchemy,sqlalchemy.orm
+import sqlalchemy
+import sqlalchemy.orm
+from sqlalchemy import (JSON, Column, DateTime, ForeignKey, Integer, String,
+                        Table, create_engine)
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import relationship, sessionmaker
-from sqlalchemy.orm import relationship, backref
+from sqlalchemy.orm import aliased, backref, relationship, sessionmaker
 
 Base = declarative_base()
 
@@ -162,10 +162,14 @@ def store_alert(session:sqlalchemy.orm.Session, alert_dict: dict) -> str:
 # --- Get Active Alert Polygons ---
 def get_active_alert_polygons(session) -> list:
     # Query for polygons from active alerts (not expired and not cancelled)
+    Referenced = aliased(Alert)
     active_polygons = session.query(AlertPolygon).join(Alert).filter(
         Alert.expires_at > datetime.utcnow(), 
         Alert.urgency != "Past",
-        AlertPolygon.cancelled_by_id == None
+        AlertPolygon.cancelled_by_id == None,
+        ~Alert.id.in_(
+            session.query(alert_references.c.referenced_alert_id)
+        )
     ).all()
     
     return active_polygons
