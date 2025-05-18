@@ -140,7 +140,7 @@ def check_and_publish():
                 print(f"New outlook: {file}")
                 channel.basic_publish(
                     exchange='outlook',
-                    routing_key='outlook.ECCC',
+                    routing_key=f'outlook.ECCC.{ver}',
                     body=json.dumps({
                         "ver":ver,
                         "cont":jsonDat

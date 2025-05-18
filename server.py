@@ -284,7 +284,7 @@ def consume_messages():
 
     result = channel.queue_declare(queue='outlooks-feed', exclusive=True)
     channel.queue_bind(exchange='outlook',
-                    queue="outlooks-feed",routing_key="outlook.ECCC")
+                    queue="outlooks-feed",routing_key="outlook.ECCC.*")
     
     result = channel.queue_declare(queue='outlooks-feed-nws', exclusive=True)
     channel.queue_bind(exchange='outlook',
