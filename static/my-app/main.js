@@ -107,6 +107,9 @@ var watch = {
     "TSTORM":"󰼯 ",
     "TORNADO":"󰼯 󰼸",
 }
+var Advisory = {
+    "fog":"󰼯 󰖑",
+}
 
 //TODO REMOVE ME
 var prioritys = [
@@ -117,6 +120,7 @@ var prioritys = [
     "watch.TSTORM",
     "warns.HEAT",
     "warns.COLD",
+    "advisory.fog",
     "test"
 ]
 var alerts= {
@@ -129,7 +133,7 @@ var alerts= {
         "text":"TEST",
         "class":"test",
         "color":"#FFFFFF"
-    }
+    },
 }
 for (const key in warns) {
     const element = warns[key];
@@ -142,6 +146,18 @@ for (const key in warns) {
         "color":"#FFFFFF"
     }
 }
+for (const key in Advisory) {
+    const element = Advisory[key];
+    
+    alerts[`advisory.${key}`]={
+        "class":"advisories",
+        "bg":"gray",
+        "symbols": element,
+        "text":key,
+        "color":"#333"
+    }
+}
+
 for (const key in watch) {
     const element = watch[key];
     
@@ -153,6 +169,7 @@ for (const key in watch) {
         "color":"#333"
     }
 }
+
 
 const weatherTypes = {
   cloudy: "󰖐",
