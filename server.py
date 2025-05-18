@@ -155,6 +155,7 @@ iconBindings = {
     "16":"snowing",
     "17":"snowing",
     "18":"snowing",
+    "24":"fog",
     "26":"partcloud",
     "27":"partcloud",
     "28":"cloudy",
