@@ -12,7 +12,7 @@ import connLog
 config = configparser.ConfigParser()
 config.read("config.ini")
 logger = logging.Logger("AX")
-logger.level = logging.DEBUG
+logger.level = logging.INFO
 
 def parse_cap_for_alert_exchange(cap_xml):
     ns = {'cap': 'urn:oasis:names:tc:emergency:cap:1.2'}
