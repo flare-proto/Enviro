@@ -2,6 +2,7 @@ from datetime import datetime
 
 from sqlalchemy import (Column, DateTime, ForeignKey, Integer, String, Table,
                         create_engine)
+import sqlalchemy
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, sessionmaker
 
@@ -46,16 +47,17 @@ class AlertPolygon(Base):
     cancelled_by = relationship("AlertPolygon", remote_side=[id])
 
 
+def parse_time(ts):
+        return datetime.fromisoformat(ts) if ts else None
+
 # --- Store Alert Function ---
 def store_alert(session, alert_dict: dict) -> str:
     # Helper: parse ISO time safely
-    def parse_time(ts):
-        return datetime.fromisoformat(ts) if ts else None
 
     msg_type = alert_dict.get("msg_type", "alert")
     references = alert_dict.get("references")
 
-    alert_id = str(uuid.uuid4())
+    alert_id = str(alert_dict.get("id"))
     alert = Alert(
         id=alert_id,
         sender=alert_dict.get("sender", "CAP-INGEST"),
