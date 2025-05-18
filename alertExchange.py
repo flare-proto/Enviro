@@ -12,7 +12,7 @@ import connLog
 config = configparser.ConfigParser()
 config.read("config.ini")
 logger = logging.Logger("AX")
-logger.level = logging.DEBUG
+logger.level = logging.INFO
 
 def parse_cap_for_alert_exchange(cap_xml):
     ns = {'cap': 'urn:oasis:names:tc:emergency:cap:1.2'}
@@ -136,7 +136,7 @@ def start_cap_topic_relay(source_queue='alert_cap', exchange='alerts'):
     chnd = connLog.ConnHandler(channel)
     formatter = coloredlogs.ColoredFormatter('AX - %(asctime)s - %(levelname)s - %(message)s')
     chnd.setFormatter(formatter)
-    chnd.setLevel(logging.DEBUG)
+    chnd.setLevel(logging.INFO)
     logger.addHandler(chnd)
     console_handler = logging.StreamHandler()
     console_handler.setLevel(logging.DEBUG)
