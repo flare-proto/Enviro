@@ -17,11 +17,10 @@ I am happy to except contributions,
 ## Usage
 
 1. Setup a RabbitMQ server
-    - create an alert fanout exchange
-    - create an alert_cap queue
+    - create an alerts topic exchange
     - create a log queue
-    - create a merged queue
-    - create a outlook queue
+    - create a outlook exchange
+    - create an feed topic exchange
 2. Configure Server
     - set amqp urls in config.ini as required
     - set station_id in config.ini
