@@ -165,7 +165,7 @@ def get_active_alert_polygons(session) -> list:
     Referenced = aliased(Alert)
     active_polygons = session.query(AlertPolygon).join(Alert).filter(
         Alert.expires_at > datetime.utcnow(), 
-        Alert.urgency != "past",
+        #Alert.urgency != "past",
         AlertPolygon.cancelled_by_id == None,
         
     ).all()
