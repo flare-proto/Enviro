@@ -257,7 +257,7 @@ function alerts_warn(type,id,title) {
       a.id = id
       a.innerHTML = `<h3>${alerts[id]["symbols"]} ${title}</h3>`
       document.getElementById(`${type}`).appendChild(a)
-      localActiveAlerts[id]==a
+      localActiveAlerts[id]=a;
     }
   }
 
