@@ -119,7 +119,7 @@ def callback(ch, method, properties, body):
     b:str = body.decode()
     A,dd,path =b.split(" ")
     
-    logger.info(f"Received alert {A}, Downloading")
+    logger.info(f"Received alert over AMQP {A}, Downloading")
     try:
         R,n = cache(cur,dd+path)
         channel.basic_publish("alerts","cap",json.dumps({
