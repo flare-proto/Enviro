@@ -27,7 +27,7 @@ class Alert(Base):
     event = Column(String)
     msg_type = Column(String)  # e.g., "alert", "update", "cancel", "expire"
     urgency = Column(String)
-    references = Column(String, nullable=True)
+    references_str = Column(String, nullable=True)
     effective_at = Column(DateTime)
     expires_at = Column(DateTime)
     properties = Column(JSON)
@@ -89,6 +89,7 @@ def store_alert(session:sqlalchemy.orm.Session, alert_dict: dict) -> str:
         sender=alert_dict.get("sender", "CAP-INGEST"),
         event=alert_dict["event"],
         msg_type=msg_type,
+        references_str=references_raw,
         effective_at=parse_time(alert_dict.get("effective_at")),
         expires_at=parse_time(alert_dict.get("expires_at")),
         urgency=  alert_dict["urgency"],
@@ -144,7 +145,7 @@ def store_alert(session:sqlalchemy.orm.Session, alert_dict: dict) -> str:
         session.add(polygon)
 
     # Now link `cancelled_by_id` for old polygons (if this is a cancel)
-    if msg_type == "cancel":
+    if msg_type == "cancel" or msg_type == "update" or msg_type == "expire":
         for ref_id in referenced_ids:
             ref_alert = session.get(Alert, ref_id)
             if ref_alert:
