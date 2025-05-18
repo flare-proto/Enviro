@@ -146,7 +146,7 @@ def store_alert(session:sqlalchemy.orm.Session, alert_dict: dict) -> str:
         session.add(polygon)
 
     # Now update cancelled_by_id (if cancel/update/expire)
-    if msg_type in ("cancel", "update", "expire") and polygons:
+    if msg_type in ("cancel", "expire") and polygons:
         first_polygon_id = polygons[0].id
         for ref_id in referenced_ids:
             ref_alert = session.get(Alert, ref_id)
