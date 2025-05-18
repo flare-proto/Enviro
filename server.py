@@ -284,7 +284,7 @@ def consume_messages():
 
     result = channel.queue_declare(queue='outlooks-feed', exclusive=True)
     channel.queue_bind(exchange='outlook',
-                    queue="outlooks-feed",routing_key="outlook.ECCC")
+                    queue="outlooks-feed",routing_key="outlook.ECCC.*")
     
     result = channel.queue_declare(queue='outlooks-feed-nws', exclusive=True)
     channel.queue_bind(exchange='outlook',
@@ -416,10 +416,10 @@ def outlook(ver):
       - name: version
         in: path
         type: string
-        enum: ['V1', 'V2', 'V3']
+        enum: ['day1PM', 'day2AM', 'day2PM','day3']
         required: true
         default: all
-        description: Update Version
+        description: Day, see https://hpfx.collab.science.gc.ca/docs/thunderstorm_outlooks/ThunderstormOutlook_Specs_Graphical_1A_EN.pdf
       - name: offset
         in: query
         type: string

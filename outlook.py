@@ -28,6 +28,37 @@ testSrv = pika.URLParameters(config["outlook"]["amqp"])
 def ensure_hash_dir():
     os.makedirs(HASH_DIR, exist_ok=True)
 
+def classify_thunderstorm_outlook_day(filename: str) -> str:
+    # Extract parts from filename
+    match = re.match(r"(\d{8}T\d{4}Z).*_PT(\d{2})H(\d{2})M", filename)
+    if not match:
+        raise ValueError("Invalid filename format")
+
+    pub_str, offset_hours, offset_minutes = match.groups()
+    pub_time = datetime.strptime(pub_str, "%Y%m%dT%H%MZ")
+    offset = timedelta(hours=int(offset_hours), minutes=int(offset_minutes))
+    valid_time = pub_time + offset
+
+    # Define 12am and 12pm of subsequent days
+    day1_noon = pub_time.replace(hour=12, minute=0, second=0, microsecond=0)
+    day2_midnight = (pub_time + timedelta(days=1)).replace(hour=0, minute=0)
+    day2_noon = day2_midnight + timedelta(hours=12)
+    day3_midnight = (pub_time + timedelta(days=2)).replace(hour=0, minute=0)
+    day3_end = day3_midnight + timedelta(days=1)
+
+    # Classify
+    if day1_noon <= valid_time < day2_midnight:
+        return "day1PM"
+    elif day2_midnight <= valid_time < day2_noon:
+        return "day2AM"
+    elif day2_noon <= valid_time < day3_midnight:
+        return "day2PM"
+    elif day3_midnight <= valid_time < day3_end:
+        return "day3"
+    else:
+        raise OverflowError("Outside expected Day 1-3 range")
+
+
 def list_json_files():
     resp = requests.get(BASE_URL)
     resp.raise_for_status()
@@ -99,7 +130,8 @@ def check_and_publish():
             print(f"downloading {file}")
             content = download(file)
             
-            ver = str(file).removesuffix(".json")[-2:]
+            #ver = str(file).removesuffix(".json")[-2:]
+            ver = classify_thunderstorm_outlook_day(str(file))
             
             content_hash = hash_content(content)
             stored_hash = read_stored_hash(file)
@@ -108,7 +140,7 @@ def check_and_publish():
                 print(f"New outlook: {file}")
                 channel.basic_publish(
                     exchange='outlook',
-                    routing_key='outlook.ECCC',
+                    routing_key=f'outlook.ECCC.{ver}',
                     body=json.dumps({
                         "ver":ver,
                         "cont":jsonDat
