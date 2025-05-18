@@ -12,11 +12,12 @@ import connLog
 config = configparser.ConfigParser()
 config.read("config.ini")
 logger = logging.Logger("AX")
-logger.level = logging.DEBUG
+logger.level = logging.INFO
 
 def parse_cap_for_alert_exchange(cap_xml):
     ns = {'cap': 'urn:oasis:names:tc:emergency:cap:1.2'}
     root = ET.fromstring(cap_xml)
+    
     info = root.find('cap:info', namespaces=ns)
     if info is None:
         raise ValueError("No <info> section in CAP message")
@@ -30,6 +31,7 @@ def parse_cap_for_alert_exchange(cap_xml):
     areaDesc = info.findtext('cap:area/cap:areaDesc', default='', namespaces=ns)
     references = root.findtext('cap:references', default='', namespaces=ns)
     description = info.findtext('cap:description', default='', namespaces=ns)
+    msgType = root.findtext('cap:msgType', default='', namespaces=ns)
     
     broadcast_message = ""
 
@@ -73,6 +75,7 @@ def parse_cap_for_alert_exchange(cap_xml):
 
     return {
         "id":id,
+        "msg_type":msgType,
         'event': event.lower().replace(" ", "_"),
         'urgency': urgency.lower(),
         'severity': severity.lower(),
@@ -110,12 +113,20 @@ def on_message(ch, method, properties, body, alert_channel):
             body=json.dumps(alert),
             properties=pika.BasicProperties(content_type='application/json')
         )
+        logger.debug(alert)
         if alert["broadcast_message"]:
             logger.debug(alert["broadcast_message"])
             alert_channel.basic_publish(
                 exchange='enviro',
                 routing_key=f"feed.{routing_key}",
                 body=alert["broadcast_message"]
+            )
+            logger.info(f"Published alert bulletin: {alert['event']}")
+        elif alert['urgency'] == 'immediate' and json_data["src"] == "AMQP":
+            alert_channel.basic_publish(
+                exchange='feed',
+                routing_key=f"AX.{alert['event']}",
+                body=f"{alert['event']} now in effect for {alert['areaDesc']}"
             )
 
         logger.info(f"Published alert: {alert['event']} → {routing_key}")
@@ -134,7 +145,7 @@ def start_cap_topic_relay(source_queue='alert_cap', exchange='alerts'):
     chnd = connLog.ConnHandler(channel)
     formatter = coloredlogs.ColoredFormatter('AX - %(asctime)s - %(levelname)s - %(message)s')
     chnd.setFormatter(formatter)
-    chnd.setLevel(logging.INFO)
+    chnd.setLevel(logger.level)
     logger.addHandler(chnd)
     console_handler = logging.StreamHandler()
     console_handler.setLevel(logging.DEBUG)

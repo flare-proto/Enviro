@@ -107,6 +107,9 @@ var watch = {
     "TSTORM":"󰼯 ",
     "TORNADO":"󰼯 󰼸",
 }
+var Advisory = {
+    "fog":"󰼯 󰖑",
+}
 
 //TODO REMOVE ME
 var prioritys = [
@@ -117,6 +120,7 @@ var prioritys = [
     "watch.TSTORM",
     "warns.HEAT",
     "warns.COLD",
+    "advisory.fog",
     "test"
 ]
 var alerts= {
@@ -129,7 +133,7 @@ var alerts= {
         "text":"TEST",
         "class":"test",
         "color":"#FFFFFF"
-    }
+    },
 }
 for (const key in warns) {
     const element = warns[key];
@@ -142,6 +146,18 @@ for (const key in warns) {
         "color":"#FFFFFF"
     }
 }
+for (const key in Advisory) {
+    const element = Advisory[key];
+    
+    alerts[`advisory.${key}`]={
+        "class":"advisories",
+        "bg":"gray",
+        "symbols": element,
+        "text":key,
+        "color":"#ffffff"
+    }
+}
+
 for (const key in watch) {
     const element = watch[key];
     
@@ -153,6 +169,8 @@ for (const key in watch) {
         "color":"#333"
     }
 }
+
+var localActiveAlerts = {}
 
 const weatherTypes = {
   cloudy: "󰖐",
@@ -231,13 +249,35 @@ var types = [
     "statements",
     "endings"
 ]
+
 function alerts_warn(type,id,title) {
-    let a = document.createElement("div")
-    a.classList.add(type)
-    a.id = id
-    a.innerHTML = `<h3>${alerts[id]["symbols"]} ${title}</h3>`
-    document.getElementById(`${type}`).appendChild(a)
+    if (localActiveAlerts[id]==null) {
+      let a = document.createElement("div")
+      a.classList.add(type)
+      a.id = id
+      a.innerHTML = `<h3>${alerts[id]["symbols"]} ${title}</h3>`
+      document.getElementById(`${type}`).appendChild(a)
+      localActiveAlerts[id]=a;
+    }
   }
+
+function alert_local(json) {
+  let actives = []
+  for (const element of json) {
+      alerts_warn(element.class,element.mapped,element.title)
+      actives.push(element.mapped);
+  }
+  
+  for (const key in localActiveAlerts) {
+    const element = localActiveAlerts[key]
+    if (actives.includes(element.id)) {
+
+    }else{
+      localActiveAlerts[element.id] = null;
+      element.remove();
+    }
+  }
+}
 
 var qrhTbl =document.getElementById("qrhTbl")
 for (var element in weatherTypes) {
@@ -822,9 +862,7 @@ var irtrv = () => {
               document.getElementById(`${type}`).innerHTML = ""
           }
           if (json.length > 0) {
-              for (const element of json) {
-                  alerts_warn(element.class,element.mapped,element.title)
-              }
+              alert_local(json)
           }
 
         });
@@ -843,8 +881,22 @@ const ticker      = document.getElementById('ticker');
   const SPEED_PPS   = 120;        // <-- pixels per second you want to travel
   const socket      = new WebSocket('/apiws/alerts');
 
+function PushIfOk(dat) {
+  if (queue.at(-1)==null){
+    queue.push(dat)
+    return
+  }
+  var s = `${queue.at(-1)} || ${dat}`
+  if (s.length <= 200) {
+    queue.pop()
+    queue.push(s)
+  } else {
+    queue.push(dat)
+  }
+}
+
   socket.addEventListener('message', e => {
-    queue.push(e.data);
+    PushIfOk(e.data);
     if(!ticker.isScrolling) playNext();
   });
 

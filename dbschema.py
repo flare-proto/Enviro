@@ -1,23 +1,24 @@
-from datetime import datetime
-
-from sqlalchemy import (Column, DateTime, ForeignKey, Integer, String, Table,
-                        create_engine)
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import relationship, sessionmaker
-
-Base = declarative_base()
-
 import logging
 import uuid
 from datetime import datetime, timedelta
 
-from sqlalchemy import (JSON, Column, DateTime, ForeignKey, String,
-                        create_engine)
-from sqlalchemy.orm import declarative_base, relationship, sessionmaker
+import sqlalchemy
+import sqlalchemy.orm
+from sqlalchemy import (JSON, Column, DateTime, ForeignKey, Integer, String,
+                        Table, create_engine)
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import aliased, backref, relationship, sessionmaker
 
 Base = declarative_base()
 
 # --- SQLAlchemy Models ---
+
+alert_references = Table(
+    'alert_references', Base.metadata,
+    Column('referencer_id', String, ForeignKey('alerts.id'), primary_key=True),  # Alert that references another
+    Column('referencee_id', String, ForeignKey('alerts.id'), primary_key=True)   # Alert being referenced
+)
+
 class Alert(Base):
     __tablename__ = 'alerts'
 
@@ -25,13 +26,23 @@ class Alert(Base):
     sender = Column(String)
     event = Column(String)
     msg_type = Column(String)  # e.g., "alert", "update", "cancel", "expire"
-    references = Column(String, ForeignKey("alerts.id"), nullable=True)
+    urgency = Column(String)
+    references_str = Column(String, nullable=True)
     effective_at = Column(DateTime)
     expires_at = Column(DateTime)
     properties = Column(JSON)
+    
 
-    referenced_alert = relationship("Alert", remote_side=[id])
+    references = relationship(
+        'Alert',
+        secondary=alert_references,
+        primaryjoin=id==alert_references.c.referencer_id,
+        secondaryjoin=id==alert_references.c.referencee_id,
+        backref=backref('referenced_by', lazy='dynamic')
+    )
     polygons = relationship("AlertPolygon", back_populates="alert")
+
+
 
 
 class AlertPolygon(Base):
@@ -46,16 +57,33 @@ class AlertPolygon(Base):
     cancelled_by = relationship("AlertPolygon", remote_side=[id])
 
 
-# --- Store Alert Function ---
-def store_alert(session, alert_dict: dict) -> str:
-    # Helper: parse ISO time safely
-    def parse_time(ts):
+def parse_time(ts):
         return datetime.fromisoformat(ts) if ts else None
+    
+def add_reference_if_exists(session:sqlalchemy.orm.Session, referencer, referencee_id: int):
+    referencee = session.get(Alert, referencee_id)
 
+
+    if referencee not in referencer.references:
+        referencer.references.append(referencee)
+        session.commit()
+
+
+# --- Store Alert Function ---
+def store_alert(session:sqlalchemy.orm.Session, alert_dict: dict) -> str:
+    alert_id = str(alert_dict.get("id"))
     msg_type = alert_dict.get("msg_type", "alert")
-    references = alert_dict.get("references")
+    references_raw = alert_dict.get("references", "")
 
-    alert_id = str(uuid.uuid4())
+    # Parse references in CAP format: "sender1,id1,time1 sender2,id2,time2"
+    referenced_ids = []
+    for ref_str in references_raw.strip().split():
+        parts = ref_str.split(",")
+        if len(parts) == 3:
+            _, ref_id, _ = parts
+            referenced_ids.append(ref_id)
+
+    # Create Alert instance
     alert = Alert(
         id=alert_id,
         sender=alert_dict.get("sender", "CAP-INGEST"),
@@ -63,50 +91,67 @@ def store_alert(session, alert_dict: dict) -> str:
         msg_type=msg_type,
         effective_at=parse_time(alert_dict.get("effective_at")),
         expires_at=parse_time(alert_dict.get("expires_at")),
-        references=references,
+        urgency=alert_dict["urgency"],
         properties={
-            "urgency": alert_dict["urgency"],
             "severity": alert_dict["severity"],
             "certainty": alert_dict["certainty"],
             "areaDesc": alert_dict["areaDesc"],
-            "broadcast_message":alert_dict["broadcast_message"]
+            "broadcast_message": alert_dict["broadcast_message"]
         }
     )
-    
 
-    # Add new polygons if any
+    # Add alert to session first
+    try:
+        session.add(alert)
+        session.flush()  # Assigns alert.id so polygons can reference it
+    except Exception as e:
+        session.rollback()
+        #raise RuntimeError(f"Failed to store alert {alert_id}: {e}")
+
+    # Add references and apply logic
+    polygons = []
+    for ref_id in referenced_ids:
+        ref_alert = session.get(Alert, ref_id)
+        if ref_alert:
+            alert.references.append(ref_alert)
+
+            if msg_type == "cancel":
+                for old_polygon in ref_alert.polygons:
+                    old_polygon.cancelled_by_id = None  # Will set later
+
+            elif msg_type == "update":
+                if ref_alert.expires_at is None or ref_alert.expires_at > datetime.utcnow():
+                    print(f"[INFO] Expiring referenced alert {ref_id}")
+                    ref_alert.expires_at = datetime.utcnow()
+
+                if alert_dict["urgency"] == "Past":
+                    alert.expires_at = datetime.utcnow()
+
+            elif msg_type == "expire":
+                ref_alert.expires_at = datetime.utcnow()
+        else:
+            print(f"[WARN] Referenced alert {ref_id} not found")
+
+    # Add polygons
     for geom in alert_dict.get("geojson_polygons", []):
         polygon = AlertPolygon(
             id=str(uuid.uuid4()),
             alert_id=alert_id,
             geometry_geojson=geom
         )
+        polygons.append(polygon)
         session.add(polygon)
 
-    # If this alert refers to a previous one, handle update/cancel
-    if references:
-        referenced_alert = session.get(Alert, references)
+    # Now update cancelled_by_id (if cancel/update/expire)
+    if msg_type in ("cancel", "expire") and polygons:
+        first_polygon_id = polygons[0].id
+        for ref_id in referenced_ids:
+            ref_alert = session.get(Alert, ref_id)
+            if ref_alert:
+                for old_polygon in ref_alert.polygons:
+                    old_polygon.cancelled_by_id = first_polygon_id
+                    #session.add(old_polygon)
 
-        if referenced_alert:
-            if msg_type == "cancel":
-                # Cancel all polygons from the referenced alert
-                for old_polygon in referenced_alert.polygons:
-                    old_polygon.cancelled_by_id = alert.polygons[0].id if alert.polygons else None
-                    session.add(old_polygon)
-
-            elif msg_type == "update":
-                # Expire previous alert immediately
-                if referenced_alert.expires_at is None or referenced_alert.expires_at > datetime.utcnow():
-                    referenced_alert.expires_at = datetime.utcnow()
-                    session.add(referenced_alert)
-                if alert_dict["urgency"] == "Past":
-                    alert.expires_at = datetime.utcnow()
-
-            elif msg_type == "expire":
-                # Manually expire the referenced alert
-                referenced_alert.expires_at = datetime.utcnow()
-                session.add(referenced_alert)
-    session.add(alert)
     session.commit()
     return alert_id
 
@@ -114,9 +159,14 @@ def store_alert(session, alert_dict: dict) -> str:
 # --- Get Active Alert Polygons ---
 def get_active_alert_polygons(session) -> list:
     # Query for polygons from active alerts (not expired and not cancelled)
+    Referenced = aliased(Alert)
     active_polygons = session.query(AlertPolygon).join(Alert).filter(
         Alert.expires_at > datetime.utcnow(), 
-        AlertPolygon.cancelled_by_id == None
+        Alert.urgency != "past",
+        AlertPolygon.cancelled_by_id == None,
+        ~Alert.id.in_(
+            session.query(alert_references.c.referencee_id)
+        )
     ).all()
     
     return active_polygons
@@ -131,11 +181,7 @@ def get_alert(session) -> list:
 
 
 
-alert_references = Table(
-    'alert_references', Base.metadata,
-    Column('alert_id', Integer, ForeignKey('alerts.id'), primary_key=True),
-    Column('referenced_alert_id', Integer, ForeignKey('alerts.id'), primary_key=True)
-)
+
 
 class Outlook(Base):
     __tablename__ = 'outlooks'

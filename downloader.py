@@ -8,7 +8,6 @@ import threading
 import time
 
 import coloredlogs
-import env_canada
 import pika
 import requests
 from bs4 import BeautifulSoup
@@ -103,7 +102,8 @@ def fetch():
                     dat.append(R)
                     channel.basic_publish("alerts","cap",json.dumps({
                         "typ":"dat",
-                        "data":R
+                        "data":R,
+                        "src":"HTTP"
                     }),pika.BasicProperties(content_type='text/json',
                                             delivery_mode=pika.DeliveryMode.Transient))
             except BaseException as e:
@@ -120,12 +120,13 @@ def callback(ch, method, properties, body):
     b:str = body.decode()
     A,dd,path =b.split(" ")
     
-    logger.info(f"Received alert {A}, Downloading")
+    logger.info(f"Received alert over AMQP {A}, Downloading")
     try:
         R,n = cache(cur,dd+path)
         channel.basic_publish("alerts","cap",json.dumps({
             "typ":"dat",
-            "data":R
+            "data":R,
+            "src":"AMQP"
         }),pika.BasicProperties(content_type='text/json',
                                 delivery_mode=pika.DeliveryMode.Transient))
     except BaseException as e:
@@ -142,12 +143,6 @@ def run():
         channel_env.queue_bind(queue_name,"xpublic",routing_key )
         channel_env.basic_consume(queue=queue_name, on_message_callback=callback, auto_ack=True)
         channel_env.start_consuming()
-        while True:
-            for i in range(10):
-                time.sleep(30)
-                
-                channel.basic_publish("","hb","HEARTBEAT")
-                channel.basic_get("hb",True)
     except BaseException as e:
         if not isinstance(e,KeyboardInterrupt):
             logger.critical(f"{type(e)} {e}")
@@ -156,20 +151,16 @@ def downloader():
     try:
         logger.info("downloading data, please wait...")
         fetch()
-        result = channel_env.queue_declare(exchange)#'q_anonymous_flare')
-        queue_name = result.method.queue
-        print(queue_name)
-        channel_env.queue_bind(queue_name,"xpublic",routing_key )
-        channel_env.basic_consume(queue=queue_name, on_message_callback=callback, auto_ack=True)
+
         threading.Thread(target=run,daemon=True).start()
         while True:
-            for i in range(10):
-                time.sleep(30)
-            channel.basic_publish("alerts","cap",json.dumps({
-                    "typ":"merge",
-                    "data":"..."
-                }),pika.BasicProperties(content_type='text/json',
-                                           delivery_mode=pika.DeliveryMode.Transient))
+            time.sleep(5)
+            connection.process_data_events()
+            #channel.basic_publish("alerts","cap",json.dumps({
+            #        "typ":"merge",
+            #        "data":"..."
+            #    }),pika.BasicProperties(content_type='text/json',
+            #                               delivery_mode=pika.DeliveryMode.Transient))
     except BaseException as e:
         if not isinstance(e,KeyboardInterrupt):
             logger.critical(f"{type(e)} {e}")
