@@ -119,7 +119,7 @@ def on_message(ch, method, properties, body, alert_channel):
                 body=alert["broadcast_message"]
             )
             logger.info(f"Published alert bulletin: {alert['event']}")
-        elif alert['urgency'] == 'immediate':
+        elif alert['urgency'] == 'immediate' and json_data["src"] == "AMQP":
             alert_channel.basic_publish(
                 exchange='feed',
                 routing_key=f"AX.{alert['event']}",

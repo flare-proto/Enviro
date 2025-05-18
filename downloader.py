@@ -102,7 +102,8 @@ def fetch():
                     dat.append(R)
                     channel.basic_publish("alerts","cap",json.dumps({
                         "typ":"dat",
-                        "data":R
+                        "data":R,
+                        "src":"HTTP"
                     }),pika.BasicProperties(content_type='text/json',
                                             delivery_mode=pika.DeliveryMode.Transient))
             except BaseException as e:
@@ -124,7 +125,8 @@ def callback(ch, method, properties, body):
         R,n = cache(cur,dd+path)
         channel.basic_publish("alerts","cap",json.dumps({
             "typ":"dat",
-            "data":R
+            "data":R,
+            "src":"AMQP"
         }),pika.BasicProperties(content_type='text/json',
                                 delivery_mode=pika.DeliveryMode.Transient))
     except BaseException as e:
