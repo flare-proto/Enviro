@@ -26,10 +26,12 @@ class Alert(Base):
     sender = Column(String)
     event = Column(String)
     msg_type = Column(String)  # e.g., "alert", "update", "cancel", "expire"
+    urgency = Column(String)
     references = Column(String, nullable=True)
     effective_at = Column(DateTime)
     expires_at = Column(DateTime)
     properties = Column(JSON)
+    
 
     references = relationship(
         'Alert',
@@ -89,8 +91,8 @@ def store_alert(session:sqlalchemy.orm.Session, alert_dict: dict) -> str:
         msg_type=msg_type,
         effective_at=parse_time(alert_dict.get("effective_at")),
         expires_at=parse_time(alert_dict.get("expires_at")),
+        urgency=  alert_dict["urgency"],
         properties={
-            "urgency": alert_dict["urgency"],
             "severity": alert_dict["severity"],
             "certainty": alert_dict["certainty"],
             "areaDesc": alert_dict["areaDesc"],
@@ -160,6 +162,7 @@ def get_active_alert_polygons(session) -> list:
     # Query for polygons from active alerts (not expired and not cancelled)
     active_polygons = session.query(AlertPolygon).join(Alert).filter(
         Alert.expires_at > datetime.utcnow(), 
+        Alert.urgency != "Past",
         AlertPolygon.cancelled_by_id == None
     ).all()
     
