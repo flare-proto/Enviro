@@ -117,6 +117,7 @@ def store_alert(session:sqlalchemy.orm.Session, alert_dict: dict) -> str:
                     session.add(ref_alert)
                 if alert_dict["urgency"] == "Past":
                     alert.expires_at = datetime.utcnow()
+                    session.add(ref_alert)
 
             elif msg_type == "expire":
                 ref_alert.expires_at = datetime.utcnow()
