@@ -74,7 +74,7 @@ def store_alert(session:sqlalchemy.orm.Session, alert_dict: dict) -> str:
     alert_id = str(alert_dict.get("id"))
     msg_type = alert_dict.get("msg_type", "alert")
     references_raw = alert_dict.get("references", "")
-    
+
     # Parse references in CAP format: "sender1,id1,time1 sender2,id2,time2"
     referenced_ids = []
     for ref_str in references_raw.strip().split():
@@ -89,10 +89,9 @@ def store_alert(session:sqlalchemy.orm.Session, alert_dict: dict) -> str:
         sender=alert_dict.get("sender", "CAP-INGEST"),
         event=alert_dict["event"],
         msg_type=msg_type,
-        references_str=references_raw,
         effective_at=parse_time(alert_dict.get("effective_at")),
         expires_at=parse_time(alert_dict.get("expires_at")),
-        urgency=  alert_dict["urgency"],
+        urgency=alert_dict["urgency"],
         properties={
             "severity": alert_dict["severity"],
             "certainty": alert_dict["certainty"],
@@ -101,40 +100,42 @@ def store_alert(session:sqlalchemy.orm.Session, alert_dict: dict) -> str:
         }
     )
 
-    # Add references
+    # Add alert to session first
+    try:
+        session.add(alert)
+        session.flush()  # Assigns alert.id so polygons can reference it
+    except Exception as e:
+        session.rollback()
+        raise RuntimeError(f"Failed to store alert {alert_id}: {e}")
+
+    # Add references and apply logic
+    polygons = []
     for ref_id in referenced_ids:
         ref_alert = session.get(Alert, ref_id)
         if ref_alert:
             alert.references.append(ref_alert)
 
-            # Handle cancel/update/expire logic
             if msg_type == "cancel":
                 for old_polygon in ref_alert.polygons:
-                    # Will link cancelled_by after polygons are added
-                    old_polygon.cancelled_by_id = None  
+                    old_polygon.cancelled_by_id = None  # Will set later
                     session.add(old_polygon)
 
             elif msg_type == "update":
                 if ref_alert.expires_at is None or ref_alert.expires_at > datetime.utcnow():
+                    print(f"[INFO] Expiring referenced alert {ref_id}")
                     ref_alert.expires_at = datetime.utcnow()
                     session.add(ref_alert)
+
                 if alert_dict["urgency"] == "Past":
                     alert.expires_at = datetime.utcnow()
-                    session.add(ref_alert)
 
             elif msg_type == "expire":
                 ref_alert.expires_at = datetime.utcnow()
                 session.add(ref_alert)
+        else:
+            print(f"[WARN] Referenced alert {ref_id} not found")
 
-    # Add alert to session early to make sure it has a DB identity
-    try:
-        session.add(alert)
-        session.flush()  # Required to assign `alert.id` before setting foreign keys
-    except:
-        session.rollback()
-
-    # Add new polygons
-    polygons = []
+    # Add polygons
     for geom in alert_dict.get("geojson_polygons", []):
         polygon = AlertPolygon(
             id=str(uuid.uuid4()),
@@ -144,15 +145,15 @@ def store_alert(session:sqlalchemy.orm.Session, alert_dict: dict) -> str:
         polygons.append(polygon)
         session.add(polygon)
 
-    # Now link `cancelled_by_id` for old polygons (if this is a cancel)
-    if msg_type == "cancel" or msg_type == "update" or msg_type == "expire":
+    # Now update cancelled_by_id (if cancel/update/expire)
+    if msg_type in ("cancel", "update", "expire") and polygons:
+        first_polygon_id = polygons[0].id
         for ref_id in referenced_ids:
             ref_alert = session.get(Alert, ref_id)
             if ref_alert:
                 for old_polygon in ref_alert.polygons:
-                    if polygons:
-                        old_polygon.cancelled_by_id = polygons[0].id  # First new polygon
-                        session.add(old_polygon)
+                    old_polygon.cancelled_by_id = first_polygon_id
+                    session.add(old_polygon)
 
     session.commit()
     return alert_id
