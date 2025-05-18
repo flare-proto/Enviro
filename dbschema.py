@@ -41,16 +41,7 @@ class Alert(Base):
     polygons = relationship("AlertPolygon", back_populates="alert")
 
 
-class AlertReference(Base):
-    __tablename__ = 'alert_references'
 
-    id = Column(Integer, primary_key=True)
-    alert_id = Column(Integer, ForeignKey('alerts.id'))
-    sender = Column(String)
-    identifier = Column(String)
-    sent = Column(DateTime)
-
-    alert = relationship("Alert", back_populates="references")
 
 class AlertPolygon(Base):
     __tablename__ = 'alert_polygons'
