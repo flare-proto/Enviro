@@ -622,7 +622,7 @@ def conditionsbft():
                     example: "\ue3b2"
                   scale:
                     type: integer
-                    description: Wind strength on the Beaufort scale (0–12)
+                    description: Wind strength on the Beaufort scale (0-12)
                     minimum: 0
                     maximum: 12
                     example: 3
