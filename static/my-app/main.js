@@ -268,11 +268,11 @@ function alert_local(json) {
       actives.push(element.mapped);
   }
   
-  for (const [key,element] of localActiveAlerts.entries()) {
-    if (actives.includes(key)) {
+  for (const element of localActiveAlerts) {
+    if (actives.includes(element.id)) {
 
     }else{
-      localActiveAlerts[key] = null;
+      localActiveAlerts[element.id] = null;
       element.remove();
     }
   }
