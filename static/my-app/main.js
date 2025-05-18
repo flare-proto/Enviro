@@ -843,8 +843,18 @@ const ticker      = document.getElementById('ticker');
   const SPEED_PPS   = 120;        // <-- pixels per second you want to travel
   const socket      = new WebSocket('/apiws/alerts');
 
+function PushIfOk(dat) {
+  var s = `${queue.at(-1)} || ${dat}`
+  if (s.length <= 100) {
+    queue.pop()
+    queue.push(s)
+  } else {
+    queue.push(dat)
+  }
+}
+
   socket.addEventListener('message', e => {
-    queue.push(e.data);
+    PushIfOk(e.data);
     if(!ticker.isScrolling) playNext();
   });
 
