@@ -416,9 +416,10 @@ def outlook(ver):
       - name: version
         in: path
         type: string
-        enum: ['V1', 'V2', 'V3']
+        enum: ['day1PM', 'day2AM', 'day2PM','day3']
         required: true
         default: all
+        description: Day, see https://hpfx.collab.science.gc.ca/docs/thunderstorm_outlooks/ThunderstormOutlook_Specs_Graphical_1A_EN.pdf
       - name: offset
         in: query
         type: string
