@@ -17,6 +17,7 @@ logger.level = logging.INFO
 def parse_cap_for_alert_exchange(cap_xml):
     ns = {'cap': 'urn:oasis:names:tc:emergency:cap:1.2'}
     root = ET.fromstring(cap_xml)
+    
     info = root.find('cap:info', namespaces=ns)
     if info is None:
         raise ValueError("No <info> section in CAP message")
@@ -30,6 +31,7 @@ def parse_cap_for_alert_exchange(cap_xml):
     areaDesc = info.findtext('cap:area/cap:areaDesc', default='', namespaces=ns)
     references = root.findtext('cap:references', default='', namespaces=ns)
     description = info.findtext('cap:description', default='', namespaces=ns)
+    msgType = root.findtext('cap:msgType', default='', namespaces=ns)
     
     broadcast_message = ""
 
@@ -73,6 +75,7 @@ def parse_cap_for_alert_exchange(cap_xml):
 
     return {
         "id":id,
+        "msg_type":msgType,
         'event': event.lower().replace(" ", "_"),
         'urgency': urgency.lower(),
         'severity': severity.lower(),
