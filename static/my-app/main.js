@@ -845,7 +845,7 @@ const ticker      = document.getElementById('ticker');
 
 function PushIfOk(dat) {
   var s = `${queue.at(-1)} || ${dat}`
-  if (s.length <= 100) {
+  if (s.length <= 200) {
     queue.pop()
     queue.push(s)
   } else {
