@@ -154,7 +154,7 @@ for (const key in Advisory) {
         "bg":"gray",
         "symbols": element,
         "text":key,
-        "color":"#333"
+        "color":"#ffffff"
     }
 }
 
