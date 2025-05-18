@@ -861,6 +861,10 @@ const ticker      = document.getElementById('ticker');
   const socket      = new WebSocket('/apiws/alerts');
 
 function PushIfOk(dat) {
+  if (queue.at(-1)==null){
+    queue.push(dat)
+    return
+  }
   var s = `${queue.at(-1)} || ${dat}`
   if (s.length <= 200) {
     queue.pop()
