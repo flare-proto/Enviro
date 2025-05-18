@@ -55,7 +55,7 @@ def store_alert(session, alert_dict: dict) -> str:
     # Helper: parse ISO time safely
 
     msg_type = alert_dict.get("msg_type", "alert")
-    references = alert_dict.get("references")
+    references = str(alert_dict.get("references")).split(",")[1]
 
     alert_id = str(alert_dict.get("id"))
     alert = Alert(
