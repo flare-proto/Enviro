@@ -268,7 +268,8 @@ function alert_local(json) {
       actives.push(element.mapped);
   }
   
-  for (const element of localActiveAlerts) {
+  for (const key in localActiveAlerts) {
+    const element = localActiveAlerts[key]
     if (actives.includes(element.id)) {
 
     }else{
