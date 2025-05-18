@@ -118,20 +118,17 @@ def store_alert(session:sqlalchemy.orm.Session, alert_dict: dict) -> str:
             if msg_type == "cancel":
                 for old_polygon in ref_alert.polygons:
                     old_polygon.cancelled_by_id = None  # Will set later
-                    session.add(old_polygon)
 
             elif msg_type == "update":
                 if ref_alert.expires_at is None or ref_alert.expires_at > datetime.utcnow():
                     print(f"[INFO] Expiring referenced alert {ref_id}")
                     ref_alert.expires_at = datetime.utcnow()
-                    session.add(ref_alert)
 
                 if alert_dict["urgency"] == "Past":
                     alert.expires_at = datetime.utcnow()
 
             elif msg_type == "expire":
                 ref_alert.expires_at = datetime.utcnow()
-                session.add(ref_alert)
         else:
             print(f"[WARN] Referenced alert {ref_id} not found")
 
@@ -153,7 +150,7 @@ def store_alert(session:sqlalchemy.orm.Session, alert_dict: dict) -> str:
             if ref_alert:
                 for old_polygon in ref_alert.polygons:
                     old_polygon.cancelled_by_id = first_polygon_id
-                    session.add(old_polygon)
+                    #session.add(old_polygon)
 
     session.commit()
     return alert_id
@@ -167,7 +164,9 @@ def get_active_alert_polygons(session) -> list:
         Alert.expires_at > datetime.utcnow(), 
         Alert.urgency != "past",
         AlertPolygon.cancelled_by_id == None,
-        
+        ~Alert.id.in_(
+            session.query(alert_references.c.referencee_id)
+        )
     ).all()
     
     return active_polygons
