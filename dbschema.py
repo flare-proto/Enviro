@@ -106,7 +106,7 @@ def store_alert(session:sqlalchemy.orm.Session, alert_dict: dict) -> str:
         session.flush()  # Assigns alert.id so polygons can reference it
     except Exception as e:
         session.rollback()
-        raise RuntimeError(f"Failed to store alert {alert_id}: {e}")
+        #raise RuntimeError(f"Failed to store alert {alert_id}: {e}")
 
     # Add references and apply logic
     polygons = []
