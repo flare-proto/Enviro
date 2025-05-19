@@ -64,7 +64,7 @@ def classify_thunderstorm_outlook_day(filename: str) -> str:
     elif day4_midnight <= valid_time < day4_end:
         return "day4"
     else:
-        raise OverflowError("Outside expected Day 1-4 range")
+        raise OverflowError(f"Outside expected Day 1-4 range {(valid_time-day4_end).days}")
 
 
 def list_json_files():
