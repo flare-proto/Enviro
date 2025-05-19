@@ -31,11 +31,11 @@ def ensure_hash_dir():
 
 def classify_thunderstorm_outlook_day(filename: str) -> str:
     # Extract parts from filename
-    match = re.match(r"(\d{8}T\d{4}Z).*_PT0(\d{2})H(\d{2})M_v\d", filename)
+    match = re.match(r"(\d{8}T\d{4}Z)(.*)_PT0(\d{2})H(\d{2})M_v\d", filename)
     if not match:
         raise ValueError("Invalid filename format")
 
-    pub_str, offset_hours, offset_minutes = match.groups()
+    pub_str,region, offset_hours, offset_minutes = match.groups()
     pub_time = datetime.strptime(pub_str, "%Y%m%dT%H%MZ")
     offset = timedelta(hours=int(offset_hours), minutes=int(offset_minutes))
     valid_time = pub_time + offset
@@ -52,19 +52,19 @@ def classify_thunderstorm_outlook_day(filename: str) -> str:
 
     # Classify
     if day1_midnight <= valid_time < day1_noon:
-        return "day1AM"
+        return "day1AM",region
     elif day1_noon <= valid_time < day2_midnight:
-        return "day1PM"
+        return "day1PM",region
     elif day2_midnight <= valid_time < day2_noon:
-        return "day2AM"
+        return "day2AM",region
     elif day2_noon <= valid_time < day3_midnight:
-        return "day2PM"
+        return "day2PM",region
     elif day3_midnight <= valid_time < day3_end:
-        return "day3"
+        return "day3",region
     elif day4_midnight <= valid_time < day4_end:
-        return "day4"
+        return "day4",region
     elif day4_end <= valid_time:
-        return "day5+"
+        return "day5+",region
     else:
         raise OverflowError(f"Outside expected Day 1-4 range {(valid_time-day4_end).days}")
 
@@ -141,7 +141,7 @@ def check_and_publish():
             content = download(file)
             
             #ver = str(file).removesuffix(".json")[-2:]
-            ver = classify_thunderstorm_outlook_day(str(file))
+            ver,region = classify_thunderstorm_outlook_day(str(file))
             
             content_hash = hash_content(content)
             stored_hash = read_stored_hash(file)
@@ -153,6 +153,7 @@ def check_and_publish():
                     routing_key=f'outlook.ECCC.{ver}',
                     body=json.dumps({
                         "ver":ver,
+                        "region":region,
                         "cont":jsonDat
                     })
                 )

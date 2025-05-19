@@ -209,7 +209,8 @@ def saveFeature(feature):
             feature=json.dumps(feature),
             expires_at=dt,
             effective_at=edt,
-            ver=feature["ver"]
+            ver=feature["ver"],
+            region=feature['region']
         )
 
         # On conflict with outlook_id, update the feature, expires_at, and effective_at
@@ -220,6 +221,7 @@ def saveFeature(feature):
                 "expires_at": stmt.excluded.expires_at,
                 "effective_at": stmt.excluded.effective_at,
                 "ver": stmt.excluded.ver,
+                "region":stmt.excluded.region,
             }
         )
 
@@ -233,6 +235,7 @@ def callback_outlook(ch, method, properties, body):
         for i,f in enumerate(message["cont"]["features"]):
             f["id"] = f"{f["id"]}_{i}"
             f['ver'] = message["ver"]
+            f['region'] = message["region"]
             saveFeature(f)
     except Exception as e:
         logging.exception(e)
