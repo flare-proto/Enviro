@@ -973,13 +973,14 @@ function draw(timestamp) {
 
   while (activeBlocks.length > 0 && activeBlocks[0].x + activeBlocks[0].width < 0) {
     const removed = activeBlocks.shift();
-    console.log('Block finished:', removed.text);
+    
     if (ticker_expires.has(removed.text)) {
       if (removed.text in ticker_delay_expires) {
         ticker_delay_expires = removeFirstOccurrence(ticker_delay_expires,removed.text)
         buffer.push(removed.text)
       } else {
-        ticker_expires.delete(removed.text)
+        ticker_expires.delete(removed.text);
+        console.log('Block Expired:', removed.text);
       }
     } else {
       buffer.push(removed.text)
@@ -1006,6 +1007,7 @@ var audio = new Audio('/static/ALERT.mp3');
 socket.addEventListener('message', e => {
   buffer.push(e.data);
   ticker_expires.add(e.data);
+  ticker_delay_expires.push(e.data);
   ticker_delay_expires.push(e.data);
   audio.play()
   if (!ticker.isScrolling) playNext();
