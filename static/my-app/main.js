@@ -22,6 +22,10 @@ let content_element = document.getElementById("popup-content");
 let viewInfo = document.getElementById("viewInfo");
 let selectedInfo = document.getElementById("selectedInfo");
 let closer = document.getElementById("popup-closer");
+
+
+var outlookDay = document.getElementById("outlookDay")
+
 let activeAlert = 1;
 
 var saturation = 100
@@ -557,7 +561,7 @@ function NWSstyleFunction(feature) {
 }
 
 const outlooksrc = new VectorSource({
-  url: '/api/outlook/v1',
+  url: `/api/outlook/${outlookDay.value}`,
   format: new GeoJSON(),
 })
 const outlook_layer = new VectorImageLayer({
@@ -926,7 +930,7 @@ var audio = new Audio('/static/ALERT.mp3');
 
 var outs = document.getElementById("outlookOff")
 outs.onchange = () => {
-  outlooksrc.setUrl(`/api/outlook/v1?offset=${outs.value}`)
+  outlooksrc.setUrl(`/api/outlook/${outlookDay.value}?offset=${outs.value}`)
   outlooksrc.refresh();
   outlooks_nws_src.setUrl(`/api/nws/outlook/outlook.NWS.d1_${OutlookNWSType.value}?sortLatest=true&offset=${outs.value}`)
   outlooks_nws_src.refresh();
