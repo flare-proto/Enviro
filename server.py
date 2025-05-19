@@ -414,7 +414,7 @@ def alerts_og():
     return jsonify(weather["alerts"])
 
 @app.route("/api/outlook")
-def outlook(ver):
+def outlook():
     """Active Canadian thunderstorm outlooks
     ---
     parameters:
