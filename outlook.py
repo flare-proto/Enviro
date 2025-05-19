@@ -31,7 +31,7 @@ def ensure_hash_dir():
 
 def classify_thunderstorm_outlook_day(filename: str) -> str:
     # Extract parts from filename
-    match = re.match(r"(\d{8}T\d{4}Z).*_PT(\d{2})H(\d{2})M", filename)
+    match = re.match(r"(\d{8}T\d{4}Z).*_PT0(\d{2})H(\d{2})M_v\d", filename)
     if not match:
         raise ValueError("Invalid filename format")
 
