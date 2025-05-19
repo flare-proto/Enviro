@@ -195,7 +195,7 @@ class Outlook(Base):
     effective_at = Column(DateTime, default=datetime.utcnow)
     expires_at = Column(DateTime, nullable=False)
 
-    ver = Column(String, nullable=False),
+    ver = Column(String, nullable=False)
     region = Column(String, nullable=False)
 
     def is_in_effect(self):
