@@ -46,6 +46,8 @@ def classify_thunderstorm_outlook_day(filename: str) -> str:
     day2_noon = day2_midnight + timedelta(hours=12)
     day3_midnight = (pub_time + timedelta(days=2)).replace(hour=0, minute=0)
     day3_end = day3_midnight + timedelta(days=1)
+    day4_midnight = (pub_time + timedelta(days=3)).replace(hour=0, minute=0)
+    day4_end = day3_midnight + timedelta(days=1)
 
     # Classify
     if day1_noon <= valid_time < day2_midnight:
@@ -56,8 +58,10 @@ def classify_thunderstorm_outlook_day(filename: str) -> str:
         return "day2PM"
     elif day3_midnight <= valid_time < day3_end:
         return "day3"
+    elif day4_midnight <= valid_time < day4_end:
+        return "day4"
     else:
-        raise OverflowError("Outside expected Day 1-3 range")
+        raise OverflowError("Outside expected Day 1-4 range")
 
 
 def list_json_files():
