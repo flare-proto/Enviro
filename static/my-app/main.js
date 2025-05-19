@@ -894,7 +894,7 @@ function PushIfOk(dat) {
     queue.push(dat)
   }
 }
-var audio = new Audio('ALERT.mp3');
+var audio = new Audio('/static/ALERT.mp3');
   socket.addEventListener('message', e => {
     PushIfOk(e.data);
     audio.play()
