@@ -1010,7 +1010,6 @@ socket.addEventListener('message', e => {
   ticker_delay_expires.push(e.data);
   ticker_delay_expires.push(e.data);
   audio.play()
-  if (!ticker.isScrolling) playNext();
 });
 
 
