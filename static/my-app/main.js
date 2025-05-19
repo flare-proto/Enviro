@@ -1,14 +1,14 @@
 import './style.css';
 import Feature from 'ol/Feature.js';
-import {Map, View} from 'ol';
-import {Vector,TileWMS} from 'ol/source.js';
-import {Icon,Style,Stroke} from 'ol/style.js';
-import {Tile as TileLayer, Vector as VectorLayer} from 'ol/layer.js';
-import {DEVICE_PIXEL_RATIO} from 'ol/has.js';
+import { Map, View } from 'ol';
+import { Vector, TileWMS } from 'ol/source.js';
+import { Icon, Style, Stroke } from 'ol/style.js';
+import { Tile as TileLayer, Vector as VectorLayer } from 'ol/layer.js';
+import { DEVICE_PIXEL_RATIO } from 'ol/has.js';
 import OSM from 'ol/source/OSM';
 import Overlay from "ol/Overlay"
-import {Point,LineString} from 'ol/geom';
-import {fromLonLat,useGeographic} from 'ol/proj.js';
+import { Point, LineString } from 'ol/geom';
+import { fromLonLat, useGeographic } from 'ol/proj.js';
 import VectorImageLayer from 'ol/layer/VectorImage.js';
 //import VectorLayer from 'ol/layer/Vector.js';
 import VectorSource from 'ol/source/Vector.js';
@@ -47,12 +47,12 @@ function prompt_alerts(description) {
 }*/
 
 //eel.expose(temps);
-function temps(stat,wind) {
+function temps(stat, wind) {
   sc.innerText = `${stat}°C`;
   wc.innerText = `${wind}°C`;
 }
 //eel.expose(winds);
-function winds(speed,hddn) {
+function winds(speed, hddn) {
   wnd.innerText = `${speed} km/h @ ${hddn}°`;
 }
 //eel.expose(refr);
@@ -65,24 +65,23 @@ var timeDisplayL = document.getElementById("timeLocal");
 var dateDisplayL = document.getElementById("dateLocal");
 
 function refreshTime() {
-  var d= new Date();
+  var d = new Date();
   var dateString = new Date().toLocaleString("en-US",);
   var formattedString = dateString.replace(", ", " - ");
-  formattedString = `${d.toLocaleTimeString("en-CA",{hour12: false,second: '2-digit',hour: '2-digit', minute:'2-digit',timeZone: 'UTC'})}Z`
+  formattedString = `${d.toLocaleTimeString("en-CA", { hour12: false, second: '2-digit', hour: '2-digit', minute: '2-digit', timeZone: 'UTC' })}Z`
   timeDisplay.innerHTML = formattedString;
   dateDisplay.innerHTML = `${d.getUTCFullYear()}-${d.getUTCMonth()}-${d.getUTCDate()}`;
   dateDisplayL.innerHTML = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
-  timeDisplayL.innerHTML = `${d.toLocaleTimeString("en-CA",{hour12: false,hour: '2-digit', minute:'2-digit',second: '2-digit'})}`
+  timeDisplayL.innerHTML = `${d.toLocaleTimeString("en-CA", { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' })}`
 }
 
 setInterval(refreshTime, 1000);
 
-function httpGet(theUrl)
-{
-    var xmlHttp = new XMLHttpRequest();
-    xmlHttp.open( "GET", theUrl, false ); // false for synchronous request
-    xmlHttp.send( null );
-    return xmlHttp.responseText;
+function httpGet(theUrl) {
+  var xmlHttp = new XMLHttpRequest();
+  xmlHttp.open("GET", theUrl, false); // false for synchronous request
+  xmlHttp.send(null);
+  return xmlHttp.responseText;
 }
 
 var cntr = document.getElementById("cntr");
@@ -98,99 +97,99 @@ let wc = document.getElementById("temps_wind");
 let cnd = document.getElementById("cond");
 let wnd = document.getElementById("wind");
 var warns = {
-    "TSTORM":" ",
-    "TORNADO":" 󰼸",
-    "HEAT":" ",
-    "SNOW":"󰼩",
-    "COLD":""
+  "TSTORM": " ",
+  "TORNADO": " 󰼸",
+  "HEAT": " ",
+  "SNOW": "󰼩",
+  "COLD": ""
 }
 var watch = {
-    "TSTORM":"󰼯 ",
-    "TORNADO":"󰼯 󰼸",
+  "TSTORM": "󰼯 ",
+  "TORNADO": "󰼯 󰼸",
 }
 var Advisory = {
-    "fog":"󰼯 󰖑",
+  "fog": "󰼯 󰖑",
 }
 
 //TODO REMOVE ME
 var prioritys = [
-    "warns.TORNADO",
-    "watch.TORNADO",
-    "warns.SNOW",
-    "warns.TSTORM",
-    "watch.TSTORM",
-    "warns.HEAT",
-    "warns.COLD",
-    "advisory.fog",
-    "test"
+  "warns.TORNADO",
+  "watch.TORNADO",
+  "warns.SNOW",
+  "warns.TSTORM",
+  "watch.TSTORM",
+  "warns.HEAT",
+  "warns.COLD",
+  "advisory.fog",
+  "test"
 ]
-var alerts= {
-    "NONE": {
-        "bg":"#333",
-    },
-    "test":{
-        "bg":"#119911",
-        "symbols": ' ',
-        "text":"TEST",
-        "class":"test",
-        "color":"#FFFFFF"
-    },
+var alerts = {
+  "NONE": {
+    "bg": "#333",
+  },
+  "test": {
+    "bg": "#119911",
+    "symbols": ' ',
+    "text": "TEST",
+    "class": "test",
+    "color": "#FFFFFF"
+  },
 }
 for (const key in warns) {
-    const element = warns[key];
-    
-    alerts[`warns.${key}`]={
-        "class":"warnings",
-        "bg":"red",
-        "symbols": element,
-        "text":key,
-        "color":"#FFFFFF"
-    }
+  const element = warns[key];
+
+  alerts[`warns.${key}`] = {
+    "class": "warnings",
+    "bg": "red",
+    "symbols": element,
+    "text": key,
+    "color": "#FFFFFF"
+  }
 }
 for (const key in Advisory) {
-    const element = Advisory[key];
-    
-    alerts[`advisory.${key}`]={
-        "class":"advisories",
-        "bg":"gray",
-        "symbols": element,
-        "text":key,
-        "color":"#ffffff"
-    }
+  const element = Advisory[key];
+
+  alerts[`advisory.${key}`] = {
+    "class": "advisories",
+    "bg": "gray",
+    "symbols": element,
+    "text": key,
+    "color": "#ffffff"
+  }
 }
 
 for (const key in watch) {
-    const element = watch[key];
-    
-    alerts[`watch.${key}`]={
-        "class":"watches",
-        "bg":"yellow",
-        "symbols": element,
-        "text":key,
-        "color":"#333"
-    }
+  const element = watch[key];
+
+  alerts[`watch.${key}`] = {
+    "class": "watches",
+    "bg": "yellow",
+    "symbols": element,
+    "text": key,
+    "color": "#333"
+  }
 }
 
 var localActiveAlerts = {}
 
 const weatherTypes = {
   cloudy: "󰖐",
-  fog:"󰖑",
-  hail:"󰖒",
-  lightning:"󰖓",
-  pouring:"󰖖",
-  raining:"󰖗",
-  snowing:"󰖘",
-  clear:"󰖙",
-  tornado:"󰼸",
-  windy:"󰖝",
-  snowwind:"󰜗󰖝",
-  thunderstorm:"󰙾",
-  partlyCloudy:"󰖕",
-  snowrain:"󰙿",
-  partcloud:"󰖕",
-  err:"󰼯",
-  moonclear:"󰖔"
+  fog: "󰖑",
+  hail: "󰖒",
+  lightning: "󰖓",
+  pouring: "󰖖",
+  raining: "󰖗",
+  snowing: "󰖘",
+  clear: "󰖙",
+  tornado: "󰼸",
+  windy: "󰖝",
+  snowwind: "󰜗󰖝",
+  thunderstorm: "󰙾",
+  partlyCloudy: "󰖕",
+  snowrain: "󰙿",
+  partcloud: "󰖕",
+  err: "󰼯",
+  moonclear: "󰖔"
 }
 
 var top_alert = document.getElementById("topWarn");
@@ -200,87 +199,87 @@ var curAlert = "NONE"
 var prev = alerts[curAlert]
 var alertData = alerts[curAlert]
 function setAlertLayout() {
-    var intr = 0;
-    intr = setInterval(() => {
-        top_alert.style.setProperty("--prev",alertData.bg)
-        top_alert.style.setProperty("--side","left")
-        clearInterval(intr)
-    },501)
+  var intr = 0;
+  intr = setInterval(() => {
+    top_alert.style.setProperty("--prev", alertData.bg)
+    top_alert.style.setProperty("--side", "left")
+    clearInterval(intr)
+  }, 501)
 }
 
 function setAlert(alert) {
-    prev = alerts[curAlert]
-    alertData = alerts[alert]
-    top_alert.style.setProperty("--side","right")
-    if (alert == "NONE") {
-        
-        top_alert.setAttribute("type","NONE")
-        top_alert.style.setProperty("--prev",prev.bg)
-        top_alert.style.setProperty("--cur",alertData.bg)
-        top_alert.style.setProperty("--col","#FFFFFF")
-        alertIcon.innerText = ""
-        alertType.innerText = ""
-    } else {
-        
-        //top_alert.style.background = "linear-gradient(to left, yellow 50%, red 50%) right"
-        
-        
-        top_alert.setAttribute("type","")
-        top_alert.style.setProperty("--prev",prev.bg)
-        top_alert.style.setProperty("--cur",alertData.bg)
-        top_alert.style.setProperty("--col",alertData.color)
+  prev = alerts[curAlert]
+  alertData = alerts[alert]
+  top_alert.style.setProperty("--side", "right")
+  if (alert == "NONE") {
 
-        //top_alert.class = `${alertData.class} twoLineData`
-        //top_alert.classList[0] = alertData.class
-        alertIcon.innerText = alertData.symbols
-        alertType.innerText = alertData.text
-        
-    }
-    setAlertLayout();
+    top_alert.setAttribute("type", "NONE")
+    top_alert.style.setProperty("--prev", prev.bg)
+    top_alert.style.setProperty("--cur", alertData.bg)
+    top_alert.style.setProperty("--col", "#FFFFFF")
+    alertIcon.innerText = ""
+    alertType.innerText = ""
+  } else {
 
-    curAlert = alert
+    //top_alert.style.background = "linear-gradient(to left, yellow 50%, red 50%) right"
+
+
+    top_alert.setAttribute("type", "")
+    top_alert.style.setProperty("--prev", prev.bg)
+    top_alert.style.setProperty("--cur", alertData.bg)
+    top_alert.style.setProperty("--col", alertData.color)
+
+    //top_alert.class = `${alertData.class} twoLineData`
+    //top_alert.classList[0] = alertData.class
+    alertIcon.innerText = alertData.symbols
+    alertType.innerText = alertData.text
+
+  }
+  setAlertLayout();
+
+  curAlert = alert
 }
 
 
 var active = new Set();
 var types = [
-    "warnings",
-    "watches",
-    "advisories",
-    "statements",
-    "endings"
+  "warnings",
+  "watches",
+  "advisories",
+  "statements",
+  "endings"
 ]
 
-function alerts_warn(type,id,title) {
-    if (localActiveAlerts[id]==null) {
-      let a = document.createElement("div")
-      a.classList.add(type)
-      a.id = id
-      a.innerHTML = `<h3>${alerts[id]["symbols"]} ${title}</h3>`
-      document.getElementById(`${type}`).appendChild(a)
-      localActiveAlerts[id]=a;
-    }
+function alerts_warn(type, id, title) {
+  if (localActiveAlerts[id] == null) {
+    let a = document.createElement("div")
+    a.classList.add(type)
+    a.id = id
+    a.innerHTML = `<h3>${alerts[id]["symbols"]} ${title}</h3>`
+    document.getElementById(`${type}`).appendChild(a)
+    localActiveAlerts[id] = a;
   }
+}
 
 function alert_local(json) {
   let actives = []
   for (const element of json) {
-      alerts_warn(element.class,element.mapped,element.title)
-      actives.push(element.mapped);
+    alerts_warn(element.class, element.mapped, element.title)
+    actives.push(element.mapped);
   }
-  
+
   for (const key in localActiveAlerts) {
     const element = localActiveAlerts[key]
     if (actives.includes(element.id)) {
 
-    }else{
+    } else {
       localActiveAlerts[element.id] = null;
       element.remove();
     }
   }
 }
 
-var qrhTbl =document.getElementById("qrhTbl")
+var qrhTbl = document.getElementById("qrhTbl")
 for (var element in weatherTypes) {
   var icon = weatherTypes[element]
   qrhTbl.innerHTML += `<tr><td>${icon}</td><td>${element.toUpperCase()}</td></tr>`
@@ -292,20 +291,20 @@ for (var element in weatherTypes) {
 
 var checks = document.getElementById('checks')
 function makeBind(name) {
-    var elem = document.getElementById(name)
-    var data = document.createElement("p");
-    var check = document.createElement("input");
-    check.type = "checkbox";
-    check.checked = !elem.hidden;
-    data.innerText = name;
-    //data.appendChild(check);
-    data.insertAdjacentElement("afterbegin",check)
-    checks.appendChild(data)
-    
+  var elem = document.getElementById(name)
+  var data = document.createElement("p");
+  var check = document.createElement("input");
+  check.type = "checkbox";
+  check.checked = !elem.hidden;
+  data.innerText = name;
+  //data.appendChild(check);
+  data.insertAdjacentElement("afterbegin", check)
+  checks.appendChild(data)
 
-    check.addEventListener('change', (event) => {
-        elem.hidden = !event.currentTarget.checked
-      })
+
+  check.addEventListener('change', (event) => {
+    elem.hidden = !event.currentTarget.checked
+  })
 }
 makeBind("shear")
 makeBind("MUCAPE")
@@ -366,43 +365,43 @@ const watch_alert = [
 ]
 
 const warnColors = {
-  "snowfall":"#00ffff",
-  "blowing snow":"#008fbb",
-  
-  "winter storm":"#67c9bc",
-  
-  "blizzard":"#3f92d1",
-  "snow squall":"#00e5ff",
-  "squall":"#33e5ff",
-  
-  "arctic outflow":"#03c2fc",
-  "extreme cold":"#0004ff",
+  "snowfall": "#00ffff",
+  "blowing snow": "#008fbb",
 
-  "freezing rain":"#332dbf",
-  "fog":"#80a1ba",
-  "rainfall":"#00ff00",
-  
-  
+  "winter storm": "#67c9bc",
 
-  "weather":"#595959",
-  "wind":"#ffa200",
-  "waterspout":"#F03500",
-  "special marine":"#D06018",
+  "blizzard": "#3f92d1",
+  "snow squall": "#00e5ff",
+  "squall": "#33e5ff",
 
-  "thunderstorm":"#ffee00",
-  "tornado":"#FF0000",
-  "air quality":"#CCCCCC"
+  "arctic outflow": "#03c2fc",
+  "extreme cold": "#0004ff",
+
+  "freezing rain": "#332dbf",
+  "fog": "#80a1ba",
+  "rainfall": "#00ff00",
+
+
+
+  "weather": "#595959",
+  "wind": "#ffa200",
+  "waterspout": "#F03500",
+  "special marine": "#D06018",
+
+  "thunderstorm": "#ffee00",
+  "tornado": "#FF0000",
+  "air quality": "#CCCCCC"
 
 }
 
 function makeStyle() {
-  var legend =document.getElementById("legend")
+  var legend = document.getElementById("legend")
   var s = []
   for (var element in warnColors) {
     var col = warnColors[element]
     legend.innerHTML += `<tr><td style="background-color: ${col};">~</td><td>${element.toUpperCase()}</td></tr>`
     s.push({
-      filter: ['==', ['get', 'warn'],element],
+      filter: ['==', ['get', 'warn'], element],
       style: {
         //"fill-color":"#03c2fc55",
         'stroke-color': col,
@@ -411,9 +410,9 @@ function makeStyle() {
     })
   }
   s.push({
-    else:true,
+    else: true,
     style: {
-      "fill-color":"#FFFFFFF1",
+      "fill-color": "#FFFFFFF1",
       'stroke-color': "#00000077",
       'stroke-width': 5,
     }
@@ -422,7 +421,7 @@ function makeStyle() {
 }
 makeStyle()
 
-function createPatternFill(text,color,nf) {
+function createPatternFill(text, color, nf) {
   const canvas = document.createElement('canvas');
   const w = 250;
   const h = 250;
@@ -433,11 +432,11 @@ function createPatternFill(text,color,nf) {
   ctx.strokeStyle = color
   ctx.font = "20px NerdSpace"
   if (warnTextShow.includes(text) || nf) {
-    ctx.fillText(text,5,125)
+    ctx.fillText(text, 5, 125)
   }
   if (warnHAZShow.includes(text)) {
-    ctx.lineWidth=75;
-    
+    ctx.lineWidth = 75;
+
     ctx.beginPath();
 
     // Line through top left and bottom right corners
@@ -468,7 +467,7 @@ function style_feature_alert(feature, resolution) {
   var nf = false;
   if (!wc) {
     fill = "#FFFFFFFF",
-    wc = "#AAAAAA"
+      wc = "#AAAAAA"
     nf = true
   }
   var stroke;
@@ -476,15 +475,15 @@ function style_feature_alert(feature, resolution) {
     stroke = new Stroke({
       color: wc,
       width: 1.5,
-      lineDash: [5, 3,5]  // ← This creates the dashed effect
+      lineDash: [5, 3, 5]  // ← This creates the dashed effect
     })
   } else {
     stroke = new Stroke({ color: wc, width: 1.5 })
   }
   return new Style({
-    fill: createPatternFill(text,wc,nf),//new Fill({ color: fill }),
+    fill: createPatternFill(text, wc, nf),//new Fill({ color: fill }),
     stroke: stroke,
-    
+
   });
 }
 
@@ -502,7 +501,7 @@ const alertsO_layer = new TileLayer({
   opacity: 0.4,
   source: new TileWMS({
     url: 'https://geo.weather.gc.ca/geomet/',
-    params: {'LAYERS': 'ALERTS', 'TILED': true},
+    params: { 'LAYERS': 'ALERTS', 'TILED': true },
     transition: 0
   })
 })
@@ -510,7 +509,7 @@ const radar_layer = new TileLayer({
   opacity: 0.4,
   source: new TileWMS({
     url: 'https://geo.weather.gc.ca/geomet/',
-    params: {'LAYERS': 'RADAR_1KM_RRAI', 'TILED': true},
+    params: { 'LAYERS': 'RADAR_1KM_RRAI', 'TILED': true },
     transition: 0
   })
 })
@@ -523,7 +522,7 @@ function styleFunction(feature) {
   if (severity === 'extreme') {
     fillColor = '#FF000088';
     strokeColor = '#FF0000';
-  }else if (severity === 'high') {
+  } else if (severity === 'high') {
     fillColor = '#FFAA0088';
     strokeColor = '#FFAA00';
   } else if (severity === 'moderate') {
@@ -592,7 +591,7 @@ radar_layer.getSource().on("imageloaderror", () => {
 
 
 function updateLayers() {
-  radar_layer.getSource().updateParams({'TIME': currentTime.toISOString().split('.')[0]+"Z"});
+  radar_layer.getSource().updateParams({ 'TIME': currentTime.toISOString().split('.')[0] + "Z" });
   //radar_layer.getSource().updateParams({'TIME': currentTime.toISOString().split('.')[0]+"Z"});
 }
 
@@ -641,8 +640,8 @@ const map = new Map({
     alerts_layer,
     alertsO_layer,
     radar_layer,
-    
-    
+
+
   ],
   overlays: [overlay],
   view: new View({
@@ -652,24 +651,24 @@ const map = new Map({
 });
 
 var checks = document.getElementById('checks_map')
-function makeBindLyr(name,o) {
-    var data = document.createElement("p");
-    var check = document.createElement("input");
-    check.type = "checkbox";
-    data.innerText = name;
-    //data.appendChild(check);
-    check.checked = o.getVisible()
-    data.insertAdjacentElement("afterbegin",check)
-    checks.appendChild(data)
-    
+function makeBindLyr(name, o) {
+  var data = document.createElement("p");
+  var check = document.createElement("input");
+  check.type = "checkbox";
+  data.innerText = name;
+  //data.appendChild(check);
+  check.checked = o.getVisible()
+  data.insertAdjacentElement("afterbegin", check)
+  checks.appendChild(data)
 
-    check.addEventListener('change', (event) => {
-        o.setVisible(check.checked);
-      })
-    return function(vis) {
-      o.setVisible(vis);
-      check.checked = vis
-    }
+
+  check.addEventListener('change', (event) => {
+    o.setVisible(check.checked);
+  })
+  return function (vis) {
+    o.setVisible(vis);
+    check.checked = vis
+  }
 }
 function makesat(name) {
   var data = document.createElement("p");
@@ -678,26 +677,26 @@ function makesat(name) {
   data.innerText = name;
   //data.appendChild(check);
   check.checked = false;
-  data.insertAdjacentElement("afterbegin",check)
+  data.insertAdjacentElement("afterbegin", check)
   checks.appendChild(data)
-  
+
 
   check.addEventListener('change', (event) => {
-      if (check.checked) {
-        saturation = 5;
-        brightness = 35;
-      } else {
-        saturation = 100;
-        brightness = 100;
-      }
-    })
+    if (check.checked) {
+      saturation = 5;
+      brightness = 35;
+    } else {
+      saturation = 100;
+      brightness = 100;
+    }
+  })
 }
-makeBindLyr("Alerts",alerts_layer)
-makeBindLyr("ECCC Alerts",alertsO_layer)(false)
-makeBindLyr("Bounds",vectorLayer)(false)
-makeBindLyr("Radar",radar_layer)
-makeBindLyr("Outlook",outlook_layer)
-makeBindLyr("NWS Outlook",outlook_nws_layer)
+makeBindLyr("Alerts", alerts_layer)
+makeBindLyr("ECCC Alerts", alertsO_layer)(false)
+makeBindLyr("Bounds", vectorLayer)(false)
+makeBindLyr("Radar", radar_layer)
+makeBindLyr("Outlook", outlook_layer)
+makeBindLyr("NWS Outlook", outlook_nws_layer)
 makesat("Desaturate")
 
 
@@ -776,59 +775,59 @@ map.on("singleclick", function (evt) {
     }
   } else if (selOpt.value == "Outlooks") {
     var feature = map.forEachFeatureAtPixel(evt.pixel,
-      function(feature, layer) {
+      function (feature, layer) {
         if (layer == outlook_layer) {
           return feature;
         }
       });
     if (feature) {
-        var geometry = feature.getGeometry();
-        var coord = geometry.getCoordinates();
-        if (!viewInfo.classList.contains("visible")) {
-          viewInfo.classList.toggle("visible")
-        }
-        var content = '<h3>' + feature.get('product_class') + ' Outlook</h3>';
-        var tbl = document.createElement("table")
-        tbl.innerHTML += '<tr><td>Published</td><td>' + feature.get("publication_datetime") +'</td></tr>';
-        tbl.innerHTML += '<tr><td>Valid</td><td>' + feature.get("validity_datetime") +'</td></tr>';
-        tbl.innerHTML += '<tr><td>Ends</td><td>' + feature.get("expiration_datetime") +'</td></tr>';
-        tbl.innerHTML += '<tr><td>Severity</td><td>' + feature.get('metobject').severity.value + '</td></tr>';
-        tbl.innerHTML += '<tr><td>Thunderstorms</td><td>' + feature.get('metobject').thunderstorm.value + '</td></tr>';
-        tbl.innerHTML += '<tr><td>Tornados</td><td>' + feature.get('metobject').tornado_risk.value + '</td></tr>';
-        tbl.innerHTML += '<tr><td>Rain</td><td>' + feature.get('metobject').rain.value +" "+feature.get('metobject').rain.unit+ '</td></tr>';
-        tbl.innerHTML += '<tr><td>Hail</td><td>' + feature.get('metobject').hail.value +" "+feature.get('metobject').hail.unit+ '</td></tr>';
-        tbl.innerHTML += '<tr><td>Gust</td><td>' + feature.get('metobject').gust.value +" "+feature.get('metobject').gust.unit+ '</td></tr>';
-        
-        selectedInfo.innerHTML = content;
-        selectedInfo.appendChild(tbl)
-        
-        console.info(feature.getProperties());
+      var geometry = feature.getGeometry();
+      var coord = geometry.getCoordinates();
+      if (!viewInfo.classList.contains("visible")) {
+        viewInfo.classList.toggle("visible")
+      }
+      var content = '<h3>' + feature.get('product_class') + ' Outlook</h3>';
+      var tbl = document.createElement("table")
+      tbl.innerHTML += '<tr><td>Published</td><td>' + feature.get("publication_datetime") + '</td></tr>';
+      tbl.innerHTML += '<tr><td>Valid</td><td>' + feature.get("validity_datetime") + '</td></tr>';
+      tbl.innerHTML += '<tr><td>Ends</td><td>' + feature.get("expiration_datetime") + '</td></tr>';
+      tbl.innerHTML += '<tr><td>Severity</td><td>' + feature.get('metobject').severity.value + '</td></tr>';
+      tbl.innerHTML += '<tr><td>Thunderstorms</td><td>' + feature.get('metobject').thunderstorm.value + '</td></tr>';
+      tbl.innerHTML += '<tr><td>Tornados</td><td>' + feature.get('metobject').tornado_risk.value + '</td></tr>';
+      tbl.innerHTML += '<tr><td>Rain</td><td>' + feature.get('metobject').rain.value + " " + feature.get('metobject').rain.unit + '</td></tr>';
+      tbl.innerHTML += '<tr><td>Hail</td><td>' + feature.get('metobject').hail.value + " " + feature.get('metobject').hail.unit + '</td></tr>';
+      tbl.innerHTML += '<tr><td>Gust</td><td>' + feature.get('metobject').gust.value + " " + feature.get('metobject').gust.unit + '</td></tr>';
+
+      selectedInfo.innerHTML = content;
+      selectedInfo.appendChild(tbl)
+
+      console.info(feature.getProperties());
     }
   } else if (selOpt.value == "NWSOutlooks") {
     var feature = map.forEachFeatureAtPixel(evt.pixel,
-      function(feature, layer) {
+      function (feature, layer) {
         if (layer == outlook_nws_layer) {
           return feature;
         }
       });
     if (feature) {
-        var geometry = feature.getGeometry();
-        var coord = geometry.getCoordinates();
-        if (!viewInfo.classList.contains("visible")) {
-          viewInfo.classList.toggle("visible")
-        }
-        var content = '<h3>' + OutlookNWSType.value + ' Outlook</h3>';
-        var tbl = document.createElement("table")
-        tbl.innerHTML += '<tr><td>Published</td><td>' + feature.get("ISSUE") +'</td></tr>';
-        tbl.innerHTML += '<tr><td>Valid</td><td>' + feature.get("VALID") +'</td></tr>';
-        tbl.innerHTML += '<tr><td>Ends</td><td>' + feature.get("EXPIRE") +'</td></tr>';
-        tbl.innerHTML += '<tr><td>Risk</td><td>' + feature.get('LABEL2') +'</td></tr>';
+      var geometry = feature.getGeometry();
+      var coord = geometry.getCoordinates();
+      if (!viewInfo.classList.contains("visible")) {
+        viewInfo.classList.toggle("visible")
+      }
+      var content = '<h3>' + OutlookNWSType.value + ' Outlook</h3>';
+      var tbl = document.createElement("table")
+      tbl.innerHTML += '<tr><td>Published</td><td>' + feature.get("ISSUE") + '</td></tr>';
+      tbl.innerHTML += '<tr><td>Valid</td><td>' + feature.get("VALID") + '</td></tr>';
+      tbl.innerHTML += '<tr><td>Ends</td><td>' + feature.get("EXPIRE") + '</td></tr>';
+      tbl.innerHTML += '<tr><td>Risk</td><td>' + feature.get('LABEL2') + '</td></tr>';
 
-        
-        selectedInfo.innerHTML = content;
-        selectedInfo.appendChild(tbl)
-        
-        console.info(feature.getProperties());
+
+      selectedInfo.innerHTML = content;
+      selectedInfo.appendChild(tbl)
+
+      console.info(feature.getProperties());
     }
   }
 });
@@ -837,92 +836,185 @@ map.on("singleclick", function (evt) {
 
 var irtrv = () => {
   fetch("/api/alerts/top")
-      .then((response) => response.json())
-      .then((json) => {
-          setAlert(json.mapped)
-      });
-      fetch("/api/conditions")
-      .then((response) => response.json())
-      .then((json) => {
-          sc.innerText = `${json["temperature"]}°C`;
-          if (json["wind_chill"]) {
-            wc.innerText = `${json["wind_chill"]}°C`;
-          }
-          cnd.innerText = `${weatherTypes[json["icon_code"]]}`
-          fetch("/api/conditions/bft")
-              .then((rs) => rs.json())
-              .then((bft) => {
-                  wnd.innerText = `[ ${bft["icon"]} ] ${json["wind_speed"]} km/h at ${json["wind_bearing"]}°`
-                  
-                  PushIfOk(`Current Conditions: ${json["temperature"]}°C - ${weatherTypes[json["icon_code"]]} - [ ${bft["icon"]} ] ${json["wind_speed"]} km/h at ${json["wind_bearing"]}°`)
-              })
-      });
-      fetch("/api/alerts")
-        .then((response) => response.json())
-        .then((json) => {
-          for (const type of types) {
-              document.getElementById(`${type}`).innerHTML = ""
-          }
-          if (json.length > 0) {
-              alert_local(json)
-          }
+    .then((response) => response.json())
+    .then((json) => {
+      setAlert(json.mapped)
+    });
+  fetch("/api/conditions")
+    .then((response) => response.json())
+    .then((json) => {
+      sc.innerText = `${json["temperature"]}°C`;
+      if (json["wind_chill"]) {
+        wc.innerText = `${json["wind_chill"]}°C`;
+      }
+      cnd.innerText = `${weatherTypes[json["icon_code"]]}`
+      fetch("/api/conditions/bft")
+        .then((rs) => rs.json())
+        .then((bft) => {
+          wnd.innerText = `[ ${bft["icon"]} ] ${json["wind_speed"]} km/h at ${json["wind_bearing"]}°`
+          ticker_expires.add(curConds)
+          buffer.push(`Current Conditions: ${json["temperature"]}°C - ${weatherTypes[json["icon_code"]]} - [ ${bft["icon"]} ] ${json["wind_speed"]} km/h at ${json["wind_bearing"]}°`)
+        })
+    });
+  fetch("/api/alerts")
+    .then((response) => response.json())
+    .then((json) => {
+      for (const type of types) {
+        document.getElementById(`${type}`).innerHTML = ""
+      }
+      if (json.length > 0) {
+        alert_local(json)
+      }
 
-        });
+    });
 }
-setInterval(irtrv,1000*60)
+setInterval(irtrv, 1000 * 60)
 irtrv()
 setInterval(() => {
   alerts_layer.getSource().refresh()
   radar_layer.getSource().refresh()
-},1000*5*60)
+}, 1000 * 5 * 60)
 
 
+const canvas = document.getElementById('tickerCanvas');
+const ctx = canvas.getContext('2d');
 
-const ticker      = document.getElementById('ticker');
-  var queue       = [];
-  const SPEED_PPS   = 120;        // <-- pixels per second you want to travel
-  const socket      = new WebSocket('/apiws/alerts');
+const speed = 150; // px per second
+const font = '24px sans-serif';
+const spacing = 50; // space between messages in px
 
-function PushIfOk(dat) {
-  if (queue.at(-1)==null){
-    queue.push(dat)
-    return
+// Resize canvas to full window width and fix height
+function resizeCanvas() {
+  canvas.width = window.innerWidth;
+  canvas.height = 50;
+}
+window.addEventListener('resize', () => {
+  resizeCanvas();
+});
+resizeCanvas();
+
+class RingBuffer {
+  constructor(size) {
+    this.size = size;
+    this.buffer = new Array(size);
+    this.head = 0;
+    this.count = 0;
   }
-  var s = `${queue.at(-1)} || ${dat}`
-  if (s.length <= 200) {
-    queue.pop()
-    queue.push(s)
-  } else {
-    queue.push(dat)
+  push(item) {
+    this.buffer[this.head] = item;
+    this.head = (this.head + 1) % this.size;
+    if (this.count < this.size) this.count++;
+  }
+  pop() {
+    if (this.count === 0) return null;
+    const tailIndex = (this.head + this.size - this.count) % this.size;
+    const item = this.buffer[tailIndex];
+    this.buffer[tailIndex] = undefined;
+    this.count--;
+    return item;
+  }
+  isEmpty() {
+    return this.count === 0;
   }
 }
-var audio = new Audio('/static/ALERT.mp3');
-  socket.addEventListener('message', e => {
-    PushIfOk(e.data);
-    audio.play()
-    if(!ticker.isScrolling) playNext();
-  });
 
-  /** Scroll one message then recurse */
-  function playNext(){
-    if(queue.length===0){ ticker.isScrolling=false; return; }
-    ticker.isScrolling = true;
-    ticker.textContent = queue.shift();
+let curConds = ""
+let ticker_delay_expires = []
+let ticker_expires = new Set();
 
-    // allow the browser to lay out the new text so offsetWidth is correct
-    requestAnimationFrame(()=>{
+const buffer = new RingBuffer(20);
+buffer.push("🚀 Rocket launched successfully!");
+buffer.push("ENVIRO TEST");
+buffer.push("🌦️ Chance of rain today.");
+buffer.push("🎉 Welcome to the new ticker demo.");
+buffer.push("🔥 Breaking News: Major event happening!");
 
-      const distance   = ticker.offsetWidth + window.innerWidth; // px to travel
-      const durationMs = distance / SPEED_PPS * 1000;            // px / (px/s)
+const activeBlocks = [];
 
-      ticker.style.animation = 'none';
-      // force reflow
-      void ticker.offsetWidth;
-      ticker.style.animation = `scroll ${durationMs}ms linear`;
+ctx.font = font;
 
-      setTimeout(playNext, durationMs);
-    });
+function canAddNewBlock() {
+  if (activeBlocks.length === 0) return true;
+  const lastBlock = activeBlocks[activeBlocks.length - 1];
+  return lastBlock.x + lastBlock.width + spacing < canvas.width;
+}
+
+function addNextBlock() {
+  const nextText = buffer.pop();
+  if (nextText) {
+    const width = ctx.measureText(nextText).width;
+    activeBlocks.push({ text: nextText, x: canvas.width, width });
   }
+}
+
+let lastTimestamp = null;
+
+function removeFirstOccurrence(arr, value) {
+  const index = arr.indexOf(value);
+  if (index !== -1) {
+    arr.splice(index, 1);
+  }
+  return arr;
+}
+
+function draw(timestamp) {
+  if (!lastTimestamp) lastTimestamp = timestamp;
+  const dt = (timestamp - lastTimestamp) / 1000;
+  lastTimestamp = timestamp;
+
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.fillStyle = '#111';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  ctx.fillStyle = '#fff';
+  ctx.font = font;
+  ctx.textBaseline = 'middle';
+
+  for (let block of activeBlocks) {
+    block.x -= speed * dt;
+    ctx.fillText(block.text, block.x, canvas.height / 2);
+  }
+
+  while (activeBlocks.length > 0 && activeBlocks[0].x + activeBlocks[0].width < 0) {
+    const removed = activeBlocks.shift();
+    console.log('Block finished:', removed.text);
+    if (ticker_expires.has(removed.text)) {
+      if (removed.text in ticker_delay_expires) {
+        ticker_delay_expires = removeFirstOccurrence(ticker_delay_expires,removed.text)
+        buffer.push(removed.text)
+      } else {
+        ticker_expires.delete(removed.text)
+      }
+    } else {
+      buffer.push(removed.text)
+    }
+    
+  }
+
+  if (canAddNewBlock()) {
+    addNextBlock();
+  }
+
+  requestAnimationFrame(draw);
+}
+
+
+requestAnimationFrame(draw);
+
+
+
+const socket = new WebSocket('/apiws/alerts');
+
+
+var audio = new Audio('/static/ALERT.mp3');
+socket.addEventListener('message', e => {
+  buffer.push(e.data);
+  ticker_expires.add(e.data);
+  ticker_delay_expires.push(e.data);
+  audio.play()
+  if (!ticker.isScrolling) playNext();
+});
+
 
 
 
