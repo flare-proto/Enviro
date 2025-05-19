@@ -880,7 +880,7 @@ const canvas = document.getElementById('tickerCanvas');
 const ctx = canvas.getContext('2d');
 
 const speed = 150; // px per second
-const font = '24px sans-serif';
+const font = '24px NerdSpace';
 const spacing = 50; // space between messages in px
 
 // Resize canvas to full window width and fix height
@@ -923,11 +923,7 @@ let ticker_delay_expires = []
 let ticker_expires = new Set();
 
 const buffer = new RingBuffer(20);
-buffer.push("🚀 Rocket launched successfully!");
-buffer.push("ENVIRO TEST");
-buffer.push("🌦️ Chance of rain today.");
-buffer.push("🎉 Welcome to the new ticker demo.");
-buffer.push("🔥 Breaking News: Major event happening!");
+
 
 const activeBlocks = [];
 
