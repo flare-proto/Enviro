@@ -1,3 +1,4 @@
+import json
 import logging
 import uuid
 from datetime import datetime, timedelta
@@ -8,6 +9,8 @@ from sqlalchemy import (JSON, Column, DateTime, ForeignKey, Integer, String,
                         Table, create_engine)
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import aliased, backref, relationship, sessionmaker
+from sqlalchemy import and_
+from collections import defaultdict
 
 Base = declarative_base()
 
@@ -156,6 +159,7 @@ def store_alert(session:sqlalchemy.orm.Session, alert_dict: dict) -> str:
     return alert_id
 
 
+
 # --- Get Active Alert Polygons ---
 def get_active_alert_polygons(session) -> list:
     # Query for polygons from active alerts (not expired and not cancelled)
@@ -197,6 +201,43 @@ class Outlook(Base):
     def is_in_effect(self):
         return datetime.utcnow() >= self.expires_at and datetime.utcnow() <= self.effective_at
     
+    
+def get_best_current_outlooks_all_regions(session: sqlalchemy.orm.Session, offset: timedelta = timedelta(0)) -> list[dict]:
+    now = datetime.utcnow() + offset
+
+    ver_priority = [
+        "day1AM", "day1PM", "day2AM", "day2PM", "day3", "day4", "day5+"
+    ]
+
+    # Get all valid outlooks
+    valid_outlooks = session.query(Outlook).filter(
+        and_(
+            Outlook.effective_at <= now,
+            Outlook.expires_at > now
+        )
+    ).all()
+
+    # Organize outlooks by region and version
+    region_ver_map = defaultdict(list)
+    for outlook in valid_outlooks:
+        region_ver_map[outlook.region].append(outlook)
+
+    # For each region, pick all outlooks that match the highest-priority version available
+    result:list[Outlook] = []
+    for region, outlooks in region_ver_map.items():
+        ver_map = defaultdict(list)
+        for outlook in outlooks:
+            ver_map[outlook.ver].append(outlook)
+
+        for ver in ver_priority:
+            if ver in ver_map:
+                result.extend(ver_map[ver])
+                break  # only include the best version for this region
+    fresult = []
+    for r in result:
+        fresult.append(json.loads(r.feature))
+    return fresult
+
 class NWSOutlook(Base):
     __tablename__ = 'NWSoutlooks'
 
@@ -220,3 +261,5 @@ Session = sessionmaker(bind=engine)
 
 # Create tables
 Base.metadata.create_all(engine)
+
+

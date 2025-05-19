@@ -439,15 +439,10 @@ def outlook(ver):
     now += timedelta(hours=offsetH)
     session = dbschema.Session()
     with session.begin():
-        valid_tokens = session.query(dbschema.Outlook).filter(
-            dbschema.Outlook.ver ==ver,
-          
-            dbschema.Outlook.expires_at > now,
-            dbschema.Outlook.effective_at < now).all()
 
         jsonDat = {	
             "type":"FeatureCollection",
-            "features":[json.loads(t.feature) for t in valid_tokens]
+            "features":dbschema.get_best_current_outlooks_all_regions(session,timedelta(hours=offsetH))
         }
     session.close()
     return jsonify(jsonDat)
