@@ -215,13 +215,13 @@ def saveFeature(feature):
 
         # On conflict with outlook_id, update the feature, expires_at, and effective_at
         stmt = stmt.on_conflict_do_update(
-            index_elements=['outlook_id'],
+            index_elements=["outlook_id"],  # outlook_id must be UNIQUE or PRIMARY KEY
             set_={
-                "feature": stmt.excluded.feature,
-                "expires_at": stmt.excluded.expires_at,
-                "effective_at": stmt.excluded.effective_at,
-                "ver": stmt.excluded.ver,
-                "region":stmt.excluded.region,
+                "feature": json.dumps(feature),
+                "expires_at": dt,
+                "effective_at": edt,
+                "ver": feature["ver"],
+                "region": feature["region"]
             }
         )
 
