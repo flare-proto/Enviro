@@ -41,6 +41,7 @@ def classify_thunderstorm_outlook_day(filename: str) -> str:
     valid_time = pub_time + offset
 
     # Define 12am and 12pm of subsequent days
+    day1_midnight = pub_time.replace(hour=0, minute=0, second=0, microsecond=0)
     day1_noon = pub_time.replace(hour=12, minute=0, second=0, microsecond=0)
     day2_midnight = (pub_time + timedelta(days=1)).replace(hour=0, minute=0)
     day2_noon = day2_midnight + timedelta(hours=12)
@@ -50,7 +51,9 @@ def classify_thunderstorm_outlook_day(filename: str) -> str:
     day4_end = day3_midnight + timedelta(days=1)
 
     # Classify
-    if day1_noon <= valid_time < day2_midnight:
+    if day1_midnight <= valid_time < day1_noon:
+        return "day1AM"
+    elif day1_noon <= valid_time < day2_midnight:
         return "day1PM"
     elif day2_midnight <= valid_time < day2_noon:
         return "day2AM"
