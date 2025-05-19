@@ -939,3 +939,8 @@ OutlookNWSType.onchange = () => {
   outlooks_nws_src.setUrl(`/api/nws/outlook/outlook.NWS.d1_${OutlookNWSType.value}?sortLatest=true&offset=${outs.value}`)
   outlooks_nws_src.refresh();
 }
+
+outlookDay.onchange = () => {
+  outlooksrc.setUrl(`/api/outlook/${outlookDay.value}?offset=${outs.value}`)
+  outlooksrc.refresh();
+}
