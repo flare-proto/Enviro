@@ -63,6 +63,8 @@ def classify_thunderstorm_outlook_day(filename: str) -> str:
         return "day3"
     elif day4_midnight <= valid_time < day4_end:
         return "day4"
+    elif day4_end <= valid_time:
+        return "day5+"
     else:
         raise OverflowError(f"Outside expected Day 1-4 range {(valid_time-day4_end).days}")
 
