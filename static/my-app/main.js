@@ -23,9 +23,6 @@ let viewInfo = document.getElementById("viewInfo");
 let selectedInfo = document.getElementById("selectedInfo");
 let closer = document.getElementById("popup-closer");
 
-
-var outlookDay = document.getElementById("outlookDay")
-
 let activeAlert = 1;
 
 var saturation = 100
@@ -938,9 +935,4 @@ outs.onchange = () => {
 OutlookNWSType.onchange = () => {
   outlooks_nws_src.setUrl(`/api/nws/outlook/outlook.NWS.d1_${OutlookNWSType.value}?sortLatest=true&offset=${outs.value}`)
   outlooks_nws_src.refresh();
-}
-
-outlookDay.onchange = () => {
-  outlooksrc.setUrl(`/api/outlook?offset=${outs.value}`)
-  outlooksrc.refresh();
 }
