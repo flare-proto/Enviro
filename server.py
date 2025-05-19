@@ -204,7 +204,7 @@ def saveFeature(feature):
             logger.warning(f"{feature["id"]} No Time")
             edt = datetime.now(timezone.utc)
 
-        stmt = insert(dbschema.Outlook).values(
+        stmt = insert(dbschema.Outlook.__table__).values(
             outlook_id=feature["id"],
             feature=json.dumps(feature),
             expires_at=dt,
