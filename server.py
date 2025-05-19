@@ -232,6 +232,8 @@ def callback_outlook(ch, method, properties, body):
     try:
         message = json.loads(body.decode())
         logger.info(f"RECV OUTLOOK {message["ver"]} {message["region"]}")
+        assert isinstance(message["region"],str)
+        assert isinstance(message["ver"],str)
         for i,f in enumerate(message["cont"]["features"]):
             f["id"] = f"{f["id"]}_{i}"
             f['ver'] = message["ver"]
