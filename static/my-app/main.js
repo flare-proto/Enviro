@@ -853,7 +853,9 @@ var irtrv = () => {
         .then((bft) => {
           wnd.innerText = `[ ${bft["icon"]} ] ${json["wind_speed"]} km/h at ${json["wind_bearing"]}°`
           ticker_expires.add(curConds)
-          buffer.push(`Current Conditions: ${json["temperature"]}°C - ${weatherTypes[json["icon_code"]]} - [ ${bft["icon"]} ] ${json["wind_speed"]} km/h at ${json["wind_bearing"]}°`)
+          
+          curConds = `Current Conditions: ${json["temperature"]}°C - ${weatherTypes[json["icon_code"]]} - [ ${bft["icon"]} ] ${json["wind_speed"]} km/h at ${json["wind_bearing"]}°`
+          buffer.push(curConds)
         })
     });
   fetch("/api/alerts")
