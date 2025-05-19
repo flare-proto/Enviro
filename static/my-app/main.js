@@ -975,13 +975,8 @@ function draw(timestamp) {
     const removed = activeBlocks.shift();
     
     if (ticker_expires.has(removed.text)) {
-      if (removed.text in ticker_delay_expires) {
-        ticker_delay_expires = removeFirstOccurrence(ticker_delay_expires,removed.text)
-        buffer.push(removed.text)
-      } else {
-        ticker_expires.delete(removed.text);
-        console.log('Block Expired:', removed.text);
-      }
+      ticker_expires.delete(removed.text);
+      console.log('Block Expired:', removed.text);
     } else {
       buffer.push(removed.text)
     }
