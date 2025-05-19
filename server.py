@@ -413,18 +413,11 @@ def alerts_og():
     weather = update()
     return jsonify(weather["alerts"])
 
-@app.route("/api/outlook/<ver>")
+@app.route("/api/outlook")
 def outlook(ver):
     """Active Canadian thunderstorm outlooks
     ---
     parameters:
-      - name: version
-        in: path
-        type: string
-        enum: ['day1PM', 'day2AM', 'day2PM','day3']
-        required: true
-        default: all
-        description: Day, see https://hpfx.collab.science.gc.ca/docs/thunderstorm_outlooks/ThunderstormOutlook_Specs_Graphical_1A_EN.pdf
       - name: offset
         in: query
         type: string

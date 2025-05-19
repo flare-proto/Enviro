@@ -561,7 +561,7 @@ function NWSstyleFunction(feature) {
 }
 
 const outlooksrc = new VectorSource({
-  url: `/api/outlook/${outlookDay.value}`,
+  url: `/api/outlook`,
   format: new GeoJSON(),
 })
 const outlook_layer = new VectorImageLayer({
@@ -930,7 +930,7 @@ var audio = new Audio('/static/ALERT.mp3');
 
 var outs = document.getElementById("outlookOff")
 outs.onchange = () => {
-  outlooksrc.setUrl(`/api/outlook/${outlookDay.value}?offset=${outs.value}`)
+  outlooksrc.setUrl(`/api/outlook?offset=${outs.value}`)
   outlooksrc.refresh();
   outlooks_nws_src.setUrl(`/api/nws/outlook/outlook.NWS.d1_${OutlookNWSType.value}?sortLatest=true&offset=${outs.value}`)
   outlooks_nws_src.refresh();
@@ -941,6 +941,6 @@ OutlookNWSType.onchange = () => {
 }
 
 outlookDay.onchange = () => {
-  outlooksrc.setUrl(`/api/outlook/${outlookDay.value}?offset=${outs.value}`)
+  outlooksrc.setUrl(`/api/outlook?offset=${outs.value}`)
   outlooksrc.refresh();
 }
