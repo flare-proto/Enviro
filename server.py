@@ -299,7 +299,7 @@ def consume_messages():
     channel.queue_bind(exchange='alerts', queue='weather-alerts', routing_key='alerts.*.*.*')
     
     channel.queue_declare(queue='live-feed', exclusive=True)
-    channel.queue_bind(exchange='feed', queue='live-feed', routing_key='*.*')
+    channel.queue_bind(exchange='feed', queue='live-feed', routing_key='*.active.*')
     
     channel.basic_consume(queue='weather-alerts', on_message_callback=callback_nerv_alert, auto_ack=True)
     
