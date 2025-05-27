@@ -33,15 +33,17 @@ def parse_cap_for_alert_exchange(cap_xml):
     description = info.findtext('cap:description', default='', namespaces=ns)
     msgType = root.findtext('cap:msgType', default='', namespaces=ns)
     
-    broadcast_message = ""
-
-    for param in root.findall('parameter'):
-        value_name = param.findtext('valueName')
-        if value_name == 'layer:SOREM:1.0:Broadcast_Text':
-            value = param.findtext('value')
-            if value:
-                broadcast_message = value
-                break
+    def find(key):
+        for param in root.findall('parameter'):
+            value_name = param.findtext('valueName')
+            if value_name == key:
+                value = param.findtext('value')
+                if value:
+                    return value
+    broadcast_message = find('layer:SOREM:1.0:Broadcast_Text')
+    Alert_Name = find('layer:EC-MSC-SMC:1.0:Alert_Name')
+    Alert_Location_Status = find('layer:EC-MSC-SMC:1.0:Alert_Location_Status')
+    Newly_Active_Areas =  find('layer:EC-MSC-SMC:1.1:Newly_Active_Areas')
 
     # Timestamps
     effective = info.findtext('cap:effective', default='', namespaces=ns)
@@ -86,7 +88,9 @@ def parse_cap_for_alert_exchange(cap_xml):
         'expires_at': expires,
         'description':description,
         'broadcast_message':broadcast_message,
-        'geojson_polygons': geojson_polygons
+        'geojson_polygons': geojson_polygons,
+        'Alert_Name':Alert_Name,
+        'Alert_Location_Status':Alert_Location_Status
     }
 
 
@@ -126,7 +130,7 @@ def on_message(ch, method, properties, body, alert_channel):
             alert_channel.basic_publish(
                 exchange='feed',
                 routing_key=f"AX.{alert['event']}",
-                body=f"{alert['event']} now in effect for {alert['areaDesc']}"
+                body=f"{str(alert['Alert_Name']).capitalize()} now in effect for {alert['areaDesc']}"
             )
 
         logger.info(f"Published alert: {alert['event']} → {routing_key}")
