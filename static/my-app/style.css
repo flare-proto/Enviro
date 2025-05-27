@@ -340,7 +340,7 @@ iframe {
   background: #111;
   overflow: hidden;
   white-space: nowrap;
-  padding: 10px 0;
+  height: 50px;
   color: #fff;
   position: fixed;
   bottom: 0;

@@ -786,21 +786,33 @@ map.on("singleclick", function (evt) {
       if (!viewInfo.classList.contains("visible")) {
         viewInfo.classList.toggle("visible")
       }
-      var content = '<h3>' + feature.get('product_class') + ' Outlook</h3>';
-      var tbl = document.createElement("table")
-      tbl.innerHTML += '<tr><td>Published</td><td>' + feature.get("publication_datetime") + '</td></tr>';
-      tbl.innerHTML += '<tr><td>Valid</td><td>' + feature.get("validity_datetime") + '</td></tr>';
-      tbl.innerHTML += '<tr><td>Ends</td><td>' + feature.get("expiration_datetime") + '</td></tr>';
-      tbl.innerHTML += '<tr><td>Severity</td><td>' + feature.get('metobject').severity.value + '</td></tr>';
-      tbl.innerHTML += '<tr><td>Thunderstorms</td><td>' + feature.get('metobject').thunderstorm.value + '</td></tr>';
-      tbl.innerHTML += '<tr><td>Tornados</td><td>' + feature.get('metobject').tornado_risk.value + '</td></tr>';
-      tbl.innerHTML += '<tr><td>Rain</td><td>' + feature.get('metobject').rain.value + " " + feature.get('metobject').rain.unit + '</td></tr>';
-      tbl.innerHTML += '<tr><td>Hail</td><td>' + feature.get('metobject').hail.value + " " + feature.get('metobject').hail.unit + '</td></tr>';
-      tbl.innerHTML += '<tr><td>Gust</td><td>' + feature.get('metobject').gust.value + " " + feature.get('metobject').gust.unit + '</td></tr>';
+      if (feature.get('metobject').sub_type ==0) {
+        var content = '<h3>' + feature.get('product_class') + ' Outlook</h3>';
+        var tbl = document.createElement("table")
+        tbl.innerHTML += '<tr><td>Published</td><td>' + feature.get("publication_datetime") +'</td></tr>';
+        tbl.innerHTML += '<tr><td>Valid</td><td>' + feature.get("validity_datetime") +'</td></tr>';
+        tbl.innerHTML += '<tr><td>Ends</td><td>' + feature.get("expiration_datetime") +'</td></tr>';
+        tbl.innerHTML += '<tr><td>Severity</td><td>' + feature.get('metobject').severity.value + '</td></tr>';
+        tbl.innerHTML += '<tr><td>Thunderstorms</td><td>' + feature.get('metobject').thunderstorm.value + '</td></tr>';
+        tbl.innerHTML += '<tr><td>Tornados</td><td>' + feature.get('metobject').tornado_risk.value + '</td></tr>';
+        tbl.innerHTML += '<tr><td>Rain</td><td>' + feature.get('metobject').rain.value +" "+feature.get('metobject').rain.unit+ '</td></tr>';
+        tbl.innerHTML += '<tr><td>Hail</td><td>' + feature.get('metobject').hail.value +" "+feature.get('metobject').hail.unit+ '</td></tr>';
+        tbl.innerHTML += '<tr><td>Gust</td><td>' + feature.get('metobject').gust.value +" "+feature.get('metobject').gust.unit+ '</td></tr>';
 
-      selectedInfo.innerHTML = content;
-      selectedInfo.appendChild(tbl)
+        selectedInfo.innerHTML = content;
+        selectedInfo.appendChild(tbl)
 
+      } else if (feature.get('metobject').sub_type ==1) {
+        var content = '<h3>' + feature.get('product_class') + ' Outlook</h3><h3>Risk of Funnel Clouds</h3>';
+
+        
+        selectedInfo.innerHTML = content;
+
+
+      }
+
+      
+      
       console.info(feature.getProperties());
     }
   } else if (selOpt.value == "NWSOutlooks") {
@@ -852,8 +864,10 @@ var irtrv = () => {
         .then((rs) => rs.json())
         .then((bft) => {
           wnd.innerText = `[ ${bft["icon"]} ] ${json["wind_speed"]} km/h at ${json["wind_bearing"]}°`
-
-          PushIfOk(`Current Conditions: ${json["temperature"]}°C - ${weatherTypes[json["icon_code"]]} - [ ${bft["icon"]} ] ${json["wind_speed"]} km/h at ${json["wind_bearing"]}°`)
+          ticker_expires.add(curConds)
+          
+          curConds = `Current Conditions: ${json["temperature"]}°C - ${weatherTypes[json["icon_code"]]} - [ ${bft["icon"]} ] ${json["wind_speed"]} km/h at ${json["wind_bearing"]}°`
+          buffer.push(curConds)
         })
     });
   fetch("/api/alerts")
@@ -876,52 +890,137 @@ setInterval(() => {
 }, 1000 * 5 * 60)
 
 
+const canvas = document.getElementById('tickerCanvas');
+const ctx = canvas.getContext('2d');
 
-const ticker = document.getElementById('ticker');
-var queue = [];
-const SPEED_PPS = 120;        // <-- pixels per second you want to travel
+const speed = 150; // px per second
+const font = '24px NerdSpace';
+const spacing = 50; // space between messages in px
+
+// Resize canvas to full window width and fix height
+function resizeCanvas() {
+  canvas.width = window.innerWidth;
+  canvas.height = 50;
+}
+window.addEventListener('resize', () => {
+  resizeCanvas();
+});
+resizeCanvas();
+
+class RingBuffer {
+  constructor(size) {
+    this.size = size;
+    this.buffer = new Array(size);
+    this.head = 0;
+    this.count = 0;
+  }
+  push(item) {
+    this.buffer[this.head] = item;
+    this.head = (this.head + 1) % this.size;
+    if (this.count < this.size) this.count++;
+  }
+  pop() {
+    if (this.count === 0) return null;
+    const tailIndex = (this.head + this.size - this.count) % this.size;
+    const item = this.buffer[tailIndex];
+    this.buffer[tailIndex] = undefined;
+    this.count--;
+    return item;
+  }
+  isEmpty() {
+    return this.count === 0;
+  }
+}
+
+let curConds = ""
+let ticker_delay_expires = []
+let ticker_expires = new Set();
+
+const buffer = new RingBuffer(20);
+
+
+const activeBlocks = [];
+
+ctx.font = font;
+
+function canAddNewBlock() {
+  if (activeBlocks.length === 0) return true;
+  const lastBlock = activeBlocks[activeBlocks.length - 1];
+  return lastBlock.x + lastBlock.width + spacing < canvas.width;
+}
+
+function addNextBlock() {
+  const nextText = buffer.pop();
+  if (nextText) {
+    const width = ctx.measureText(nextText).width;
+    activeBlocks.push({ text: nextText, x: canvas.width, width });
+  }
+}
+
+let lastTimestamp = null;
+
+function removeFirstOccurrence(arr, value) {
+  const index = arr.indexOf(value);
+  if (index !== -1) {
+    arr.splice(index, 1);
+  }
+  return arr;
+}
+
+function draw(timestamp) {
+  if (!lastTimestamp) lastTimestamp = timestamp;
+  const dt = (timestamp - lastTimestamp) / 1000;
+  lastTimestamp = timestamp;
+
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.fillStyle = '#111';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  ctx.fillStyle = '#fff';
+  ctx.font = font;
+  ctx.textBaseline = 'middle';
+
+  for (let block of activeBlocks) {
+    block.x -= speed * dt;
+    ctx.fillText(block.text, block.x, canvas.height / 2);
+  }
+
+  while (activeBlocks.length > 0 && activeBlocks[0].x + activeBlocks[0].width < 0) {
+    const removed = activeBlocks.shift();
+    
+    if (ticker_expires.has(removed.text)) {
+      ticker_expires.delete(removed.text);
+      console.log('Block Expired:', removed.text);
+    } else {
+      buffer.push(removed.text)
+    }
+    
+  }
+
+  if (canAddNewBlock()) {
+    addNextBlock();
+  }
+
+  requestAnimationFrame(draw);
+}
+
+
+requestAnimationFrame(draw);
+
+
+
 const socket = new WebSocket('/apiws/alerts');
 
-function PushIfOk(dat) {
-  if (queue.at(-1) == null) {
-    queue.push(dat)
-    return
-  }
-  var s = `${queue.at(-1)} || ${dat}`
-  if (s.length <= 200) {
-    queue.pop()
-    queue.push(s)
-  } else {
-    queue.push(dat)
-  }
-}
+
 var audio = new Audio('/static/ALERT.mp3');
 socket.addEventListener('message', e => {
-  PushIfOk(e.data);
+  buffer.push(e.data);
+  ticker_expires.add(e.data);
+  ticker_delay_expires.push(e.data);
+  ticker_delay_expires.push(e.data);
   audio.play()
-  if (!ticker.isScrolling) playNext();
 });
 
-/** Scroll one message then recurse */
-function playNext() {
-  if (queue.length === 0) { ticker.isScrolling = false; return; }
-  ticker.isScrolling = true;
-  ticker.textContent = queue.shift();
-
-  // allow the browser to lay out the new text so offsetWidth is correct
-  requestAnimationFrame(() => {
-
-    const distance = ticker.offsetWidth + window.innerWidth; // px to travel
-    const durationMs = distance / SPEED_PPS * 1000;            // px / (px/s)
-
-    ticker.style.animation = 'none';
-    // force reflow
-    void ticker.offsetWidth;
-    ticker.style.animation = `scroll ${durationMs}ms linear`;
-
-    setTimeout(playNext, durationMs);
-  });
-}
 
 
 
