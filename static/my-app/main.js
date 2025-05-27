@@ -531,8 +531,10 @@ function styleFunction(feature) {
   } else if (severity === 'minor') {
     fillColor = '#00FF0088';
     strokeColor = '#00FF00';
+  } if (feature.get('metobject').sub_type ==1) {
+    fillColor = '#AAAAAA55';
+    strokeColor = '#BBBBBB';
   }
-
   return new Style({
     stroke: new Stroke({
       color: strokeColor,
