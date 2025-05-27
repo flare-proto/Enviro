@@ -786,21 +786,33 @@ map.on("singleclick", function (evt) {
       if (!viewInfo.classList.contains("visible")) {
         viewInfo.classList.toggle("visible")
       }
-      var content = '<h3>' + feature.get('product_class') + ' Outlook</h3>';
-      var tbl = document.createElement("table")
-      tbl.innerHTML += '<tr><td>Published</td><td>' + feature.get("publication_datetime") + '</td></tr>';
-      tbl.innerHTML += '<tr><td>Valid</td><td>' + feature.get("validity_datetime") + '</td></tr>';
-      tbl.innerHTML += '<tr><td>Ends</td><td>' + feature.get("expiration_datetime") + '</td></tr>';
-      tbl.innerHTML += '<tr><td>Severity</td><td>' + feature.get('metobject').severity.value + '</td></tr>';
-      tbl.innerHTML += '<tr><td>Thunderstorms</td><td>' + feature.get('metobject').thunderstorm.value + '</td></tr>';
-      tbl.innerHTML += '<tr><td>Tornados</td><td>' + feature.get('metobject').tornado_risk.value + '</td></tr>';
-      tbl.innerHTML += '<tr><td>Rain</td><td>' + feature.get('metobject').rain.value + " " + feature.get('metobject').rain.unit + '</td></tr>';
-      tbl.innerHTML += '<tr><td>Hail</td><td>' + feature.get('metobject').hail.value + " " + feature.get('metobject').hail.unit + '</td></tr>';
-      tbl.innerHTML += '<tr><td>Gust</td><td>' + feature.get('metobject').gust.value + " " + feature.get('metobject').gust.unit + '</td></tr>';
+      if (feature.get('metobject').sub_type ==0) {
+        var content = '<h3>' + feature.get('product_class') + ' Outlook</h3>';
+        var tbl = document.createElement("table")
+        tbl.innerHTML += '<tr><td>Published</td><td>' + feature.get("publication_datetime") +'</td></tr>';
+        tbl.innerHTML += '<tr><td>Valid</td><td>' + feature.get("validity_datetime") +'</td></tr>';
+        tbl.innerHTML += '<tr><td>Ends</td><td>' + feature.get("expiration_datetime") +'</td></tr>';
+        tbl.innerHTML += '<tr><td>Severity</td><td>' + feature.get('metobject').severity.value + '</td></tr>';
+        tbl.innerHTML += '<tr><td>Thunderstorms</td><td>' + feature.get('metobject').thunderstorm.value + '</td></tr>';
+        tbl.innerHTML += '<tr><td>Tornados</td><td>' + feature.get('metobject').tornado_risk.value + '</td></tr>';
+        tbl.innerHTML += '<tr><td>Rain</td><td>' + feature.get('metobject').rain.value +" "+feature.get('metobject').rain.unit+ '</td></tr>';
+        tbl.innerHTML += '<tr><td>Hail</td><td>' + feature.get('metobject').hail.value +" "+feature.get('metobject').hail.unit+ '</td></tr>';
+        tbl.innerHTML += '<tr><td>Gust</td><td>' + feature.get('metobject').gust.value +" "+feature.get('metobject').gust.unit+ '</td></tr>';
 
-      selectedInfo.innerHTML = content;
-      selectedInfo.appendChild(tbl)
+        selectedInfo.innerHTML = content;
+        selectedInfo.appendChild(tbl)
 
+      } else if (feature.get('metobject').sub_type ==1) {
+        var content = '<h3>' + feature.get('product_class') + ' Outlook</h3><h3>Risk of Funnel Clouds</h3>';
+
+        
+        selectedInfo.innerHTML = content;
+
+
+      }
+
+      
+      
       console.info(feature.getProperties());
     }
   } else if (selOpt.value == "NWSOutlooks") {
