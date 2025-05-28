@@ -132,7 +132,7 @@ def on_message(ch, method, properties, body, alert_channel):
             alert_channel.basic_publish(
                 exchange='feed',
                 routing_key=f"AX.{dest}.{alert['event']}",
-                body=f"{str(alert['Alert_Name']).capitalize()} now in effect for {alert['areaDesc']}"
+                body=f"{str(alert['Alert_Name'] or alert["event"]).capitalize()} now in effect for {alert['areaDesc']}"
             )
 
         logger.info(f"Published alert: {alert['event']} → {routing_key}")
