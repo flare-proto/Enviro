@@ -139,7 +139,7 @@ def on_message(ch, method, properties, body, alert_channel):
                 routing_key=f"AX.{dest}.{alert['event']}",
                 body=json.dumps({
                     "urgency": alert['urgency'],
-                    "event": f"{str(alert['Alert_Name']).capitalize()} now in effect for {alert['areaDesc']}",
+                    "event": f"{str(alert['Alert_Name'] or alert["event"]).capitalize()} now in effect for {alert['areaDesc']}",
                     "effective_time": alert["effective_at"],
                     'type':alert['event']
                 })
