@@ -9,7 +9,7 @@ from dateutil.parser import parse as parse_datetime
 
 import connLog
 
-dest = 'active'
+dest = 'queue'
 
 config = configparser.ConfigParser()
 config.read("config.ini")
