@@ -33,10 +33,10 @@ def handle_alert(ch, method, properties, body):
 
         effective_time = datetime.fromisoformat(effective_str)
 
-        if urgency == "immediate" or effective_time <= datetime.now():
+        if urgency == "immediate" or effective_time <= datetime.utcnow():
             issue(alert, ch)
         else:
-            delay = (effective_time - datetime.now()).total_seconds()
+            delay = (effective_time - datetime.utcnow()).total_seconds()
             scheduler.enter(delay, 1, issue, argument=(alert, ch))
             print(f"[{datetime.now().isoformat()}] Scheduled alert: {alert.get('type')} at {effective_time.isoformat()}")
 
