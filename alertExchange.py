@@ -128,7 +128,8 @@ def on_message(ch, method, properties, body, alert_channel):
                 body=json.dumps({
                     "urgency": alert['urgency'],
                     "event": alert['broadcast_message'],
-                    "effective_time": alert["effective_at"]
+                    "effective_time": alert["effective_at"],
+                    'type':alert['event']
                 })
             )
             logger.info(f"Published alert bulletin: {alert['event']}")
@@ -139,7 +140,8 @@ def on_message(ch, method, properties, body, alert_channel):
                 body=json.dumps({
                     "urgency": alert['urgency'],
                     "event": f"{str(alert['Alert_Name']).capitalize()} now in effect for {alert['areaDesc']}",
-                    "effective_time": alert["effective_at"]
+                    "effective_time": alert["effective_at"],
+                    'type':alert['event']
                 })
             )
 

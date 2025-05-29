@@ -17,10 +17,10 @@ def issue(alert_data, channel):
     """Send the alert to the 'alerts.out' queue."""
     channel.basic_publish(
         exchange='feed',
-        routing_key=f"BRODCAST.active.{alert_data.get('event')}",
-        body=json.dumps(alert_data)
+        routing_key=f"BRODCAST.active.{alert_data.get('type')}",
+        body=alert_data.get('event')
     )
-    print(f"[{datetime.now().isoformat()}] Issued alert: {alert_data.get('event')}")
+    print(f"[{datetime.now().isoformat()}] Issued alert: {alert_data.get('type')}")
 
 def handle_alert(ch, method, properties, body):
     """Process an incoming alert message."""
@@ -38,7 +38,7 @@ def handle_alert(ch, method, properties, body):
         else:
             delay = (effective_time - datetime.now()).total_seconds()
             scheduler.enter(delay, 1, issue, argument=(alert, ch))
-            print(f"[{datetime.now().isoformat()}] Scheduled alert: {alert.get('event')} at {effective_time.isoformat()}")
+            print(f"[{datetime.now().isoformat()}] Scheduled alert: {alert.get('type')} at {effective_time.isoformat()}")
 
         ch.basic_ack(delivery_tag=method.delivery_tag)
 
