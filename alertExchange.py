@@ -124,15 +124,23 @@ def on_message(ch, method, properties, body, alert_channel):
             logger.debug(alert["broadcast_message"])
             alert_channel.basic_publish(
                 exchange='feed',
-                routing_key=f"AX.{dest}.{alert['event']}",
-                body=alert["broadcast_message"]
+                routing_key=f"AX.active.{alert['event']}",
+                body=json.dumps({
+                    "urgency": alert['urgency'],
+                    "event": alert['broadcast_message'],
+                    "effective_time": alert["effective_at"]
+                })
             )
             logger.info(f"Published alert bulletin: {alert['event']}")
-        elif alert['urgency'] == 'immediate' and json_data["src"] == "AMQP":
+        elif json_data["src"] == "AMQP":
             alert_channel.basic_publish(
                 exchange='feed',
                 routing_key=f"AX.{dest}.{alert['event']}",
-                body=f"{str(alert['Alert_Name']).capitalize()} now in effect for {alert['areaDesc']}"
+                body=json.dumps({
+                    "urgency": alert['urgency'],
+                    "event": f"{str(alert['Alert_Name']).capitalize()} now in effect for {alert['areaDesc']}",
+                    "effective_time": alert["effective_at"]
+                })
             )
 
         logger.info(f"Published alert: {alert['event']} → {routing_key}")
