@@ -11,6 +11,7 @@ import coloredlogs
 import pika
 import requests
 from bs4 import BeautifulSoup
+from retry import retry
 
 import connLog
 
@@ -38,9 +39,7 @@ amqp_url = "amqps://anonymous:anonymous@dd.weather.gc.ca/"
 exchange = "q_anonymous.sr_subscribe.cap-xml_conf.flare_envirotron"
 routing_key = "v02.post.*.WXO-DD.alerts.cap.#"
 # Establish connection
-params = pika.URLParameters(amqp_url)
-connection_env = pika.BlockingConnection(params)
-channel_env = connection_env.channel()
+
 
 newCapDownloaded = 0
 
@@ -133,13 +132,18 @@ def callback(ch, method, properties, body):
         logger.warning(f"Failed to download {e}")
     conn.commit()
     conn.close()
+    
+@retry(tries=2,delay=30)
 def run():
     try:
-        logger.info("downloading data, please wait...")
-        fetch()
+
+        params = pika.URLParameters(amqp_url)
+        connection_env = pika.BlockingConnection(params)
+        channel_env = connection_env.channel()
         result = channel_env.queue_declare(exchange)#'q_anonymous_flare')
         queue_name = result.method.queue
         print(queue_name)
+        
         channel_env.queue_bind(queue_name,"xpublic",routing_key )
         channel_env.basic_consume(queue=queue_name, on_message_callback=callback, auto_ack=True)
         channel_env.start_consuming()
@@ -147,6 +151,7 @@ def run():
         if not isinstance(e,KeyboardInterrupt):
             logger.critical(f"{type(e)} {e}")
         logger.warning("DL auto offline")
+        connection_env.close()
 def downloader():
     try:
         logger.info("downloading data, please wait...")
@@ -166,5 +171,5 @@ def downloader():
             logger.critical(f"{type(e)} {e}")
         logger.warning("DL offline")
         connection.close()
-        connection_env.close()
+        
         
