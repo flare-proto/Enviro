@@ -137,7 +137,6 @@ def check_and_publish():
     try:
         NWS(channel)
         for file in list_json_files():
-            print(f"downloading {file}")
             content = download(file)
             
             #ver = str(file).removesuffix(".json")[-2:]
@@ -159,7 +158,7 @@ def check_and_publish():
                 )
                 write_stored_hash(file, content_hash)
             else:
-                print(f"No change: {file}")
+                pass
     except Exception as e:
         print(f"[ERROR] {e}")
     connection.close()
