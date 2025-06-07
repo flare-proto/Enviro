@@ -34,16 +34,18 @@ def parse_cap_for_alert_exchange(cap_xml):
     references = root.findtext('cap:references', default='', namespaces=ns)
     description = info.findtext('cap:description', default='', namespaces=ns)
     msgType = root.findtext('cap:msgType', default='', namespaces=ns)
+    headline = info.findtext('cap:headline', default='', namespaces=ns)
     
-    def find(key):
+    def find(key,default=None):
         for param in root.findall('parameter'):
             value_name = param.findtext('valueName')
             if value_name == key:
                 value = param.findtext('value')
                 if value:
                     return value
+        return default
     broadcast_message = find('layer:SOREM:1.0:Broadcast_Text')
-    Alert_Name = find('layer:EC-MSC-SMC:1.0:Alert_Name')
+    Alert_Name = find('layer:EC-MSC-SMC:1.0:Alert_Name',default=event)
     Alert_Location_Status = find('layer:EC-MSC-SMC:1.0:Alert_Location_Status')
     Newly_Active_Areas =  find('layer:EC-MSC-SMC:1.1:Newly_Active_Areas')
 
@@ -92,7 +94,8 @@ def parse_cap_for_alert_exchange(cap_xml):
         'broadcast_message':broadcast_message,
         'geojson_polygons': geojson_polygons,
         'Alert_Name':Alert_Name,
-        'Alert_Location_Status':Alert_Location_Status
+        'Alert_Location_Status':Alert_Location_Status,
+        'headline':headline
     }
 
 
