@@ -637,7 +637,7 @@ def assets(key):
 
 @app.route('/favicon.ico')
 def favicon():
-    return send_from_directory("static/favicon.ico")
+    return send_from_directory(path="static/favicon.ico")
 
 if __name__ == '__main__':
     threading.Thread(target=consume_messages, daemon=True,name="AMQP SERVER RECV").start()
