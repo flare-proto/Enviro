@@ -35,6 +35,7 @@ def parse_cap_for_alert_exchange(cap_xml):
     description = info.findtext('cap:description', default='', namespaces=ns)
     msgType = root.findtext('cap:msgType', default='', namespaces=ns)
     headline = info.findtext('cap:headline', default='', namespaces=ns)
+    instruction = info.findtext('cap:instruction', default='', namespaces=ns)
 
     
     def find(key,default=None):
@@ -96,7 +97,8 @@ def parse_cap_for_alert_exchange(cap_xml):
         'geojson_polygons': geojson_polygons,
         'Alert_Name':Alert_Name,
         'Alert_Location_Status':Alert_Location_Status,
-        'headline':headline
+        'headline':headline,
+        'instruction':instruction
     }
 
 
@@ -132,7 +134,7 @@ def on_message(ch, method, properties, body, alert_channel):
                 routing_key=f"AX.active.{alert['event']}",
                 body=json.dumps({
                     "urgency": alert['urgency'],
-                    "event": f"{alert.get('headline',f'{str(alertName).capitalize()} now in effect')} --- {alert['broadcast_message']}",
+                    "event": f"{alert.get('headline',f'{str(alertName).capitalize()} now in effect')} - {alert['broadcast_message']} ",
                     "effective_time": alert["effective_at"],
                     'type':alert['event']
                 })
@@ -146,7 +148,7 @@ def on_message(ch, method, properties, body, alert_channel):
                 
                 body=json.dumps({
                     "urgency": alert['urgency'],
-                    "event": f"{str(alertName).capitalize()} now in effect for {alert['areaDesc']}",
+                    "event": f"{str(alertName).capitalize()} now in effect for {alert['areaDesc']} - {alert['instruction']}",
                     "effective_time": alert["effective_at"],
                     'type':alert['event']
                 })
