@@ -275,10 +275,11 @@ def callback_nerv_alert(ch, method, properties, body):
     session.commit()
     session.close()
 
-def callback_feed(ch, method, properties, body):
+def callback_feed(ch, method:pika.spec.Basic.Deliver, properties:pika.frame.Header, body):
     """Handle incoming RabbitMQ messages."""
-    message = body.decode()
-    broadcast(message)
+    if str(method.routing_key).split(".")[1] == "active":
+        message = body.decode()
+        broadcast(message)
     
 def consume_messages():
     """Start consuming messages from RabbitMQ."""

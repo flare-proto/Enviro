@@ -126,7 +126,7 @@ def on_message(ch, method, properties, body, alert_channel):
             properties=pika.BasicProperties(content_type='application/json')
         )
         logger.debug(alert)
-        if alert["broadcast_message"]:
+        if json_data["src"] == "AMQP" and alert["broadcast_message"]:
             logger.debug(alert["broadcast_message"])
             alertName = alert.get('Alert_Name',alert["event"])
             alert_channel.basic_publish(
