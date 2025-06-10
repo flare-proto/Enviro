@@ -35,12 +35,13 @@ def parse_cap_for_alert_exchange(cap_xml):
     description = info.findtext('cap:description', default='', namespaces=ns)
     msgType = root.findtext('cap:msgType', default='', namespaces=ns)
     headline = info.findtext('cap:headline', default='', namespaces=ns)
+
     
     def find(key,default=None):
-        for param in root.findall('parameter'):
-            value_name = param.findtext('valueName')
+        for param in info.findall('cap:parameter',namespaces=ns):
+            value_name = param.findtext('cap:valueName',namespaces=ns)
             if value_name == key:
-                value = param.findtext('value')
+                value = param.findtext('cap:value',namespaces=ns)
                 if value:
                     return value
         return default
