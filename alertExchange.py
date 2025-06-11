@@ -148,7 +148,7 @@ def on_message(ch, method, properties, body, alert_channel):
                 
                 body=json.dumps({
                     "urgency": alert['urgency'],
-                    "event": f"{str(alertName).capitalize()} now in effect for {alert['areaDesc']} - {alert['instruction']}",
+                    "event": f"{str(alertName).capitalize()} now in effect for {alert['areaDesc']} ",
                     "effective_time": alert["effective_at"],
                     'type':alert['event']
                 })
