@@ -6,6 +6,7 @@ from datetime import datetime
 from threading import Thread
 
 import pika
+import pytz
 
 config = configparser.ConfigParser()
 config.read("config.ini")
@@ -32,6 +33,8 @@ def handle_alert(ch, method, properties, body):
             raise ValueError("Missing effective_time in alert")
 
         effective_time = datetime.fromisoformat(effective_str)
+        if effective_time.tzinfo is None or effective_time.tzinfo.utcoffset(effective_time) is None:
+            effective_time = effective_time.replace(tzinfo=pytz.utc)
 
         if urgency == "immediate" or effective_time <= datetime.utcnow():
             issue(alert, ch)
