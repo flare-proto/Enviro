@@ -131,10 +131,10 @@ def on_message(ch, method, properties, body, alert_channel):
             alertName = alert.get('Alert_Name',alert["event"])
             alert_channel.basic_publish(
                 exchange='feed',
-                routing_key=f"AX.active.{alert['event']}",
+                routing_key=f"AX.{dest}.{alert['event']}",
                 body=json.dumps({
                     "urgency": alert['urgency'],
-                    "event": f"{alert.get('headline',f'{str(alertName).capitalize()} now in effect')} - {alert['broadcast_message']} ",
+                    "event": f"{alert['broadcast_message']}",
                     "effective_time": alert["effective_at"],
                     'type':alert['event']
                 })
