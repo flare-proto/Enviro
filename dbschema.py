@@ -99,7 +99,9 @@ def store_alert(session:sqlalchemy.orm.Session, alert_dict: dict) -> str:
             "severity": alert_dict["severity"],
             "certainty": alert_dict["certainty"],
             "areaDesc": alert_dict["areaDesc"],
-            "broadcast_message": alert_dict["broadcast_message"]
+            "broadcast_message": alert_dict["broadcast_message"],
+            "headline":alert_dict.get("headline",""),
+            "Alert_Type":alert_dict.get("Alert_Type",""),
         }
     )
 
@@ -261,5 +263,3 @@ Session = sessionmaker(bind=engine)
 
 # Create tables
 Base.metadata.create_all(engine)
-
-

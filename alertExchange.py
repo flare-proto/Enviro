@@ -48,6 +48,7 @@ def parse_cap_for_alert_exchange(cap_xml):
         return default
     broadcast_message = find('layer:SOREM:1.0:Broadcast_Text')
     Alert_Name = find('layer:EC-MSC-SMC:1.0:Alert_Name',default=event)
+    Alert_Type = find('layer:EC-MSC-SMC:1.0:Alert_Type')
     Alert_Location_Status = find('layer:EC-MSC-SMC:1.0:Alert_Location_Status')
     Newly_Active_Areas =  find('layer:EC-MSC-SMC:1.1:Newly_Active_Areas')
 
@@ -78,6 +79,7 @@ def parse_cap_for_alert_exchange(cap_xml):
             "properties":{
                 "warn":event,
                 "id":id,
+                "level":Alert_Type,
             }
             })
 
@@ -98,7 +100,8 @@ def parse_cap_for_alert_exchange(cap_xml):
         'Alert_Name':Alert_Name,
         'Alert_Location_Status':Alert_Location_Status,
         'headline':headline,
-        'instruction':instruction
+        'instruction':instruction,
+        "Alert_Type":Alert_Type
     }
 
 
