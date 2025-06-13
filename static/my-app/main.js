@@ -421,7 +421,7 @@ function makeStyle() {
 }
 makeStyle()
 
-function createPatternFill(text, color, nf) {
+function createPatternFill(text, color, nf,level) {
   const canvas = document.createElement('canvas');
   const w = 250;
   const h = 250;
@@ -431,10 +431,11 @@ function createPatternFill(text, color, nf) {
   ctx.fillStyle = color
   ctx.strokeStyle = color
   ctx.font = "20px NerdSpace"
+
   if (warnTextShow.includes(text) || nf) {
     ctx.fillText(text, 5, 125)
   }
-  if (warnHAZShow.includes(text)) {
+  if (warnHAZShow.includes(text) && level == "warning") {
     ctx.lineWidth = 75;
 
     ctx.beginPath();
@@ -481,7 +482,7 @@ function style_feature_alert(feature, resolution) {
     stroke = new Stroke({ color: wc, width: 1.5 })
   }
   return new Style({
-    fill: createPatternFill(text, wc, nf),//new Fill({ color: fill }),
+    fill: createPatternFill(text, wc, nf,level),//new Fill({ color: fill }),
     stroke: stroke,
 
   });
