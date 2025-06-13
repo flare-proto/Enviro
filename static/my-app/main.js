@@ -482,7 +482,7 @@ function style_feature_alert(feature, resolution) {
     stroke = new Stroke({ color: wc, width: 1.5 })
   }
   return new Style({
-    fill: createPatternFill(text, wc, nf,level),//new Fill({ color: fill }),
+    fill: createPatternFill(text, wc, nf,feature.get('level')),//new Fill({ color: fill }),
     stroke: stroke,
 
   });
