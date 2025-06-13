@@ -36,10 +36,10 @@ def handle_alert(ch, method, properties, body):
         if effective_time.tzinfo is None or effective_time.tzinfo.utcoffset(effective_time) is None:
             effective_time = effective_time.replace(tzinfo=pytz.utc)
 
-        if urgency == "immediate" or effective_time <= datetime.utcnow():
+        if urgency == "immediate" or effective_time <= datetime.now():
             issue(alert, ch)
         else:
-            delay = (effective_time - datetime.utcnow()).total_seconds()
+            delay = (effective_time - datetime.now()).total_seconds()
             scheduler.enter(delay, 1, issue, argument=(alert, ch))
             print(f"[{datetime.now().isoformat()}] Scheduled alert: {alert.get('type')} at {effective_time.isoformat()}")
 
