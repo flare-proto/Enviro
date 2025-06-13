@@ -520,16 +520,16 @@ function styleFunction(feature) {
   let fillColor = 'gray'; // default
   let strokeColor = 'gray'; // default
   if (severity === 'extreme') {
-    fillColor = '#FF000088';
+    fillColor = '#FF000033';
     strokeColor = '#FF0000';
   } else if (severity === 'high') {
-    fillColor = '#FFAA0088';
+    fillColor = '#FFAA0033';
     strokeColor = '#FFAA00';
   } else if (severity === 'moderate') {
-    fillColor = '#FFFF0088';
+    fillColor = '#FFFF0033';
     strokeColor = '#FFFF00';
   } else if (severity === 'minor') {
-    fillColor = '#00FF0088';
+    fillColor = '#00FF0033';
     strokeColor = '#00FF00';
   } if (feature.get('metobject').sub_type ==1) {
     fillColor = '#AAAAAA55';
