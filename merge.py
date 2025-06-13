@@ -14,11 +14,11 @@ def merge_polygons_by_warn(input_geojson: dict) -> dict:
     gdf = gpd.GeoDataFrame.from_features(input_geojson["features"])
     
     # Check if 'warn' property exists
-    if 'warn' not in gdf.columns:
-        raise KeyError("The 'warn' property is missing in the GeoJSON dictionary.")
+    if 'warn.level' not in gdf.columns:
+        raise KeyError("The 'warn.level' property is missing in the GeoJSON dictionary.")
 
     # Group by 'warn' and merge polygons
-    merged_gdf = gdf.dissolve(by='warn', as_index=False)
+    merged_gdf = gdf.dissolve(by='warn.level', as_index=False)
 
     # Convert back to GeoJSON dictionary
     merged_geojson = {

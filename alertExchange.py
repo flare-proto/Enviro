@@ -80,6 +80,7 @@ def parse_cap_for_alert_exchange(cap_xml):
                 "warn":event,
                 "id":id,
                 "level":Alert_Type,
+                "warn.level":f"{event}.{Alert_Type}",
             }
             })
 
