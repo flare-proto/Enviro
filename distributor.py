@@ -1,8 +1,8 @@
-import configparser
+import configparser,collections
 import json
 import sched
 import time
-from datetime import datetime
+from datetime import datetime, tzinfo
 from threading import Thread
 
 import pika
@@ -13,6 +13,8 @@ config.read("config.ini")
 
 # Global scheduler
 scheduler = sched.scheduler(timefunc=time.time, delayfunc=time.sleep)
+
+latestRecvs = collections.deque(maxlen=10)
 
 def issue(alert_data, channel):
     """Send the alert to the 'alerts.out' queue."""
@@ -26,6 +28,11 @@ def issue(alert_data, channel):
 def handle_alert(ch, method, properties, body):
     """Process an incoming alert message."""
     try:
+        if body in latestRecvs:
+            ch.basic_ack(delivery_tag=method.delivery_tag)
+            print("4000 EXISTS")
+            return
+        latestRecvs.append(body)
         alert = json.loads(body)
         urgency = alert.get("urgency", "immediate").lower()
         effective_str = alert.get("effective_time")
@@ -36,7 +43,7 @@ def handle_alert(ch, method, properties, body):
         if effective_time.tzinfo is None or effective_time.tzinfo.utcoffset(effective_time) is None:
             effective_time = effective_time.replace(tzinfo=pytz.utc)
 
-        if urgency == "immediate" or effective_time <= datetime.now():
+        if urgency == "immediate" or effective_time <= datetime.now(pytz.utc):
             issue(alert, ch)
         else:
             delay = (effective_time - datetime.now()).total_seconds()
