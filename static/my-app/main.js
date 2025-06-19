@@ -524,8 +524,8 @@ function styleFunction(feature) {
     fillColor = '#FF000011';
     strokeColor = '#FF0000';
   } else if (severity === 'high') {
-    fillColor = '#FFAA0011';
-    strokeColor = '#FFAA00';
+    fillColor = '#D0601811';
+    strokeColor = '#D06018';
   } else if (severity === 'moderate') {
     fillColor = '#FFFF0011';
     strokeColor = '#FFFF00';
