@@ -331,13 +331,14 @@ def update():
     except:
         pass
     for c in types:
-        if ec_en.alerts[c]["value"]:
-            for i in ec_en.alerts[c]["value"]:
-                weather["alerts"].append({
-                    "mapped":mapings.get(i['title'],"NONE"),
-                    "title":i['title'],
-                    "class":c
-                })
+        if ec_en.alerts.get(c,None):
+            if ec_en.alerts[c]["value"]:
+                for i in ec_en.alerts[c]["value"]:
+                    weather["alerts"].append({
+                        "mapped":mapings.get(i['title'],"NONE"),
+                        "title":i['title'],
+                        "class":c
+                    })
     for c in conditionTypes:
         weather["cond"][c] = ec_en.conditions[c]["value"]
     weather["cond"]["ECicon_code"] = ec_en.conditions["icon_code"]["value"]
