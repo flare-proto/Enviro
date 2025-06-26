@@ -341,7 +341,7 @@ def update():
                     })
     for c in conditionTypes:
         weather["cond"][c] = ec_en.conditions[c]["value"]
-    weather["cond"]["ECicon_code"] = ec_en.conditions["icon_code"]["value"]
+    weather["cond"]["ECicon_code"] = int(ec_en.conditions["icon_code"]["value"])
     weather["cond"]["icon_code"] = iconBindings.get(weather["cond"]["ECicon_code"],"err")
     
     icon = "?"
