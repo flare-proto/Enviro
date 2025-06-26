@@ -191,6 +191,57 @@ const weatherTypes = {
   err: "󰼯",
   moonclear: "󰖔"
 }
+const wxico = [
+"󰖙",
+"",
+"󰖕",
+"󰖕",
+"",
+"",
+"󰖗",
+"",
+"",
+"",
+"󰖐",
+"󰖗",
+"",
+"󰖖",
+"󰖖",
+"󰙿",
+"󰖘",
+"",
+"󰼶",
+"",
+"",
+"",
+"",
+"󰖑",
+"󰖑",
+"󰖘",
+"󰖘",
+"",
+"󰖗",
+"",
+"",
+"󰼱",
+"󰼱",
+"",
+"",
+"",
+"",
+"",
+"",
+"",
+"󰖘",
+"",
+"󰼸",
+"󰖝",
+"",
+"",
+" ",
+" ",
+"󰼸",
+]
 
 var top_alert = document.getElementById("topWarn");
 var alertIcon = document.getElementById("warn");
@@ -461,6 +512,28 @@ function createPatternFill(text, color, nf,level) {
   });
 }
 
+function createPatternFillB(text, color) {
+  const canvas = document.createElement('canvas');
+  const w = 250;
+  const h = 250;
+  canvas.width = w;
+  canvas.height = h;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = color
+  ctx.strokeStyle = color
+  ctx.font = "20px NerdSpace"
+
+  if (warnTextShow.includes(text) || nf) {
+    ctx.fillText(text, 5, 125)
+  }
+
+  const pattern = ctx.createPattern(canvas, 'repeat');
+
+  return new Fill({
+    color: pattern
+  });
+}
+
 function style_feature_alert(feature, resolution) {
   const text = feature.get('warn') || 'Region'; // Or any other attribute
   var wc = warnColors[text];
@@ -520,6 +593,19 @@ function styleFunction(feature) {
 
   let fillColor = 'gray'; // default
   let strokeColor = 'gray'; // default
+
+  if (feature.get('metobject').sub_type ==1) {
+    fillColor = '#AAAAAA33';
+    strokeColor = '#BBBBBB';
+    return new Style({
+      stroke: new Stroke({
+        color: strokeColor,
+        width: 3,
+      }),
+      fill: createPatternFillB('')
+    });
+  }
+
   if (severity === 'extreme') {
     fillColor = '#FF000011';
     strokeColor = '#FF0000';
@@ -532,10 +618,8 @@ function styleFunction(feature) {
   } else if (severity === 'minor') {
     fillColor = '#00FF0011';
     strokeColor = '#00FF00';
-  } if (feature.get('metobject').sub_type ==1) {
-    fillColor = '#AAAAAA33';
-    strokeColor = '#BBBBBB';
   }
+  
   return new Style({
     stroke: new Stroke({
       color: strokeColor,
@@ -862,14 +946,14 @@ var irtrv = () => {
       if (json["wind_chill"]) {
         wc.innerText = `${json["wind_chill"]}°C`;
       }
-      cnd.innerText = `${weatherTypes[json["icon_code"]]}`
+      cnd.innerText = `${weatherTypes[json["icon_code"]]} ${wxico[json["ECicon_code"]]}`
       fetch("/api/conditions/bft")
         .then((rs) => rs.json())
         .then((bft) => {
           wnd.innerText = `[ ${bft["icon"]} ] ${json["wind_speed"]} km/h at ${json["wind_bearing"]}°`
           ticker_expires.add(curConds)
           
-          curConds = `Current Conditions: ${json["temperature"]}°C - ${weatherTypes[json["icon_code"]]} - [ ${bft["icon"]} ] ${json["wind_speed"]} km/h at ${json["wind_bearing"]}°`
+          curConds = `Current Conditions: ${json["temperature"]}°C - ${weatherTypes[json["icon_code"]]} ${wxico[json["ECicon_code"]]} - [ ${bft["icon"]} ] ${json["wind_speed"]} km/h at ${json["wind_bearing"]}°`
           buffer.push(curConds)
         })
     });
