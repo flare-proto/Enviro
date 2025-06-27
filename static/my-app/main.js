@@ -523,9 +523,8 @@ function createPatternFillB(text, color) {
   ctx.strokeStyle = color
   ctx.font = "20px NerdSpace"
 
-  if (warnTextShow.includes(text) || nf) {
-    ctx.fillText(text, 5, 125)
-  }
+  ctx.fillText(text, 5, 125)
+
 
   const pattern = ctx.createPattern(canvas, 'repeat');
 
