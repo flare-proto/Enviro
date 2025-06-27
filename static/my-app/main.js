@@ -521,7 +521,7 @@ function createPatternFillB(text, color) {
   const ctx = canvas.getContext('2d');
   ctx.fillStyle = color
   ctx.strokeStyle = color
-  ctx.font = "20px NerdSpace"
+  ctx.font = "40px NerdSpace"
 
   ctx.fillText(text, 5, 125)
 
