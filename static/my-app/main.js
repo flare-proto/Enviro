@@ -604,7 +604,7 @@ function styleFunction(feature) {
         color: strokeColor,
         width: 3,
       }),
-      fill: createPatternFillB('')
+      fill: createPatternFillB('',strokeColor)
     });
   }
 
@@ -623,7 +623,7 @@ function styleFunction(feature) {
   }
 
   if (feature.get('metobject').tornado_risk.value) {
-    fill = createPatternFillB('󰼸')
+    fill = createPatternFillB('󰼸',strokeColor)
   }
   
   if (!fill) {
