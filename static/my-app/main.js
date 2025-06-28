@@ -514,8 +514,8 @@ function createPatternFill(text, color, nf,level) {
 
 function createPatternFillB(text, color) {
   const canvas = document.createElement('canvas');
-  const w = 250;
-  const h = 250;
+  const w = 125;
+  const h = 125;
   canvas.width = w;
   canvas.height = h;
   const ctx = canvas.getContext('2d');
@@ -523,7 +523,7 @@ function createPatternFillB(text, color) {
   ctx.strokeStyle = color
   ctx.font = "40px NerdSpace"
 
-  ctx.fillText(text, 5, 125)
+  ctx.fillText(text, 25, 25)
 
 
   const pattern = ctx.createPattern(canvas, 'repeat');
