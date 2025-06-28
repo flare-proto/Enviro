@@ -28,7 +28,7 @@ let activeAlert = 1;
 var saturation = 100
 var brightness = 100
 
-//region main
+//#region main
 let warnsls = document.getElementById("warns");
 //eel.expose(prompt_alerts);
 function prompt_alerts(description) {
@@ -88,9 +88,9 @@ var cntr = document.getElementById("cntr");
 function update(url) {
   cntr.innerHTML = httpGet(url)
 }
-//endregion
+//#endregion
 
-//region alerts
+//#region alerts
 
 let sc = document.getElementById("temps");
 let wc = document.getElementById("temps_wind");
@@ -336,9 +336,9 @@ for (var element in weatherTypes) {
   qrhTbl.innerHTML += `<tr><td>${icon}</td><td>${element.toUpperCase()}</td></tr>`
 }
 
-//endregion
+//#endregion
 
-//region datapane
+//#region datapane
 
 var checks = document.getElementById('checks')
 function makeBind(name) {
@@ -363,9 +363,9 @@ makeBind("VORT")
 makeBind("DEW")
 makeBind("MOIST")
 makeBind("DIVERG")
-//endregion
+//#endregion
 
-
+//#region Map
 const OutlookNWSType = document.getElementById("OutlookNWSType")
 
 
@@ -394,6 +394,8 @@ const vectorLayer = new VectorImageLayer({
     'stroke-width': 0.5,
   }
 });
+
+//#region Styles
 
 const warnTextShow = [
   "snowfall",
@@ -533,6 +535,7 @@ function createPatternFillB(text, color) {
   });
 }
 
+
 function style_feature_alert(feature, resolution) {
   const text = feature.get('warn') || 'Region'; // Or any other attribute
   var wc = warnColors[text];
@@ -559,7 +562,7 @@ function style_feature_alert(feature, resolution) {
 
   });
 }
-
+//#endregion
 const alerts_layer = new VectorImageLayer({
   background: '#00000000',
   imageRatio: 2,
@@ -586,13 +589,13 @@ const radar_layer = new TileLayer({
     transition: 0
   })
 })
-
+//#region Outlooks
 function styleFunction(feature) {
   const severity = feature.get('metobject')?.severity?.value;
 
   let fillColor = 'gray'; // default
   let strokeColor = 'gray'; // default
-
+  let fill = null;
   if (feature.get('metobject').sub_type ==1) {
     fillColor = '#AAAAAA33';
     strokeColor = '#BBBBBB';
@@ -618,15 +621,22 @@ function styleFunction(feature) {
     fillColor = '#00FF0011';
     strokeColor = '#00FF00';
   }
+
+  if (feature.get('metobject').tornado_risk.value) {
+    fill = createPatternFillB('󰼸')
+  }
   
+  if (!fill) {
+    fill = new Fill({
+      color: fillColor,
+    })
+  }
   return new Style({
     stroke: new Stroke({
       color: strokeColor,
       width: 3,
     }),
-    fill: new Fill({
-      color: fillColor,
-    }),
+    fill: fill,
   });
 }
 
@@ -661,6 +671,7 @@ const outlook_nws_layer = new VectorImageLayer({
   source: outlooks_nws_src,
   style: NWSstyleFunction
 })
+//#endregion
 
 radar_layer.getSource().on("imageloaderror", () => {
   getRadarStartEndTime().then(data => {
@@ -736,6 +747,7 @@ const map = new Map({
   })
 });
 
+//#region LayerSelection
 var checks = document.getElementById('checks_map')
 function makeBindLyr(name, o) {
   var data = document.createElement("p");
@@ -784,11 +796,12 @@ makeBindLyr("Radar", radar_layer)
 makeBindLyr("Outlook", outlook_layer)
 makeBindLyr("NWS Outlook", outlook_nws_layer)
 makesat("Desaturate")
+//#endregion
+//#endregion
 
 
 
-
-
+//#region dataView
 /**
  * Add a click handler to hide the popup.
  * @return {boolean} Don't follow the href.
@@ -929,7 +942,7 @@ map.on("singleclick", function (evt) {
     }
   }
 });
-
+//#endregion
 
 
 var irtrv = () => {
@@ -975,6 +988,7 @@ setInterval(() => {
   radar_layer.getSource().refresh()
 }, 1000 * 5 * 60)
 
+//#region Ticker
 
 const canvas = document.getElementById('tickerCanvas');
 const ctx = canvas.getContext('2d');
@@ -1121,3 +1135,4 @@ OutlookNWSType.onchange = () => {
   outlooks_nws_src.setUrl(`/api/nws/outlook/outlook.NWS.d1_${OutlookNWSType.value}?sortLatest=true&offset=${outs.value}`)
   outlooks_nws_src.refresh();
 }
+//#endregion
