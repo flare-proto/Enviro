@@ -523,7 +523,7 @@ function createPatternFillB(text, color) {
   ctx.strokeStyle = color
   ctx.font = "40px NerdSpace"
 
-  ctx.fillText(text, 25, 25)
+  ctx.fillText(text, 25, 35)
 
 
   const pattern = ctx.createPattern(canvas, 'repeat');
