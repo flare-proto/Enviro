@@ -1121,18 +1121,22 @@ socket.addEventListener('message', e => {
   audio.play()
 });
 
+//#endregion
 
-
-
-var outs = document.getElementById("outlookOff")
-outs.onchange = () => {
+function offset() {
   outlooksrc.setUrl(`/api/outlook?offset=${outs.value}`)
   outlooksrc.refresh();
   outlooks_nws_src.setUrl(`/api/nws/outlook/outlook.NWS.d1_${OutlookNWSType.value}?sortLatest=true&offset=${outs.value}`)
   outlooks_nws_src.refresh();
 }
+
+var outs = document.getElementById("outlookOff")
+outs.onchange = () => {
+  offset()
+}
 OutlookNWSType.onchange = () => {
   outlooks_nws_src.setUrl(`/api/nws/outlook/outlook.NWS.d1_${OutlookNWSType.value}?sortLatest=true&offset=${outs.value}`)
   outlooks_nws_src.refresh();
 }
-//#endregion
+
+offset()
