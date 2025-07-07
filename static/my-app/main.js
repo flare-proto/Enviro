@@ -402,6 +402,7 @@ const warnTextShow = [
   "winter storm",
   "blizzard",
   "snow squall",
+  "squall",
   "waterspout",
   "tornado"
 ]
