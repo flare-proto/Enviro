@@ -489,7 +489,7 @@ function createPatternFill(text, color, nf,level) {
     ctx.fillText(text, 5, 125)
   }
   if (warnHAZShow.includes(text) && level == "warning") {
-    ctx.lineWidth = 75;
+    ctx.lineWidth = 25;
 
     ctx.beginPath();
 
